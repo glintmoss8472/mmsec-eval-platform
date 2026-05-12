@@ -11,7 +11,7 @@ from mmsec_eval.plugins.builtin import register_builtin_plugins
 from mmsec_eval.runner.retrieval_runner import run as run_vlr
 
 
-# 中文注释：验证 test_runner_vlr_smoke 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `runner 图文检索 smoke` 场景，防止相关行为在后续修改中退化。
 def test_runner_vlr_smoke(tmp_path: Path):
     register_builtin_plugins()
     cfg = load_config("configs/mvp.yaml")

@@ -23,12 +23,12 @@ if str(SRC_ROOT) not in sys.path:
 from mmsec_eval.model_adapters.local_vlm_catalog import LOCAL_OPENAI_COMPAT_ADAPTERS
 
 
-# 中文注释：封装 _now_tag 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `now tag` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _now_tag() -> str:
     return datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
 
 
-# 中文注释：封装 _git_value 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `git value` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _git_value(repo: Path, args: list[str]) -> str:
     import subprocess
 
@@ -47,7 +47,7 @@ def _git_value(repo: Path, args: list[str]) -> str:
     return out.stdout.strip()
 
 
-# 中文注释：封装 _local_build_fingerprint 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `本地 build fingerprint` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _local_build_fingerprint(deployment_root: Path) -> dict[str, Any]:
     version_path = deployment_root / "deployment_version.json"
     version_data = json.loads(version_path.read_text(encoding="utf-8")) if version_path.exists() else {}
@@ -93,7 +93,7 @@ def _local_build_fingerprint(deployment_root: Path) -> dict[str, Any]:
     }
 
 
-# 中文注释：封装 _dataset_override 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 推断 `数据集 override`，从样本、配置或运行记录中提取统一名称。
 def _dataset_override(name: str) -> dict[str, Any]:
     if name == "mini_flickr":
         return {
@@ -125,7 +125,7 @@ def _dataset_override(name: str) -> dict[str, Any]:
     raise KeyError(f"unsupported dataset: {name}")
 
 
-# 中文注释：封装 _base_override 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `基础 override` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _base_override(*, attack: str, victims: list[str], dataset_name: str, experiment_id: str) -> dict[str, Any]:
     eval_scope = "joint" if attack in {"tmm", "advedm_plus"} else "image"
     return {
@@ -176,7 +176,7 @@ def _base_override(*, attack: str, victims: list[str], dataset_name: str, experi
     }
 
 
-# 中文注释：定义 AttackSpec 的结构化职责，作为运维与实验脚本中状态、配置或行为的边界。
+# 定义 `AttackSpec` 的状态和行为边界，供运维与实验脚本在固定职责内复用。
 @dataclass(frozen=True)
 class AttackSpec:
     attack: str
@@ -211,57 +211,57 @@ MAIN_MODELS: tuple[str, ...] = (
 )
 
 
-# 中文注释：定义 ApiClient 的结构化职责，作为运维与实验脚本中状态、配置或行为的边界。
+# 实现 `ApiClient.__init__` 的对象行为，维护该类在运维与实验脚本中的调用契约。
 class ApiClient:
-    # 中文注释：封装 ApiClient.__init__ 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 封装 ApiClient.__init__ 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
     def __init__(self, api_base: str, *, timeout: float = 60.0) -> None:
         self.api_base = str(api_base).rstrip("/")
         self.timeout = float(timeout)
         self.session = requests.Session()
         self.session.trust_env = False
 
-    # 中文注释：实现 ApiClient.get 的核心行为，维护运维与实验脚本在该对象上的调用契约。
+    # 实现 `ApiClient.get` 的对象行为，维护该类在运维与实验脚本中的调用契约。
     def get(self, path: str) -> Any:
         resp = self.session.get(f"{self.api_base}{path}", timeout=self.timeout)
         resp.raise_for_status()
         return resp.json()
 
-    # 中文注释：实现 ApiClient.post 的核心行为，维护运维与实验脚本在该对象上的调用契约。
+    # 实现 `ApiClient.post` 的对象行为，维护该类在运维与实验脚本中的调用契约。
     def post(self, path: str, payload: dict[str, Any]) -> Any:
         resp = self.session.post(f"{self.api_base}{path}", json=payload, timeout=self.timeout)
         resp.raise_for_status()
         return resp.json()
 
-    # 中文注释：实现 ApiClient.create_job 的核心行为，维护运维与实验脚本在该对象上的调用契约。
+    # 创建 `任务`，初始化后续流程所需的记录、对象或产物。
     def create_job(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self.post("/jobs", payload)
 
-    # 中文注释：实现 ApiClient.get_job 的核心行为，维护运维与实验脚本在该对象上的调用契约。
+    # 获取 `任务`，封装存储查询或状态读取细节。
     def get_job(self, job_id: str) -> dict[str, Any]:
         return self.get(f"/jobs/{job_id}")
 
-    # 中文注释：实现 ApiClient.get_job_logs 的核心行为，维护运维与实验脚本在该对象上的调用契约。
+    # 获取 `任务 日志`，封装存储查询或状态读取细节。
     def get_job_logs(self, job_id: str, *, page_size: int = 200) -> dict[str, Any]:
         return self.get(f"/jobs/{job_id}/logs?page=1&page_size={page_size}")
 
-    # 中文注释：实现 ApiClient.list_runs 的核心行为，维护运维与实验脚本在该对象上的调用契约。
+    # 列出 `运行记录`，按调用方需要组织分页或过滤结果。
     def list_runs(self, *, page: int = 1, page_size: int = 20) -> dict[str, Any]:
         return self.get(f"/runs?page={page}&page_size={page_size}")
 
-    # 中文注释：实现 ApiClient.get_run_summary 的核心行为，维护运维与实验脚本在该对象上的调用契约。
+    # 获取 `运行记录 摘要`，封装存储查询或状态读取细节。
     def get_run_summary(self, run_id: str) -> dict[str, Any]:
         return self.get(f"/runs/{run_id}/summary")
 
-    # 中文注释：实现 ApiClient.get_run_report_data 的核心行为，维护运维与实验脚本在该对象上的调用契约。
+    # 获取 `运行记录 报告 数据`，封装存储查询或状态读取细节。
     def get_run_report_data(self, run_id: str) -> dict[str, Any]:
         return self.get(f"/runs/{run_id}/report-data")
 
-    # 中文注释：实现 ApiClient.get_run_cases 的核心行为，维护运维与实验脚本在该对象上的调用契约。
+    # 获取 `运行记录 案例`，封装存储查询或状态读取细节。
     def get_run_cases(self, run_id: str, *, page_size: int = 10) -> dict[str, Any]:
         return self.get(f"/runs/{run_id}/cases?page=1&page_size={page_size}")
 
 
-# 中文注释：封装 _wait_for_job 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `wait 所属 任务` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _wait_for_job(
     api: ApiClient,
     job_id: str,
@@ -279,7 +279,7 @@ def _wait_for_job(
     raise TimeoutError(f"job timed out: {job_id}")
 
 
-# 中文注释：封装 _verify_overview 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `verify 系统总览` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _verify_overview(api: ApiClient, *, deployment_root: Path, deployment_name: str) -> dict[str, Any]:
     overview = api.get("/system/overview")
     models = overview.get("models", [])
@@ -321,7 +321,7 @@ def _verify_overview(api: ApiClient, *, deployment_root: Path, deployment_name: 
     }
 
 
-# 中文注释：封装 _run_attack_matrix 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `运行记录 攻击 矩阵`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _run_attack_matrix(
     api: ApiClient,
     *,
@@ -347,7 +347,7 @@ def _run_attack_matrix(
     }
 
 
-# 中文注释：封装 _run_attack_matrix_spec 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `运行记录 攻击 矩阵 spec`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _run_attack_matrix_spec(
     api: ApiClient,
     spec: AttackSpec,
@@ -377,7 +377,7 @@ def _run_attack_matrix_spec(
     return result
 
 
-# 中文注释：封装 _attack_matrix_payload 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `攻击 矩阵 载荷`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _attack_matrix_payload(spec: AttackSpec, timestamp: str) -> dict[str, Any]:
     override = _base_override(
         attack=spec.attack,
@@ -390,7 +390,7 @@ def _attack_matrix_payload(spec: AttackSpec, timestamp: str) -> dict[str, Any]:
     return {"job_type": "run_vlr", "config_path": spec.config_path, "override": override, "benchmark_mode": False}
 
 
-# 中文注释：封装 _attack_matrix_seed_result 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `攻击 矩阵 seed result`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _attack_matrix_seed_result(spec: AttackSpec, index: int, job_id: str) -> dict[str, Any]:
     return {
         "index": index,
@@ -401,7 +401,7 @@ def _attack_matrix_seed_result(spec: AttackSpec, index: int, job_id: str) -> dic
     }
 
 
-# 中文注释：封装 _successful_attack_artifacts 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 推断 `successful 攻击 产物`，从样本、配置或运行记录中提取统一名称。
 def _successful_attack_artifacts(api: ApiClient, run_id: str) -> dict[str, Any]:
     summary = api.get_run_summary(run_id)
     report = api.get_run_report_data(run_id)
@@ -424,7 +424,7 @@ def _successful_attack_artifacts(api: ApiClient, run_id: str) -> dict[str, Any]:
     }
 
 
-# 中文注释：封装 _run_model_matrix 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `运行记录 模型 矩阵`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _run_model_matrix(
     api: ApiClient,
     *,
@@ -498,7 +498,7 @@ def _run_model_matrix(
     }
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `verify_live_server.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--api-base", default="http://127.0.0.1:18081/api/v1")

@@ -22,12 +22,12 @@ LOG_FN = Callable[[str], None]
 _LOCAL_ADAPTERS = set(LOCAL_OPENAI_COMPAT_ADAPTERS)
 
 
-# 中文注释：实现 project_root_default 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 整理 `project root default` 路径信息，把本地文件或产物引用转换成统一表示。
 def project_root_default() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
-# 中文注释：实现 local_vlm_adapters 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 执行 `本地 视觉语言模型 adapters` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def local_vlm_adapters(adapters: Iterable[str] | None) -> list[str]:
     seen: dict[str, None] = {}
     for item in adapters or []:
@@ -37,12 +37,12 @@ def local_vlm_adapters(adapters: Iterable[str] | None) -> list[str]:
     return list(seen.keys())
 
 
-# 中文注释：实现 has_local_vlm_adapter 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 判断 `是否包含 本地 视觉语言模型 adapter` 条件是否成立，为调用方提供布尔决策。
 def has_local_vlm_adapter(adapters: Iterable[str] | None) -> bool:
     return bool(local_vlm_adapters(adapters))
 
 
-# 中文注释：封装 _health_url 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 拼接 `health URL`，把配置中的主机、端口和路径合成实际访问入口。
 def _health_url(endpoint: str) -> str:
     parts = urlsplit(str(endpoint or ""))
     path = parts.path.rstrip("/")
@@ -52,7 +52,7 @@ def _health_url(endpoint: str) -> str:
     return urlunsplit((parts.scheme, parts.netloc, path, "", ""))
 
 
-# 中文注释：封装 _is_ready 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 判断 `是否 ready` 条件是否成立，为调用方提供布尔决策。
 def _is_ready(spec: LocalVLMModelSpec, *, timeout: float = 1.5) -> bool:
     url = _health_url(spec.endpoint_default)
     try:
@@ -63,7 +63,7 @@ def _is_ready(spec: LocalVLMModelSpec, *, timeout: float = 1.5) -> bool:
         return False
 
 
-# 中文注释：封装 _scan_processes 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 执行 `scan processes` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def _scan_processes() -> list[tuple[int, str]]:
     proc = subprocess.run(
         ["ps", "-eo", "pid=,args="],
@@ -86,18 +86,18 @@ def _scan_processes() -> list[tuple[int, str]]:
     return out
 
 
-# 中文注释：封装 _pid_alive 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 判断或归一 `pid alive` 状态，让调用方可以稳定渲染能力和可用性。
 def _pid_alive(pid: int) -> bool:
     return pid > 0 and Path(f"/proc/{pid}").exists()
 
 
-# 中文注释：封装 _target_specs 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 整理 `target specs`，描述当前服务器运行环境、模型入口或部署状态。
 def _target_specs(adapters: Iterable[str] | None) -> list[LocalVLMModelSpec]:
     names = local_vlm_adapters(adapters) if adapters is not None else list(LOCAL_OPENAI_COMPAT_ADAPTERS)
     return [local_vlm_spec_by_adapter(name) for name in names]
 
 
-# 中文注释：实现 stop_local_vlm_servers 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 停止 `本地 视觉语言模型 servers`，释放端口、进程或显存等运行资源。
 def stop_local_vlm_servers(
     *,
     adapters: Iterable[str] | None = None,
@@ -154,7 +154,7 @@ def stop_local_vlm_servers(
     return {"ports": sorted(ports), "stopped_pids": stopped, "killed_pids": killed}
 
 
-# 中文注释：实现 empty_cuda_cache 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 执行 `empty CUDA cache` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def empty_cuda_cache() -> None:
     try:
         import torch
@@ -169,7 +169,7 @@ def empty_cuda_cache() -> None:
         return
 
 
-# 中文注释：封装 _timeout_seconds 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 计算 `timeout seconds` 进度或耗时，用于任务中心展示剩余时间和阶段完成度。
 def _timeout_seconds(default: int = 1200) -> int:
     raw = str(os.getenv("MMSEC_MODEL_PREFLIGHT_TIMEOUT_SECONDS", str(default)) or "").strip()
     try:
@@ -178,7 +178,7 @@ def _timeout_seconds(default: int = 1200) -> int:
         return int(default)
 
 
-# 中文注释：封装 _launch_local_vlm 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 执行 `launch 本地 视觉语言模型` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def _launch_local_vlm(spec: LocalVLMModelSpec, *, project_root: Path, log: LOG_FN | None = None) -> int:
     script_path = project_root / spec.launch_script
     if not script_path.exists():
@@ -210,7 +210,7 @@ def _launch_local_vlm(spec: LocalVLMModelSpec, *, project_root: Path, log: LOG_F
     return pid
 
 
-# 中文注释：实现 ensure_local_vlm_adapters_ready 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 确保 `本地 视觉语言模型 adapters ready` 已准备好，不满足条件时主动创建、下载或报错。
 def ensure_local_vlm_adapters_ready(
     adapters: Iterable[str] | None,
     *,

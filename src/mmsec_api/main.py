@@ -22,7 +22,7 @@ from mmsec_api.routes.system import router as system_router
 from mmsec_api.runtime import ensure_app_runtime
 
 
-# 中文注释：实现 lifespan 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 执行 `lifespan` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Start the in-process queue/bootstrap once for the whole API app.
@@ -64,7 +64,7 @@ if _assets_dir.exists():
     app.mount("/assets", StaticFiles(directory=str(_assets_dir)), name="frontend-assets")
 
 
-# 中文注释：实现 frontend_cache_control 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 执行 `frontend cache control` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 @app.middleware("http")
 async def frontend_cache_control(request: Request, call_next):
     response = await call_next(request)
@@ -87,13 +87,13 @@ async def frontend_cache_control(request: Request, call_next):
     return response
 
 
-# 中文注释：实现 api_not_found 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 执行 `API not found` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 @app.api_route("/api/{full_path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], include_in_schema=False)
 def api_not_found(full_path: str):
     raise HTTPException(status_code=404, detail=f"API route not found: /api/{full_path}")
 
 
-# 中文注释：实现 frontend_index 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 处理 `GET /` 接口，完成请求校验、存储访问和响应模型组装。
 @app.get("/", include_in_schema=False)
 def frontend_index():
     if _index_file.exists():
@@ -101,7 +101,7 @@ def frontend_index():
     return {"status": "frontend_not_built"}
 
 
-# 中文注释：实现 frontend_spa_fallback 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 处理 `GET /{full_path:path}` 接口，完成请求校验、存储访问和响应模型组装。
 @app.get("/{full_path:path}", include_in_schema=False)
 def frontend_spa_fallback(full_path: str):
     # Vite builds a client-side routed SPA, so unknown paths should fall back

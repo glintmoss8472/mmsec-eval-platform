@@ -12,7 +12,7 @@ from mmsec_eval.runtime import torch_install_hint
 SUPPORTED_DATASET_KINDS = {"toy_shapes", "folder_jsonl", "flickr30k", "flickr1k", "coco_subset", "mini_flickr", "generation_jsonl"}
 
 
-# 中文注释：封装 _validate_plugin 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 校验 `插件` 的约束，发现不兼容时阻止继续执行。
 def _validate_plugin(cfg: AppConfig) -> None:
     if cfg.plugins.model_adapter not in list_plugins("model_adapter"):
         raise ConfigError(f"unknown model adapter: {cfg.plugins.model_adapter}")
@@ -26,7 +26,7 @@ def _validate_plugin(cfg: AppConfig) -> None:
         raise ConfigError(f"unknown judge plugin: {cfg.plugins.judge}")
 
 
-# 中文注释：封装 _validate_dataset 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 校验 `数据集` 的约束，发现不兼容时阻止继续执行。
 def _validate_dataset(cfg: AppConfig) -> None:
     kind = cfg.dataset.kind
     if kind not in SUPPORTED_DATASET_KINDS:
@@ -83,12 +83,12 @@ def _validate_dataset(cfg: AppConfig) -> None:
         raise ConfigError(f"dataset.captions_file not found: {captions_file}")
 
 
-# 中文注释：封装 _generation_case_source 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 执行 `生成式评测 案例 source` 辅助逻辑，保持配置系统中的输入处理和结果输出一致。
 def _generation_case_source(cfg: AppConfig) -> str:
     return f"{cfg.task.cases_jsonl} {cfg.dataset.benchmark_tag}".lower()
 
 
-# 中文注释：封装 _validate_generation_task_dataset_match 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 校验 `生成式评测 任务 数据集 match` 的约束，发现不兼容时阻止继续执行。
 def _validate_generation_task_dataset_match(cfg: AppConfig) -> None:
     if cfg.task.kind not in {"vqa", "caption"}:
         return
@@ -99,7 +99,7 @@ def _validate_generation_task_dataset_match(cfg: AppConfig) -> None:
         raise ConfigError("Caption task requires the COCO caption object JSONL, not a VQA JSONL dataset")
 
 
-# 中文注释：封装 _validate_task 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 校验 `任务` 的约束，发现不兼容时阻止继续执行。
 def _validate_task(cfg: AppConfig) -> None:
     if cfg.task.kind not in {"pairwise", "vlr", "vqa", "caption"}:
         raise ConfigError("task.kind must be 'pairwise', 'vlr', 'vqa', or 'caption'")
@@ -123,7 +123,7 @@ def _validate_task(cfg: AppConfig) -> None:
             raise ConfigError("task.retrieval_k entries must be > 0")
 
 
-# 中文注释：封装 _validate_attack 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 校验 `攻击` 的约束，发现不兼容时阻止继续执行。
 def _validate_attack(cfg: AppConfig) -> None:
     if cfg.attack.mode not in {"A", "B"}:
         raise ConfigError("attack.mode must be 'A' or 'B'")
@@ -176,7 +176,7 @@ def _validate_attack(cfg: AppConfig) -> None:
             raise ConfigError(f"attack.loss_weights.{k} must be >= 0")
 
 
-# 中文注释：封装 _validate_defense 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 校验 `防御` 的约束，发现不兼容时阻止继续执行。
 def _validate_defense(cfg: AppConfig) -> None:
     bounded_fields = {
         "jpeg_quality": (cfg.defense.jpeg_quality, 1, 100),
@@ -210,7 +210,7 @@ def _validate_defense(cfg: AppConfig) -> None:
         raise ConfigError("defense.text_candidates_k must be > 0")
 
 
-# 中文注释：封装 _validate_runtime 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 校验 `runtime` 的约束，发现不兼容时阻止继续执行。
 def _validate_runtime(cfg: AppConfig) -> None:
     dev = str(cfg.runtime.device or "").strip().lower()
     if not dev:
@@ -239,7 +239,7 @@ def _validate_runtime(cfg: AppConfig) -> None:
         raise ConfigError("runtime.num_workers must be >= 0")
 
 
-# 中文注释：封装 _validate_model_and_plugins 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 校验 `模型 and 插件` 的约束，发现不兼容时阻止继续执行。
 def _validate_model_and_plugins(cfg: AppConfig) -> None:
     if cfg.plugins.model_adapter == "http" and not cfg.model.http_endpoint:
         raise ConfigError("model.http_endpoint is required when model_adapter=http")
@@ -250,7 +250,7 @@ def _validate_model_and_plugins(cfg: AppConfig) -> None:
     _validate_plugin(cfg)
 
 
-# 中文注释：封装 _validate_runner 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 校验 `runner` 的约束，发现不兼容时阻止继续执行。
 def _validate_runner(cfg: AppConfig) -> None:
     adapters = set(list_plugins("model_adapter"))
     if cfg.runner.surrogate_model_adapter and cfg.runner.surrogate_model_adapter not in adapters:
@@ -266,7 +266,7 @@ def _validate_runner(cfg: AppConfig) -> None:
         raise ConfigError("runner.continue_on_error must be false in strict real mode.")
 
 
-# 中文注释：封装 _validate_risk 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 校验 `风险` 的约束，发现不兼容时阻止继续执行。
 def _validate_risk(cfg: AppConfig) -> None:
     if cfg.risk.l2_reference <= 0:
         raise ConfigError("risk.l2_reference must be > 0")
@@ -282,7 +282,7 @@ def _validate_risk(cfg: AppConfig) -> None:
             raise ConfigError(f"risk.weights.{k} must be >= 0")
 
 
-# 中文注释：实现 validate_config 的核心流程，支撑配置系统中的业务语义和异常边界。
+# 校验 `配置` 的约束，发现不兼容时阻止继续执行。
 def validate_config(cfg: AppConfig) -> None:
     if cfg.seed < 0:
         raise ConfigError("seed must be >= 0")

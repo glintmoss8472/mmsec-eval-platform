@@ -8,11 +8,12 @@ import { getRunAnalytics, getSystemOverview, listRuns } from "../lib/api";
 import { isDemoRun, isHighRisk, riskBucket, riskText, riskTone } from "../lib/runPresentation";
 import { formatAdapterName, formatAttackName, formatRunDatasetName } from "../lib/uiLabels";
 
-/** 中文注释：实现 percent 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `percent` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function percent(value: number | undefined, fallback = 0) {
   return Math.round(Number.isFinite(Number(value)) ? Number(value) * 100 : fallback);
 }
 
+/** 渲染 `DashboardPage` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export default function DashboardPage() {
   const overviewQ = useQuery({
     queryKey: ["system-overview"],

@@ -13,7 +13,7 @@ from mmsec_eval.plugins.builtin import register_builtin_plugins
 from mmsec_eval.plugins.registry import list_plugins
 
 
-# 中文注释：验证 test_attack_surrogate_policy_rejects_incompatible_surrogates 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `攻击 surrogate policy rejects incompatible surrogates` 场景，防止相关行为在后续修改中退化。
 def test_attack_surrogate_policy_rejects_incompatible_surrogates() -> None:
     assert attack_surrogate_error("fgsm", "clip_hf") is None
     assert attack_surrogate_error("fgsm", "openai_qwen25_vl")
@@ -24,7 +24,7 @@ def test_attack_surrogate_policy_rejects_incompatible_surrogates() -> None:
     assert attack_surrogate_error("advclip", "openai_qwen3_vl") is None
 
 
-# 中文注释：验证 test_attack_catalog_matches_builtin_registration 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `攻击 catalog matches builtin registration` 场景，防止相关行为在后续修改中退化。
 def test_attack_catalog_matches_builtin_registration() -> None:
     register_builtin_plugins()
     registered_attacks = set(list_plugins("attack"))
@@ -34,7 +34,7 @@ def test_attack_catalog_matches_builtin_registration() -> None:
     assert JOINT_TEXT_ATTACKS == {"tmm", "advedm_plus"}
 
 
-# 中文注释：验证 test_external_attack_metadata_is_synchronized 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `external 攻击 metadata 是否 synchronized` 场景，防止相关行为在后续修改中退化。
 def test_external_attack_metadata_is_synchronized() -> None:
     register_builtin_plugins()
     registered_attacks = set(list_plugins("attack"))

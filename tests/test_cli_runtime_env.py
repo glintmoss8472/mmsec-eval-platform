@@ -7,7 +7,7 @@ from mmsec_eval.cli import _apply_runtime_env
 from mmsec_eval.config.loader import load_config
 
 
-# 中文注释：验证 test_apply_runtime_env_sets_local_openai_compat_defaults 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `apply runtime 环境 sets 本地 OpenAI compat defaults` 场景，防止相关行为在后续修改中退化。
 def test_apply_runtime_env_sets_local_openai_compat_defaults(monkeypatch):
     for key in [
         "MMSEC_OPENAI_QWEN35_9B_BASE_URL",

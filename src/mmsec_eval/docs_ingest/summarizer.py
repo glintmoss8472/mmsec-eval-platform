@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 
 
-# 中文注释：实现 make_snippets 的核心流程，支撑资料摄取层中的业务语义和异常边界。
+# 构建 `snippets` 数据，集中整理资料摄取层需要的输出结构。
 def make_snippets(text: str, max_chars: int = 800) -> dict:
     clean = re.sub(r"\s+", " ", text or "").strip()
     head = clean[:max_chars]

@@ -19,7 +19,7 @@ MODEL_MAP = local_vlm_model_map()
 DEFAULT_MODELS = ",".join(MODEL_MAP)
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `prefetch_local_vlm_assets.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", default="artifacts/local_vlm")

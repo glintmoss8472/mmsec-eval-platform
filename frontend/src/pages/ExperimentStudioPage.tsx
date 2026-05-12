@@ -53,6 +53,7 @@ export { generationCapableAdapter, modelTaskCapabilities, modelSupportsTask, sur
 
 const ASSET_MIN_SAMPLE_COUNT = 1;
 
+/** 渲染 `ExperimentStudioPage` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export default function ExperimentStudioPage() {
   const qc = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -169,7 +170,7 @@ export default function ExperimentStudioPage() {
     : "当前没有可用于该任务的真实生成式数据集";
   const activeAttacks = attacks;
   const rawSampleBatches = sampleBatchQ.data?.items ?? [];
-  /** 中文注释：实现 selectableAssetCount 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+  /** 整理 `selectable asset count` 前端辅助逻辑，保持数据转换和展示口径一致。 */
   const selectableAssetCount = (batch: any) => {
     if (assetBatchStatus === "pending_evaluation") {
       const ids = Array.isArray(batch.asset_ids) ? batch.asset_ids.length : 0;
@@ -497,7 +498,7 @@ export default function ExperimentStudioPage() {
     }
   }, [attack, compatibleSurrogates, selectedSurrogate, surrogate]);
 
-  /** 中文注释：实现 applyAttackDefaults 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+  /** 整理 `apply 攻击 defaults` 前端辅助逻辑，保持数据转换和展示口径一致。 */
   function applyAttackDefaults(nextAttack: string) {
     setAdvancedSteps(String(defaultStepCount(nextAttack)));
     setAdvancedStepSize(String(defaultStepSize(nextAttack, Number(defaultStrengthForAttack(nextAttack)))));
@@ -517,7 +518,7 @@ export default function ExperimentStudioPage() {
     setAttackModeOverride("A");
   }
 
-  /** 中文注释：实现 saveDraft 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+  /** 整理 `save draft` 前端辅助逻辑，保持数据转换和展示口径一致。 */
   function saveDraft() {
     try {
       window.localStorage.setItem(
@@ -653,9 +654,9 @@ export default function ExperimentStudioPage() {
   });
 
   const runningJob = jobsQ.data?.items?.find((item) => item.status === "running" || item.status === "queued");
-  /** 中文注释：实现 goNext 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+  /** 整理 `go prev` 前端辅助逻辑，保持数据转换和展示口径一致。 */
   const goNext = () => setCurrentStep((step) => Math.min(4, step + 1) as WizardStep);
-  /** 中文注释：实现 goPrev 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+  /** 处理 `go prev` 逻辑，保持前端页面的数据转换和展示口径一致。 */
   const goPrev = () => setCurrentStep((step) => Math.max(1, step - 1) as WizardStep);
   const taskKindLabel = taskKind === "vqa" ? "视觉问答" : taskKind === "caption" ? "图像描述" : "图文检索";
   const sidePanelTitle = currentStep === 1 ? "对象状态" : currentStep === 2 ? evaluationMode === "assets" ? "样本集" : "数据规模" : currentStep === 3 ? evaluationMode === "assets" ? "复用测评" : "样本生成参数" : "提交检查";

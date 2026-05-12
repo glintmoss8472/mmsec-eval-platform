@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 
-# 中文注释：定义 SampleAsset 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `SampleAsset` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class SampleAsset:
     sample_id: str
@@ -14,7 +14,7 @@ class SampleAsset:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
-# 中文注释：定义 AdversarialAsset 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `AdversarialAsset` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class AdversarialAsset:
     sample_id: str
@@ -24,13 +24,13 @@ class AdversarialAsset:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
-# 中文注释：定义 AttackTrace 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `AttackTrace` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class AttackTrace:
     steps: list[dict[str, Any]] = field(default_factory=list)
 
 
-# 中文注释：定义 CaseBundle 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `CaseBundle` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class CaseBundle:
     sample: SampleAsset

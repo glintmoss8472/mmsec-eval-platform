@@ -10,12 +10,12 @@ from mmsec_api.store.sqlite import SQLiteStore
 
 
 
-# 中文注释：封装 _run_dir 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 定位 `运行记录 目录`，把配置值或请求上下文转换成实际文件系统路径。
 def _run_dir(run_id: str, artifacts_dir: str = "artifacts") -> Path:
     return Path(artifacts_dir) / "runs" / run_id
 
 
-# 中文注释：封装 _to_float 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 转换 `float` 输入，在类型不匹配时回退到安全默认值。
 def _to_float(value: object, default: float = 0.0) -> float:
     try:
         if value is None:
@@ -24,17 +24,17 @@ def _to_float(value: object, default: float = 0.0) -> float:
     except (TypeError, ValueError):
         return float(default)
 
-# 中文注释：封装 _record 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 确认 `record` 是字典记录，避免后续字段读取直接接触异常类型。
 def _record(value: object) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-# 中文注释：封装 _text 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 规范化 `文本` 字段，把空值和非字符串输入转换为稳定文本。
 def _text(value: object) -> str:
     return str(value or "").strip()
 
 
-# 中文注释：封装 _asset_scope 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 执行 `asset 作用范围` 辅助逻辑，保持后端业务服务中的输入处理和结果输出一致。
 def _asset_scope(task_kind: str, attack: str, eval_scope: str) -> str:
     attack_key = attack.lower()
     if eval_scope.lower() == "joint" or attack_key in {"tmm", "advedm_plus"}:
@@ -46,7 +46,7 @@ def _asset_scope(task_kind: str, attack: str, eval_scope: str) -> str:
     return "图像扰动"
 
 
-# 中文注释：封装 _reuse_state 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 判断或归一 `reuse state` 状态，让调用方可以稳定渲染能力和可用性。
 def _reuse_state(artifact_status: str, clean_ref: str, adv_ref: str) -> tuple[str, str]:
     if clean_ref and adv_ref:
         return "ready", "原始图像与对抗图像均已保存，可纳入样本集复用。"
@@ -57,7 +57,7 @@ def _reuse_state(artifact_status: str, clean_ref: str, adv_ref: str) -> tuple[st
     return "legacy", "历史运行证据不完整，默认只作为复盘线索展示。"
 
 
-# 中文注释：封装 _bundle_refs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 整理 `证据包 refs` 路径信息，把本地文件或产物引用转换成统一表示。
 def _bundle_refs(run_root: Path, sample_id: str) -> tuple[dict[str, Any], dict[str, str]]:
     bundle = read_json(run_root / "cases" / sample_id / "case_bundle.json", {})
     if not isinstance(bundle, dict):
@@ -66,7 +66,7 @@ def _bundle_refs(run_root: Path, sample_id: str) -> tuple[dict[str, Any], dict[s
     return bundle, {str(k): _text(v) for k, v in refs.items()}
 
 
-# 中文注释：实现 asset_from_case 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 执行 `asset 来源 案例` 辅助逻辑，保持后端业务服务中的输入处理和结果输出一致。
 def asset_from_case(run: dict[str, object], row: dict[str, object], artifacts_dir: str) -> dict[str, object]:
     run_id = _text(row.get("run_id") or run.get("run_id"))
     sample_id = _text(row.get("sample_id"))
@@ -125,13 +125,13 @@ def asset_from_case(run: dict[str, object], row: dict[str, object], artifacts_di
     }
 
 
-# 中文注释：封装 _skip_asset_eval_run 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 执行 `skip asset 评测 运行记录` 辅助逻辑，保持后端业务服务中的输入处理和结果输出一致。
 def _skip_asset_eval_run(run_id: str, artifacts_dir: str) -> bool:
     summary = read_json(_run_dir(run_id, artifacts_dir) / "summary.json", {})
     return isinstance(summary, dict) and bool(summary.get("asset_evaluation_mode"))
 
 
-# 中文注释：实现 collect_assets_from_runs 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 收集 `资产 来源 运行记录`，把分散产物整理成统一列表。
 def collect_assets_from_runs(artifacts_dir: str, store: SQLiteStore, run_ids: list[str] | None = None) -> list[dict[str, object]]:
     from mmsec_api.routes.runs import _case_rows_for_run, _decorated_rows_all
 
@@ -156,7 +156,7 @@ def collect_assets_from_runs(artifacts_dir: str, store: SQLiteStore, run_ids: li
     return assets
 
 
-# 中文注释：实现 sync_sample_assets_from_runs 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 同步 `样本 资产 来源 运行记录`，让数据库状态和产物目录保持一致。
 def sync_sample_assets_from_runs(artifacts_dir: str, store: SQLiteStore, run_ids: list[str] | None = None) -> int:
     assets = collect_assets_from_runs(artifacts_dir, store, run_ids=run_ids)
     return store.upsert_sample_assets(assets)

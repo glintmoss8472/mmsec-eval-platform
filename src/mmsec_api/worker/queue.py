@@ -10,9 +10,9 @@ from mmsec_api.store.sqlite import SQLiteStore
 from mmsec_eval.exceptions import MmsecError
 
 
-# 中文注释：定义 JobQueue 的结构化职责，作为任务队列中状态、配置或行为的边界。
+# 实现 `JobQueue.__init__` 的对象行为，维护该类在任务队列中的调用契约。
 class JobQueue:
-    # 中文注释：封装 JobQueue.__init__ 的内部步骤，让任务队列主流程保持清晰并隔离边界细节。
+    # 封装 JobQueue.__init__ 的内部步骤，让任务队列主流程保持清晰并隔离边界细节。
     def __init__(self, store: SQLiteStore, executor: JobExecutor, workers: int = 1) -> None:
         self.store = store
         self.executor = executor
@@ -21,7 +21,7 @@ class JobQueue:
         self._threads: list[threading.Thread] = []
         self._stop = threading.Event()
 
-    # 中文注释：串联 JobQueue.start 的主流程，集中处理任务队列的初始化、执行和退出条件。
+    # 实现 `JobQueue.start` 的对象行为，维护该类在任务队列中的调用契约。
     def start(self) -> None:
         if self._threads:
             return
@@ -30,7 +30,7 @@ class JobQueue:
             t.start()
             self._threads.append(t)
 
-    # 中文注释：实现 JobQueue.stop 的核心行为，维护任务队列在该对象上的调用契约。
+    # 实现 `JobQueue.stop` 的对象行为，维护该类在任务队列中的调用契约。
     def stop(self, timeout: float = 2.0) -> None:
         self._stop.set()
         for _ in self._threads:
@@ -39,11 +39,11 @@ class JobQueue:
             t.join(timeout=timeout)
         self._threads.clear()
 
-    # 中文注释：实现 JobQueue.enqueue 的核心行为，维护任务队列在该对象上的调用契约。
+    # 实现 `JobQueue.enqueue` 的对象行为，维护该类在任务队列中的调用契约。
     def enqueue(self, job_id: str) -> None:
         self._q.put_nowait(job_id)
 
-    # 中文注释：实现 JobQueue.recover_unfinished_jobs 的核心行为，维护任务队列在该对象上的调用契约。
+    # 实现 `JobQueue.recover_unfinished_jobs` 的对象行为，维护该类在任务队列中的调用契约。
     def recover_unfinished_jobs(self) -> int:
         self.store.mark_running_jobs_interrupted()
         recovered = 0
@@ -56,23 +56,23 @@ class JobQueue:
             recovered += 1
         return recovered
 
-    # 中文注释：封装 JobQueue._mk_logger 的内部步骤，让任务队列主流程保持清晰并隔离边界细节。
+    # 执行 `日志` 辅助逻辑，保持任务队列中的输入处理和结果输出一致。
     def _mk_logger(self, job_id: str) -> Callable[[str, str], None]:
-        # 中文注释：封装 _log 的内部步骤，让任务队列主流程保持清晰并隔离边界细节。
+        # 封装 _log 的内部步骤，让任务队列主流程保持清晰并隔离边界细节。
         def _log(level: str, message: str) -> None:
             self.store.add_job_log(job_id, level=level, message=message)
 
         return _log
 
-    # 中文注释：封装 JobQueue._mk_progress 的内部步骤，让任务队列主流程保持清晰并隔离边界细节。
+    # 执行 `进度` 辅助逻辑，保持任务队列中的输入处理和结果输出一致。
     def _mk_progress(self, job_id: str) -> Callable[[str, str, float | None, str], None]:
-        # 中文注释：封装 _progress 的内部步骤，让任务队列主流程保持清晰并隔离边界细节。
+        # 封装 _progress 的内部步骤，让任务队列主流程保持清晰并隔离边界细节。
         def _progress(stage_key: str, state: str, progress_percent: float | None = None, message: str = "") -> None:
             self.store.update_job_stage(job_id, stage_key=stage_key, state=state, progress_percent=progress_percent, message=message)
 
         return _progress
 
-    # 中文注释：封装 JobQueue._worker_loop 的内部步骤，让任务队列主流程保持清晰并隔离边界细节。
+    # 实现 `JobQueue._worker_loop` 的对象行为，维护该类在任务队列中的调用契约。
     def _worker_loop(self) -> None:
         while not self._stop.is_set():
             try:

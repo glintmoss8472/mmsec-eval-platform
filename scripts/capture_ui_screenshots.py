@@ -7,7 +7,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 
-# 中文注释：定义 PageShot 的结构化职责，作为运维与实验脚本中状态、配置或行为的边界。
+# 定义 `PageShot` 的状态和行为边界，供运维与实验脚本在固定职责内复用。
 @dataclass(frozen=True)
 class PageShot:
     route: str
@@ -23,7 +23,7 @@ DEFAULT_ROUTES: tuple[tuple[str, str], ...] = (
 )
 
 
-# 中文注释：封装 _parse_viewport 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 解析 `viewport`，把文本或载荷转换成可校验的字段。
 def _parse_viewport(value: str) -> tuple[int, int]:
     raw = str(value or "1440x900").lower().replace("*", "x")
     left, _, right = raw.partition("x")
@@ -34,12 +34,12 @@ def _parse_viewport(value: str) -> tuple[int, int]:
     return width, height
 
 
-# 中文注释：封装 _route_url 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 拼接 `路由 URL`，把配置中的主机、端口和路径合成实际访问入口。
 def _route_url(base_url: str, route: str) -> str:
     return f"{base_url.rstrip('/')}/{route.lstrip('/')}"
 
 
-# 中文注释：实现 capture_pages 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 执行 `capture pages` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def capture_pages(*, base_url: str, out_dir: Path, viewport: tuple[int, int], timeout_ms: int) -> list[PageShot]:
     try:
         from playwright.sync_api import sync_playwright
@@ -69,7 +69,7 @@ def capture_pages(*, base_url: str, out_dir: Path, viewport: tuple[int, int], ti
     return shots
 
 
-# 中文注释：实现 check_existing 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 执行 `check 已有` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def check_existing(out_dir: Path) -> list[str]:
     required: list[str] = []
     for _, label in DEFAULT_ROUTES:
@@ -78,7 +78,7 @@ def check_existing(out_dir: Path) -> list[str]:
     return [path for path in required if not Path(path).exists()]
 
 
-# 中文注释：实现 parse_args 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 解析 `args`，把文本或载荷转换成可校验的字段。
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Capture fixed UI screenshots used by the thesis evidence bundle.")
     parser.add_argument("--base-url", default="http://127.0.0.1:18000", help="Frontend base URL.")
@@ -89,7 +89,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `capture_ui_screenshots.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     args = parse_args()
     out_dir = Path(args.out_dir).resolve()

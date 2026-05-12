@@ -1,4 +1,4 @@
-# 文件说明：该文件属于部署模板，集中实现 nginx mmsec eval platform.conf 相关逻辑。
+# 处理 `服务` 步骤，封装脚本中的可复用命令片段。
 server {
     listen 80;
     server_name _;

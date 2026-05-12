@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 
 
-# 中文注释：封装 _broadcast_map 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `broadcast map` 辅助逻辑，保持AdvEDM 攻击模块中的输入处理和结果输出一致。
 def _broadcast_map(weight_map: np.ndarray | None, shape: tuple[int, int, int]) -> np.ndarray:
     if weight_map is None:
         return np.ones(shape, dtype=np.float32)
@@ -26,14 +26,14 @@ def _broadcast_map(weight_map: np.ndarray | None, shape: tuple[int, int, int]) -
     return np.clip(w, 0.0, 1.0).astype(np.float32)
 
 
-# 中文注释：实现 target_object_loss 的核心流程，支撑AdvEDM 攻击模块中的业务语义和异常边界。
+# 执行 `target object loss` 辅助逻辑，保持AdvEDM 攻击模块中的输入处理和结果输出一致。
 def target_object_loss(clean: np.ndarray, adv: np.ndarray, mask: np.ndarray) -> float:
     # Encourage changes within selected regions.
     delta = np.abs(adv - clean)
     return float((delta * (1.0 - mask)).mean())
 
 
-# 中文注释：实现 preserve_semantics_loss 的核心流程，支撑AdvEDM 攻击模块中的业务语义和异常边界。
+# 执行 `preserve semantics loss` 辅助逻辑，保持AdvEDM 攻击模块中的输入处理和结果输出一致。
 def preserve_semantics_loss(clean: np.ndarray, adv: np.ndarray, mask: np.ndarray, fixation_map: np.ndarray | None = None) -> float:
     # Keep non-target region close to clean image (attention-weighted).
     delta = clean - adv
@@ -41,7 +41,7 @@ def preserve_semantics_loss(clean: np.ndarray, adv: np.ndarray, mask: np.ndarray
     return float(((delta * delta) * mask * (1.0 + w)).mean())
 
 
-# 中文注释：实现 fixation_loss 的核心流程，支撑AdvEDM 攻击模块中的业务语义和异常边界。
+# 执行 `fixation loss` 辅助逻辑，保持AdvEDM 攻击模块中的输入处理和结果输出一致。
 def fixation_loss(clean: np.ndarray, adv: np.ndarray, mask: np.ndarray, fixation_map: np.ndarray | None = None) -> float:
     # Penalize leaking perturbation into preserved regions.
     leak = np.abs(adv - clean) * mask
@@ -51,7 +51,7 @@ def fixation_loss(clean: np.ndarray, adv: np.ndarray, mask: np.ndarray, fixation
     return float(leak.mean())
 
 
-# 中文注释：实现 total_loss 的核心流程，支撑AdvEDM 攻击模块中的业务语义和异常边界。
+# 执行 `total loss` 辅助逻辑，保持AdvEDM 攻击模块中的输入处理和结果输出一致。
 def total_loss(
     clean: np.ndarray,
     adv: np.ndarray,

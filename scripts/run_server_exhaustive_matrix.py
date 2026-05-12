@@ -32,17 +32,17 @@ DATASET_MAX_ITEMS_OVERRIDE = 0
 MAX_PAIRS_OVERRIDE = -1
 
 
-# 中文注释：封装 _now_iso 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `now iso` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _now_iso() -> str:
     return datetime.now(UTC).isoformat()
 
 
-# 中文注释：封装 _attack_scope 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 推断 `攻击 作用范围`，从样本、配置或运行记录中提取统一名称。
 def _attack_scope(attack: str) -> str:
     return "joint" if attack in {"tmm", "advedm_plus"} else "image"
 
 
-# 中文注释：封装 _attack_params 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 推断 `攻击 params`，从样本、配置或运行记录中提取统一名称。
 def _attack_params(attack: str) -> dict[str, Any]:
     common: dict[str, Any] = {
         "epsilon": 0.05,
@@ -83,7 +83,7 @@ def _attack_params(attack: str) -> dict[str, Any]:
     return common
 
 
-# 中文注释：封装 _with_max_items 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `with max items` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _with_max_items(payload: dict[str, Any], default_max_items: int, default_tag: str) -> dict[str, Any]:
     max_items = int(DATASET_MAX_ITEMS_OVERRIDE or default_max_items)
     payload["max_items"] = max_items
@@ -91,7 +91,7 @@ def _with_max_items(payload: dict[str, Any], default_max_items: int, default_tag
     return payload
 
 
-# 中文注释：封装 _dataset_override 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 推断 `数据集 override`，从样本、配置或运行记录中提取统一名称。
 def _dataset_override(dataset_name: str) -> dict[str, Any]:
     if dataset_name == "coco_subset":
         return _with_max_items(
@@ -144,7 +144,7 @@ def _dataset_override(dataset_name: str) -> dict[str, Any]:
     raise KeyError(f"unsupported dataset: {dataset_name}")
 
 
-# 中文注释：封装 _max_pairs_for 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `max pairs 所属` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _max_pairs_for(dataset_name: str, model_adapter: str) -> int:
     if int(MAX_PAIRS_OVERRIDE) >= 0:
         return int(MAX_PAIRS_OVERRIDE)
@@ -157,7 +157,7 @@ def _max_pairs_for(dataset_name: str, model_adapter: str) -> int:
     return 12288
 
 
-# 中文注释：封装 _mode_override 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `mode override` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _mode_override(mode_name: str) -> tuple[list[str], dict[str, Any]]:
     if mode_name == "standard":
         return ["clean", "attacked"], {
@@ -174,7 +174,7 @@ def _mode_override(mode_name: str) -> tuple[list[str], dict[str, Any]]:
     raise KeyError(f"unsupported mode: {mode_name}")
 
 
-# 中文注释：封装 _job_payload 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 组装 `任务 载荷`，把分散字段整理成后端任务或风险评分使用的载荷。
 def _job_payload(
     *,
     attack: str,
@@ -238,7 +238,7 @@ def _job_payload(
     return experiment_id, payload
 
 
-# 中文注释：封装 _row_key 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 整理 `行记录 key` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _row_key(row: dict[str, Any]) -> tuple[str, str, str, str, int]:
     return (
         str(row.get("attack", "")),
@@ -249,7 +249,7 @@ def _row_key(row: dict[str, Any]) -> tuple[str, str, str, str, int]:
     )
 
 
-# 中文注释：封装 _load_existing_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 加载 `已有 rows`，把外部文件、配置或运行产物转换为内存结构。
 def _load_existing_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -257,21 +257,21 @@ def _load_existing_rows(path: Path) -> list[dict[str, Any]]:
     return list(data.get("rows", []))
 
 
-# 中文注释：封装 _load_thresholds 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 加载 `thresholds`，把外部文件、配置或运行产物转换为内存结构。
 def _load_thresholds() -> dict[str, Any]:
     if not THRESHOLD_PATH.exists():
         return {}
     return json.loads(THRESHOLD_PATH.read_text(encoding="utf-8"))
 
 
-# 中文注释：封装 _load_paper_analysis 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 加载 `paper analysis`，把外部文件、配置或运行产物转换为内存结构。
 def _load_paper_analysis() -> dict[str, Any]:
     if not PAPER_ANALYSIS_PATH.exists():
         return {}
     return json.loads(PAPER_ANALYSIS_PATH.read_text(encoding="utf-8"))
 
 
-# 中文注释：封装 _classic_acceptance_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 整理 `classic acceptance rows` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _classic_acceptance_rows(rows: list[dict[str, Any]]) -> tuple[dict[str, dict[str, dict[str, Any]]], list[dict[str, Any]], list[dict[str, Any]]]:
     phase_rows: dict[str, dict[str, dict[str, Any]]] = {}
     acceptance_rows: list[dict[str, Any]] = []
@@ -317,7 +317,7 @@ def _classic_acceptance_rows(rows: list[dict[str, Any]]) -> tuple[dict[str, dict
     return phase_rows, acceptance_rows, external_rows
 
 
-# 中文注释：封装 _classic_phase_payload 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 组装 `classic phase 载荷`，把分散字段整理成后端任务或风险评分使用的载荷。
 def _classic_phase_payload(phase_rows: dict[str, dict[str, dict[str, Any]]], acceptance_result: dict[str, Any], external_rows: list[dict[str, Any]]) -> dict[str, Any]:
     acceptance_findings = list(acceptance_result.get("findings", []))
     phase_ok_map = {
@@ -336,7 +336,7 @@ def _classic_phase_payload(phase_rows: dict[str, dict[str, dict[str, Any]]], acc
     }
 
 
-# 中文注释：封装 _classic_acceptance_summary 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 汇总 `classic acceptance 摘要`，从运行记录和指标中提炼页面展示所需的分析结果。
 def _classic_acceptance_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     thresholds = _load_thresholds()
     if not thresholds:
@@ -363,7 +363,7 @@ def _classic_acceptance_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-# 中文注释：封装 _aggregate 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `aggregate` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
@@ -442,7 +442,7 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-# 中文注释：封装 _row_from_spec 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 整理 `行记录 来源 spec` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _row_from_spec(job_spec: dict[str, Any], *, seed_base: int, row_index: int) -> tuple[dict[str, Any], dict[str, Any]]:
     seed = int(seed_base) + int(job_spec["repeat_index"]) - 1
     experiment_id, payload = _job_payload(
@@ -468,7 +468,7 @@ def _row_from_spec(job_spec: dict[str, Any], *, seed_base: int, row_index: int) 
     return row, payload
 
 
-# 中文注释：封装 _active_jobs_by_experiment 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `active 任务 by 实验` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _active_jobs_by_experiment(api: ApiClient) -> dict[str, dict[str, Any]]:
     try:
         data = api.get("/jobs?page=1&page_size=200")
@@ -490,7 +490,7 @@ def _active_jobs_by_experiment(api: ApiClient) -> dict[str, dict[str, Any]]:
     return active
 
 
-# 中文注释：封装 _finalize_job_row 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 整理 `finalize 任务 行记录` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _finalize_job_row(api: ApiClient, row: dict[str, Any], final_job: dict[str, Any]) -> None:
     row.pop("_deadline_ts", None)
     row.pop("_poll_error_count", None)
@@ -519,7 +519,7 @@ def _finalize_job_row(api: ApiClient, row: dict[str, Any], final_job: dict[str, 
         row["logs_tail"] = logs.get("items", [])[-20:]
 
 
-# 中文注释：封装 _finalize_exception_row 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 整理 `finalize exception 行记录` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _finalize_exception_row(api: ApiClient, row: dict[str, Any], exc: Exception) -> None:
     row.pop("_deadline_ts", None)
     row.pop("_poll_error_count", None)
@@ -539,7 +539,7 @@ def _finalize_exception_row(api: ApiClient, row: dict[str, Any], exc: Exception)
         row["logs_error"] = str(log_exc)
 
 
-# 中文注释：封装 _write_matrix_outputs 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 写出 `矩阵 outputs`，保证后续报告、页面或复现实验能读取。
 def _write_matrix_outputs(
     *,
     rows: list[dict[str, Any]],
@@ -553,7 +553,7 @@ def _write_matrix_outputs(
     status_path.write_text(json.dumps(status, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-# 中文注释：封装 _parse_args 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 解析 `args`，把文本或载荷转换成可校验的字段。
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--api-base", default="http://127.0.0.1:8000/api/v1")
@@ -573,14 +573,14 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-# 中文注释：封装 _matrix_paths 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `矩阵 paths`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _matrix_paths(out_dir_arg: str) -> tuple[Path, Path, Path]:
     out_dir = Path(out_dir_arg).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     return out_dir / "status.json", out_dir / "rows.json", out_dir / "summary.json"
 
 
-# 中文注释：封装 _matrix_filters 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `矩阵 filters`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _matrix_filters(args: argparse.Namespace) -> tuple[list[str], list[str], list[Any], list[str]]:
     attack_filter = {item.strip() for item in str(args.attacks or "").split(",") if item.strip()}
     model_filter = {item.strip() for item in str(args.models or "").split(",") if item.strip()}
@@ -591,7 +591,7 @@ def _matrix_filters(args: argparse.Namespace) -> tuple[list[str], list[str], lis
     return dataset_names, mode_names, attack_specs, model_adapters
 
 
-# 中文注释：封装 _matrix_plan 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `矩阵 计划`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _matrix_plan(
     *,
     dataset_names: list[str],
@@ -623,7 +623,7 @@ def _matrix_plan(
     return plan
 
 
-# 中文注释：封装 _initial_matrix_status 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `initial 矩阵 状态`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _initial_matrix_status(
     *,
     args: argparse.Namespace,
@@ -655,7 +655,7 @@ def _initial_matrix_status(
     }
 
 
-# 中文注释：封装 _adopt_active_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 整理 `adopt active rows` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _adopt_active_rows(
     *,
     api: ApiClient,
@@ -687,7 +687,7 @@ def _adopt_active_rows(
     return remaining_plan, active_rows, len(adopted_plan_indices)
 
 
-# 中文注释：封装 _submit_jobs_until_full 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `submit 任务 until full` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _submit_jobs_until_full(
     *,
     api: ApiClient,
@@ -709,7 +709,7 @@ def _submit_jobs_until_full(
     return next_plan_index
 
 
-# 中文注释：封装 _last_row_status 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 整理 `last 行记录 状态` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _last_row_status(row: dict[str, Any]) -> dict[str, Any]:
     return {
         "attack": row["attack"],
@@ -722,7 +722,7 @@ def _last_row_status(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-# 中文注释：封装 _poll_active_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 整理 `poll active rows` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _poll_active_rows(api: ApiClient, rows: list[dict[str, Any]], active_rows: list[dict[str, Any]], status: dict[str, Any]) -> bool:
     progressed = False
     for row in list(active_rows):
@@ -748,7 +748,7 @@ def _poll_active_rows(api: ApiClient, rows: list[dict[str, Any]], active_rows: l
     return progressed
 
 
-# 中文注释：封装 _update_matrix_status 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `update 矩阵 状态`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _update_matrix_status(
     *,
     status: dict[str, Any],
@@ -774,7 +774,7 @@ def _update_matrix_status(
     ]
 
 
-# 中文注释：封装 _run_matrix_loop 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 构建 `运行记录 矩阵 loop`，把图像和文本两两配对后整理成指标计算所需的二维结果。
 def _run_matrix_loop(
     *,
     api: ApiClient,
@@ -827,7 +827,7 @@ def _run_matrix_loop(
             time.sleep(poll_seconds)
 
 
-# 中文注释：封装 _write_failed_matrix_status 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 写出 `failed 矩阵 状态`，保证后续报告、页面或复现实验能读取。
 def _write_failed_matrix_status(status: dict[str, Any], status_path: Path, exc: Exception) -> None:
     status["status"] = "failed"
     status["ended_at"] = _now_iso()
@@ -839,7 +839,7 @@ def _write_failed_matrix_status(status: dict[str, Any], status_path: Path, exc: 
     status_path.write_text(json.dumps(status, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `run_server_exhaustive_matrix.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     args = _parse_args()
 

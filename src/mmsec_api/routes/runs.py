@@ -17,17 +17,17 @@ from mmsec_api.store.sqlite import SQLiteStore
 router = APIRouter(prefix="/api/v1/runs", tags=["runs"])
 
 
-# 中文注释：封装 _artifacts_dir 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 定位 `产物 目录`，把配置值或请求上下文转换成实际文件系统路径。
 def _artifacts_dir(request: Request) -> str:
     return str(getattr(request.app.state, "artifacts_dir", "artifacts"))
 
 
-# 中文注释：封装 _run_dir 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 定位 `运行记录 目录`，把配置值或请求上下文转换成实际文件系统路径。
 def _run_dir(run_id: str, artifacts_dir: str = "artifacts") -> Path:
     return Path(artifacts_dir) / "runs" / run_id
 
 
-# 中文注释：封装 _to_float 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 转换 `float` 输入，在类型不匹配时回退到安全默认值。
 def _to_float(value: object, default: float = 0.0) -> float:
     try:
         if value is None:
@@ -37,7 +37,7 @@ def _to_float(value: object, default: float = 0.0) -> float:
         return float(default)
 
 
-# 中文注释：封装 _optional_float 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 解析可选 `float` 字段，空值保持为 None 以区分缺省和零值。
 def _optional_float(value: object) -> float | None:
     try:
         if value is None or value == "":
@@ -47,7 +47,7 @@ def _optional_float(value: object) -> float | None:
         return None
 
 
-# 中文注释：封装 _persisted_case_count_for_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 统计 `persisted 案例 count 所属 运行记录` 数量，在缺失文件或空输入时返回零值。
 def _persisted_case_count_for_run(run_id: str, artifacts_dir: str) -> int:
     if not run_id:
         return 0
@@ -61,18 +61,18 @@ def _persisted_case_count_for_run(run_id: str, artifacts_dir: str) -> int:
         return 0
 
 
-# 中文注释：封装 _record 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 确认 `record` 是字典记录，避免后续字段读取直接接触异常类型。
 def _record(value: object) -> dict[str, object]:
     return value if isinstance(value, dict) else {}
 
 
-# 中文注释：封装 _is_retired_result_key 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断 `是否 retired result key` 条件是否成立，为调用方提供布尔决策。
 def _is_retired_result_key(key: object) -> bool:
     text = str(key).lower()
     return any(token in text for token in ("defense", "defended", "recovery"))
 
 
-# 中文注释：封装 _without_retired_result_fields 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 移除 `retired result fields` 字段，避免废弃结果继续进入报告和接口响应。
 def _without_retired_result_fields(value: object) -> object:
     if isinstance(value, dict):
         return {str(k): _without_retired_result_fields(v) for k, v in value.items() if not _is_retired_result_key(k)}
@@ -81,14 +81,14 @@ def _without_retired_result_fields(value: object) -> object:
     return value
 
 
-# 中文注释：封装 _text_from 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 规范化 `文本 来源` 字段，把空值和非字符串输入转换为稳定文本。
 def _text_from(value: object) -> str:
     if value is None:
         return ""
     return str(value)
 
 
-# 中文注释：封装 _extract_attack_text 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 提取 `攻击 文本`，从归档、结果或响应中取出后续流程需要的字段。
 def _extract_attack_text(output_text: str) -> str:
     marker = "攻击文本："
     if marker not in output_text:
@@ -96,13 +96,13 @@ def _extract_attack_text(output_text: str) -> str:
     return output_text.split(marker, 1)[1].strip()
 
 
-# 中文注释：封装 _debug_token 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 清理 `调试 token`，把任意文本压缩成可安全用于文件名的短标识。
 def _debug_token(value: str) -> str:
     token = "".join(ch if ch.isalnum() or ch in {"-", "_", "."} else "_" for ch in value)
     return token[:120] if len(token) > 120 else token
 
 
-# 中文注释：封装 _resolve_existing_run_path 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 解析 `已有 运行记录 路径` 的真实位置或配置值，减少调用方重复分支。
 def _resolve_existing_run_path(run_root: Path, value: object) -> Path | None:
     raw = _text_from(value).strip()
     if not raw:
@@ -126,7 +126,7 @@ def _resolve_existing_run_path(run_root: Path, value: object) -> Path | None:
     return None
 
 
-# 中文注释：封装 _path_ref 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 生成 `引用路径` 路径引用，把本地文件位置转换成接口可返回的相对地址。
 def _path_ref(path: Path) -> str:
     return path.as_posix()
 
@@ -134,7 +134,7 @@ def _path_ref(path: Path) -> str:
 DEBUG_RESULT_MARKERS = ("smoke", "debug", "vram_", "quick", "trial", "toy", "demo", "staged_lifecycle")
 
 
-# 中文注释：封装 _truthy 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断 `真值` 输入是否表示真值，兼容字符串、数字和布尔类型。
 def _truthy(value: object) -> bool:
     if isinstance(value, bool):
         return value
@@ -142,7 +142,7 @@ def _truthy(value: object) -> bool:
     return text in {"1", "true", "yes", "y", "是", "success", "hit"}
 
 
-# 中文注释：封装 _result_type_for_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 执行 `result 类型 所属 运行记录` 辅助逻辑，保持后端接口路由中的输入处理和结果输出一致。
 def _result_type_for_run(raw: dict[str, object]) -> tuple[str, str]:
     text = " ".join(
         str(raw.get(key) or "")
@@ -153,7 +153,7 @@ def _result_type_for_run(raw: dict[str, object]) -> tuple[str, str]:
     return "formal", "作为正式测评记录展示；页面不会因样本量小而把该 run 从默认视图排除。"
 
 
-# 中文注释：封装 _confidence_for_count 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 统计 `confidence 所属 count` 数量，在缺失文件或空输入时返回零值。
 def _confidence_for_count(count: int, result_type: str) -> tuple[str, str]:
     if count >= 30:
         return "high", f"样本规模 n={count}，适合支撑稳定统计比较。"
@@ -165,19 +165,19 @@ def _confidence_for_count(count: int, result_type: str) -> tuple[str, str]:
     return "low", f"{suffix}未登记可复盘样本，当前只能作为运行级摘要证据。"
 
 
-# 中文注释：封装 _summary_for_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 汇总 `摘要 所属 运行记录`，从运行记录和指标中提炼页面展示所需的分析结果。
 def _summary_for_run(run_id: str, artifacts_dir: str) -> dict[str, object]:
     summary = read_json(_run_dir(run_id, artifacts_dir) / "summary.json", {})
     return apply_compatible_risk(summary if isinstance(summary, dict) else {})
 
 
-# 中文注释：封装 _report_data_for_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 执行 `报告 数据 所属 运行记录` 辅助逻辑，保持后端接口路由中的输入处理和结果输出一致。
 def _report_data_for_run(run_id: str, artifacts_dir: str) -> dict[str, object]:
     report = read_json(_run_dir(run_id, artifacts_dir) / "report_data.json", {})
     return apply_compatible_report_data(report if isinstance(report, dict) else {})
 
 
-# 中文注释：封装 _source_sample_id 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 读取 `样本 id` 来源数据，缺失或格式异常时返回空结构。
 def _source_sample_id(row: dict[str, object], fallback: str) -> str:
     for key in ("source_sample_id", "sample_id", "text_id", "image_id", "case_id", "id"):
         raw = str(row.get(key) or "").strip()
@@ -186,7 +186,7 @@ def _source_sample_id(row: dict[str, object], fallback: str) -> str:
     return fallback
 
 
-# 中文注释：封装 _derived_vlr_case_rows 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 推导 `derived 图文检索 案例 rows` 数据，把已有运行结果转换成接口需要的派生结构。
 def _derived_vlr_case_rows(run_id: str, artifacts_dir: str, limit: int = 50) -> list[dict[str, object]]:
     run_root = _run_dir(run_id, artifacts_dir)
     summary = _summary_for_run(run_id, artifacts_dir)
@@ -248,7 +248,7 @@ def _derived_vlr_case_rows(run_id: str, artifacts_dir: str, limit: int = 50) -> 
     return out
 
 
-# 中文注释：封装 _case_count_for_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 整理 `count 所属 运行记录` 字段，统一生成式案例在 runner 内的读取口径。
 def _case_count_for_run(run_id: str, artifacts_dir: str) -> int:
     persisted = _persisted_case_count_for_run(run_id, artifacts_dir)
     if persisted:
@@ -256,7 +256,7 @@ def _case_count_for_run(run_id: str, artifacts_dir: str) -> int:
     return len(_derived_vlr_case_rows(run_id, artifacts_dir, limit=500))
 
 
-# 中文注释：封装 _evidence_count_for_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 统计 `证据 count 所属 运行记录` 数量，在缺失文件或空输入时返回零值。
 def _evidence_count_for_run(row: dict[str, object], artifacts_dir: str) -> int:
     case_count = int(_to_float(row.get("case_count"), 0.0))
     if case_count > 0:
@@ -278,7 +278,7 @@ def _evidence_count_for_run(row: dict[str, object], artifacts_dir: str) -> int:
     return 0
 
 
-# 中文注释：封装 _decorate_run_row 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 装饰 `运行记录 行记录` 数据行，合并派生指标和展示状态。
 def _decorate_run_row(row: dict[str, object], artifacts_dir: str) -> dict[str, object]:
     out = dict(row)
     run_id = str(out.get("run_id") or "")
@@ -302,7 +302,7 @@ def _decorate_run_row(row: dict[str, object], artifacts_dir: str) -> dict[str, o
     return out
 
 
-# 中文注释：封装 _vlr_debug_dirs 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 整理 `图文检索 调试 目录` 路径信息，把本地文件或产物引用转换成统一表示。
 def _vlr_debug_dirs(run_root: Path, source_sample_id: str) -> list[Path]:
     debug_root = run_root / "attack_debug"
     token = _debug_token(source_sample_id)
@@ -317,7 +317,7 @@ def _vlr_debug_dirs(run_root: Path, source_sample_id: str) -> list[Path]:
     return out
 
 
-# 中文注释：封装 _first_vlr_adv_image 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 查找第一个可用的 `图文检索 adv 图像`，用于页面预览或结果补全。
 def _first_vlr_adv_image(debug_dir: Path) -> str:
     for path in sorted(debug_dir.glob("*.png")):
         name = path.name.lower()
@@ -327,7 +327,7 @@ def _first_vlr_adv_image(debug_dir: Path) -> str:
     return ""
 
 
-# 中文注释：封装 _first_debug_file 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 查找第一个可用的 `调试 file`，用于页面预览或结果补全。
 def _first_debug_file(debug_dirs: list[Path], patterns: list[str]) -> str:
     for directory in debug_dirs:
         for pattern in patterns:
@@ -337,7 +337,7 @@ def _first_debug_file(debug_dirs: list[Path], patterns: list[str]) -> str:
     return ""
 
 
-# 中文注释：封装 _artifact_state 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断或归一 `产物 state` 状态，让调用方可以稳定渲染能力和可用性。
 def _artifact_state(key: str, label: str, value: object, run_root: Path, *, expected: bool = True, disabled: bool = False) -> dict[str, str]:
     resolved = _resolve_existing_run_path(run_root, value)
     if resolved is not None and resolved.is_file():
@@ -349,7 +349,7 @@ def _artifact_state(key: str, label: str, value: object, run_root: Path, *, expe
     return {"key": key, "label": label, "status": "not_recorded", "reason": "历史运行未记录该证据文件"}
 
 
-# 中文注释：封装 _artifact_capability 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断或归一 `产物 capability` 状态，让调用方可以稳定渲染能力和可用性。
 def _artifact_capability(bundle: dict[str, object], run_root: Path, summary: dict[str, object], debug_files: list[str]) -> list[dict[str, str]]:
     refs = _record(bundle.get("artifact_refs"))
     task_kind = str(bundle.get("task_kind") or summary.get("task_kind") or "").lower()
@@ -368,13 +368,13 @@ def _artifact_capability(bundle: dict[str, object], run_root: Path, summary: dic
     ]
 
 
-# 中文注释：封装 _artifact_status_from_capability 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断或归一 `产物 状态 来源 capability` 状态，让调用方可以稳定渲染能力和可用性。
 def _artifact_status_from_capability(items: list[dict[str, str]]) -> str:
     blocking = [item for item in items if item.get("status") == "missing" and item.get("key") in {"clean_image", "adv_image", "output_diff"}]
     return "partial" if blocking else "complete"
 
 
-# 中文注释：封装 _attach_artifact_capability 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 附加 `产物 capability` 信息，把产物能力写回运行记录。
 def _attach_artifact_capability(bundle: dict[str, object], run_root: Path, summary: dict[str, object], debug_files: list[str]) -> dict[str, object]:
     out = dict(bundle)
     items = _artifact_capability(out, run_root, summary, debug_files)
@@ -383,7 +383,7 @@ def _attach_artifact_capability(bundle: dict[str, object], run_root: Path, summa
     return out
 
 
-# 中文注释：封装 _derived_vlr_case_bundle 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 推导 `derived 图文检索 案例 证据包` 数据，把已有运行结果转换成接口需要的派生结构。
 def _derived_vlr_case_bundle(run_id: str, sample_id: str, artifacts_dir: str) -> tuple[dict[str, object], dict[str, object]] | None:
     rows = _derived_vlr_case_rows(run_id, artifacts_dir, limit=500)
     row = next((item for item in rows if str(item.get("sample_id")) == sample_id), None)
@@ -443,7 +443,7 @@ def _derived_vlr_case_bundle(run_id: str, sample_id: str, artifacts_dir: str) ->
     return bundle, {"files": debug_files}
 
 
-# 中文注释：封装 _case_debug_dirs 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 整理 `调试 目录` 字段，统一生成式案例在 runner 内的读取口径。
 def _case_debug_dirs(run_root: Path, bundle: dict[str, object], sample_id: str) -> list[Path]:
     debug_root = run_root / "attack_debug"
     if not debug_root.exists():
@@ -498,7 +498,7 @@ def _case_debug_dirs(run_root: Path, bundle: dict[str, object], sample_id: str) 
     return out
 
 
-# 中文注释：封装 _first_existing_ref 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 查找第一个可用的 `已有 引用路径`，用于页面预览或结果补全。
 def _first_existing_ref(run_root: Path, values: list[object]) -> str:
     for value in values:
         resolved = _resolve_existing_run_path(run_root, value)
@@ -507,7 +507,7 @@ def _first_existing_ref(run_root: Path, values: list[object]) -> str:
     return ""
 
 
-# 中文注释：封装 _find_debug_artifact 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 查找 `调试 产物`，按候选路径或记录字段返回最匹配的结果。
 def _find_debug_artifact(debug_dirs: list[Path], filenames: list[str]) -> str:
     for directory in debug_dirs:
         for filename in filenames:
@@ -517,7 +517,7 @@ def _find_debug_artifact(debug_dirs: list[Path], filenames: list[str]) -> str:
     return ""
 
 
-# 中文注释：封装 _enrich_case_bundle_visual_refs 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 补全 `案例 证据包 visual refs` 字段，让前端和报告能直接消费证据包。
 def _enrich_case_bundle_visual_refs(bundle: dict[str, object], run_root: Path, sample_id: str) -> dict[str, object]:
     refs = dict(_record(bundle.get("artifact_refs")))
     adversarial = _record(bundle.get("adversarial"))
@@ -546,7 +546,7 @@ def _enrich_case_bundle_visual_refs(bundle: dict[str, object], run_root: Path, s
     return bundle
 
 
-# 中文注释：封装 _enrich_case_bundle_inputs 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 补全 `案例 证据包 inputs` 字段，让前端和报告能直接消费证据包。
 def _enrich_case_bundle_inputs(bundle: dict[str, object], run_root: Path, sample_id: str) -> dict[str, object]:
     inputs = dict(_record(bundle.get("inputs")))
     outputs = _record(bundle.get("outputs"))
@@ -568,7 +568,7 @@ def _enrich_case_bundle_inputs(bundle: dict[str, object], run_root: Path, sample
     return bundle
 
 
-# 中文注释：封装 _normalize_run_row 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 归一化 `运行记录 行记录`，把不同来源的数值或文本压到统一尺度。
 def _normalize_run_row(raw: dict[str, object]) -> dict[str, object]:
     asr = _to_float(raw.get("asr"), 0.0)
     return {
@@ -628,7 +628,7 @@ def _normalize_run_row(raw: dict[str, object]) -> dict[str, object]:
     }
 
 
-# 中文注释：封装 _run_evidence_exists 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 执行 `证据 exists` 流程，按配置驱动后端接口路由完成一次任务。
 def _run_evidence_exists(raw: dict[str, object], artifacts_dir: str) -> bool:
     run_id = str(raw.get("run_id") or "").strip()
     if not run_id:
@@ -650,7 +650,7 @@ GENERATED_ONLY_RESULT_TYPES = {"generated_only", "sample_generation_only", "pend
 FAKE_MODEL_ADAPTERS = {"fixture_vlm", "dummy"}
 
 
-# 中文注释：封装 _run_model_values 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 执行 `模型 values` 流程，按配置驱动后端接口路由完成一次任务。
 def _run_model_values(raw: dict[str, object]) -> list[str]:
     values: list[str] = []
     for key in ("model_adapter", "surrogate_model_adapter", "model_tag"):
@@ -665,7 +665,7 @@ def _run_model_values(raw: dict[str, object]) -> list[str]:
     return values
 
 
-# 中文注释：封装 _has_fake_model_marker 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断 `是否包含 fake 模型 marker` 条件是否成立，为调用方提供布尔决策。
 def _has_fake_model_marker(raw: dict[str, object]) -> bool:
     model_values = {item.lower() for item in _run_model_values(raw)}
     if model_values.intersection(FAKE_MODEL_ADAPTERS):
@@ -674,7 +674,7 @@ def _has_fake_model_marker(raw: dict[str, object]) -> bool:
     return "内置生成式演示模型" in model_text or "演示适配器" in model_text
 
 
-# 中文注释：封装 _run_root_candidates 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 执行 `root candidates` 流程，按配置驱动后端接口路由完成一次任务。
 def _run_root_candidates(raw: dict[str, object], artifacts_dir: str) -> list[Path]:
     run_id = str(raw.get("run_id") or "").strip()
     candidates: list[Path] = []
@@ -694,7 +694,7 @@ def _run_root_candidates(raw: dict[str, object], artifacts_dir: str) -> list[Pat
     return out
 
 
-# 中文注释：封装 _has_generated_only_marker 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断 `是否包含 generated only marker` 条件是否成立，为调用方提供布尔决策。
 def _has_generated_only_marker(raw: dict[str, object]) -> bool:
     if _truthy(raw.get("sample_generation_only")) or _truthy(raw.get("generation_only")):
         return True
@@ -707,7 +707,7 @@ def _has_generated_only_marker(raw: dict[str, object]) -> bool:
     return status == "generated_only"
 
 
-# 中文注释：封装 _is_generated_only_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断 `是否 generated only 运行记录` 条件是否成立，为调用方提供布尔决策。
 def _is_generated_only_run(raw: dict[str, object], artifacts_dir: str) -> bool:
     if _has_generated_only_marker(raw):
         return True
@@ -727,7 +727,7 @@ def _is_generated_only_run(raw: dict[str, object], artifacts_dir: str) -> bool:
     return False
 
 
-# 中文注释：封装 _is_fake_model_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断 `是否 fake 模型 运行记录` 条件是否成立，为调用方提供布尔决策。
 def _is_fake_model_run(raw: dict[str, object], artifacts_dir: str) -> bool:
     if _has_fake_model_marker(raw):
         return True
@@ -747,13 +747,13 @@ def _is_fake_model_run(raw: dict[str, object], artifacts_dir: str) -> bool:
     return False
 
 
-# 中文注释：封装 _raise_if_generated_only_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 检查 `generated only 运行记录` 条件，命中时抛出接口异常阻止继续访问。
 def _raise_if_generated_only_run(run_id: str, artifacts_dir: str) -> None:
     if _is_generated_only_run({"run_id": run_id}, artifacts_dir):
         raise HTTPException(status_code=404, detail="pending sample batch has no evaluation result")
 
 
-# 中文注释：封装 _raise_if_unservable_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 检查 `unservable 运行记录` 条件，命中时抛出接口异常阻止继续访问。
 def _raise_if_unservable_run(run_id: str, artifacts_dir: str) -> None:
     run_root = _run_dir(run_id, artifacts_dir)
     if not run_root.exists() or not run_root.is_dir() or not ((run_root / "summary.json").exists() or (run_root / "report_data.json").exists()):
@@ -763,7 +763,7 @@ def _raise_if_unservable_run(run_id: str, artifacts_dir: str) -> None:
         raise HTTPException(status_code=404, detail="demo model result has been removed")
 
 
-# 中文注释：封装 _run_created_sort_value 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 执行 `created sort value` 流程，按配置驱动后端接口路由完成一次任务。
 def _run_created_sort_value(item: dict[str, object]) -> float:
     raw = str(item.get("created_at") or "").strip()
     if raw:
@@ -778,7 +778,7 @@ def _run_created_sort_value(item: dict[str, object]) -> float:
         return 0.0
 
 
-# 中文注释：封装 _merge_run_rows 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 合并 `运行记录 rows` 数据，统一数据库记录和文件产物的口径。
 def _merge_run_rows(cache_rows: list[dict[str, object]], artifact_rows: list[dict[str, object]]) -> list[dict[str, object]]:
     merged: dict[str, dict[str, object]] = {}
     for row in artifact_rows:
@@ -801,7 +801,7 @@ def _merge_run_rows(cache_rows: list[dict[str, object]], artifact_rows: list[dic
     )
 
 
-# 中文注释：封装 _run_model_key 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 执行 `模型 key` 流程，按配置驱动后端接口路由完成一次任务。
 def _run_model_key(row: dict[str, object]) -> str:
     victims = row.get("victim_model_adapters")
     if isinstance(victims, list) and victims:
@@ -809,7 +809,7 @@ def _run_model_key(row: dict[str, object]) -> str:
     return str(row.get("model_adapter") or "").strip()
 
 
-# 中文注释：封装 _risk_bucket 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 归类 `风险 bucket`，把连续分数或多条记录整理成稳定分组。
 def _risk_bucket(value: object) -> str:
     text = str(value or "").strip().lower()
     if text in {"critical", "high"} or "高" in text:
@@ -819,7 +819,7 @@ def _risk_bucket(value: object) -> str:
     return "low"
 
 
-# 中文注释：封装 _model_risk_groups 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 归类 `模型 风险 groups`，把连续分数或多条记录整理成稳定分组。
 def _model_risk_groups(rows: list[dict[str, object]]) -> list[dict[str, object]]:
     grouped: dict[str, list[dict[str, object]]] = {}
     for row in rows:
@@ -847,7 +847,7 @@ def _model_risk_groups(rows: list[dict[str, object]]) -> list[dict[str, object]]
     return sorted(out, key=lambda item: (-float(item["avg_risk_score"]), str(item["model_adapter"])))
 
 
-# 中文注释：封装 _is_evaluation_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断 `是否 evaluation 运行记录` 条件是否成立，为调用方提供布尔决策。
 def _is_evaluation_run(raw: dict[str, object]) -> bool:
     run_id = str(raw.get("run_id") or "").strip().lower()
     benchmark_tag = str(raw.get("benchmark_tag") or "").strip().lower()
@@ -860,7 +860,7 @@ def _is_evaluation_run(raw: dict[str, object]) -> bool:
     return task_kind not in {"advclip_train", "train_advclip"}
 
 
-# 中文注释：封装 _is_demo_like_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 判断 `是否 demo like 运行记录` 条件是否成立，为调用方提供布尔决策。
 def _is_demo_like_run(row: dict[str, object]) -> bool:
     run_id = str(row.get("run_id") or "").lower()
     dataset = f"{row.get('dataset_name') or ''} {row.get('benchmark_tag') or ''}".lower()
@@ -879,18 +879,18 @@ def _is_demo_like_run(row: dict[str, object]) -> bool:
     )
 
 
-# 中文注释：封装 _match_text 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 匹配 `文本` 条件，支撑运行记录的搜索和筛选。
 def _match_text(value: object, needle: str) -> bool:
     return needle.lower() in str(value or "").lower()
 
 
-# 中文注释：封装 _run_model_search_text 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 执行 `模型 search 文本` 流程，按配置驱动后端接口路由完成一次任务。
 def _run_model_search_text(row: dict[str, object]) -> str:
     victims = row.get("victim_model_adapters") if isinstance(row.get("victim_model_adapters"), list) else []
     return " ".join(str(x or "") for x in [row.get("model_adapter"), row.get("surrogate_model_adapter"), *victims])
 
 
-# 中文注释：封装 _matches_run_filters 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 匹配 `运行记录 filters` 条件，支撑运行记录的搜索和筛选。
 def _matches_run_filters(
     row: dict[str, object],
     *,
@@ -928,7 +928,7 @@ def _matches_run_filters(
     return True
 
 
-# 中文注释：封装 _run_sort_value 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 执行 `sort value` 流程，按配置驱动后端接口路由完成一次任务。
 def _run_sort_value(row: dict[str, object], key: str) -> tuple[int, object, str]:
     if key == "created":
         return (0, str(row.get("created_at") or row.get("run_id") or ""), str(row.get("run_id") or ""))
@@ -959,7 +959,7 @@ def _run_sort_value(row: dict[str, object], key: str) -> tuple[int, object, str]
     return (1, str(row.get("created_at") or row.get("run_id") or ""), str(row.get("run_id") or ""))
 
 
-# 中文注释：封装 _sort_run_rows 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 排序 `运行记录 rows` 数据，保证列表接口和页面展示顺序稳定。
 def _sort_run_rows(rows: list[dict[str, object]], sort_by: str, sort_dir: str) -> list[dict[str, object]]:
     return [
         row
@@ -971,7 +971,7 @@ def _sort_run_rows(rows: list[dict[str, object]], sort_by: str, sort_dir: str) -
     ]
 
 
-# 中文注释：封装 _filtered_decorated_rows 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 整理 `filtered 已装饰 rows` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _filtered_decorated_rows(
     artifacts_dir: str,
     store: SQLiteStore,
@@ -1002,7 +1002,7 @@ def _filtered_decorated_rows(
     ]
 
 
-# 中文注释：处理 list_runs 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("", response_model=RunListResponse)
 def list_runs(
     request: Request,
@@ -1037,7 +1037,7 @@ def list_runs(
     items = [RunSummary(**row) for row in rows2]
     return RunListResponse(total=total2, page=page, page_size=page_size, items=items)
 
-# 中文注释：封装 _decorated_rows_all 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 整理 `已装饰 rows all` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _decorated_rows_all(artifacts_dir: str, store: SQLiteStore) -> list[dict[str, object]]:
     total, rows = store.list_runs_cache(page=1, page_size=10000)
     del total
@@ -1058,7 +1058,7 @@ def _decorated_rows_all(artifacts_dir: str, store: SQLiteStore) -> list[dict[str
     return [_decorate_run_row(_normalize_run_row(row if isinstance(row, dict) else {}), artifacts_dir) for row in merged]
 
 
-# 中文注释：封装 _case_rows_for_run 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 整理 `rows 所属 运行记录` 字段，统一生成式案例在 runner 内的读取口径。
 def _case_rows_for_run(run: dict[str, object], artifacts_dir: str) -> list[dict[str, object]]:
     run_id = str(run.get("run_id") or "")
     run_root = _run_dir(run_id, artifacts_dir)
@@ -1100,7 +1100,7 @@ def _case_rows_for_run(run: dict[str, object], artifacts_dir: str) -> list[dict[
     return out
 
 
-# 中文注释：处理 run_analytics 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /analytics` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/analytics")
 def run_analytics(
     request: Request,
@@ -1133,7 +1133,7 @@ def run_analytics(
     confidence_counts = Counter(str(row.get("evidence_confidence") or "unknown") for row in rows)
     case_total = sum(int(_to_float(row.get("case_count"), 0.0)) for row in rows)
 
-    # 中文注释：处理 avg 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+    # 计算 `avg` 均值，空输入时返回可控的默认结果。
     def avg(values: list[float]) -> float:
         return round(sum(values) / len(values), 6) if values else 0.0
 
@@ -1174,13 +1174,13 @@ def run_analytics(
     }
 
 
-# 中文注释：封装 _option_counter 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 推断 `option counter`，从样本、配置或运行记录中提取统一名称。
 def _option_counter(rows: list[dict[str, object]], key: str) -> list[dict[str, object]]:
     counts = Counter(str(row.get(key) or "") for row in rows if str(row.get(key) or "").strip())
     return [{"key": key, "value": value, "count": count} for value, count in sorted(counts.items())]
 
 
-# 中文注释：处理 run_options 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /options` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/options")
 def run_options(
     request: Request,
@@ -1196,7 +1196,7 @@ def run_options(
         "confidences": _option_counter(rows, "evidence_confidence"),
     }
 
-# 中文注释：处理 list_case_index 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /cases` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/cases", response_model=RowsResponse)
 def list_case_index(
     request: Request,
@@ -1223,7 +1223,7 @@ def list_case_index(
     for run in runs:
         rows.extend(_case_rows_for_run(run, artifacts_dir))
 
-    # 中文注释：处理 match_text 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+    # 匹配 `文本` 条件，支撑运行记录的搜索和筛选。
     def match_text(value: object, needle: str) -> bool:
         return needle.lower() in str(value or "").lower()
 
@@ -1256,7 +1256,7 @@ def list_case_index(
         filtered.append(row)
     artifact_order = {"complete": 3, "partial": 2, "summary_only": 1}
 
-    # 中文注释：处理 sort_value 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+    # 排序 `value` 数据，保证列表接口和页面展示顺序稳定。
     def sort_value(item: dict[str, object]) -> tuple[int, object, str]:
         key = sort_by or "created"
         if key == "created":
@@ -1280,7 +1280,7 @@ def list_case_index(
     return RowsResponse(total=total, page=page, page_size=page_size, items=items)
 
 
-# 中文注释：处理 compare_runs 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /compare` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/compare", response_model=RunCompareResponse)
 def compare_runs(
     request: Request,
@@ -1335,7 +1335,7 @@ def compare_runs(
     )
 
 
-# 中文注释：处理 get_summary 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /{run_id}/summary` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/{run_id}/summary")
 def get_summary(run_id: str, request: Request):
     artifacts_dir = _artifacts_dir(request)
@@ -1346,7 +1346,7 @@ def get_summary(run_id: str, request: Request):
     return _without_retired_result_fields(apply_compatible_risk(read_json(p, {})))
 
 
-# 中文注释：处理 get_results 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /{run_id}/results` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/{run_id}/results", response_model=RowsResponse)
 def get_results(
     run_id: str,
@@ -1363,7 +1363,7 @@ def get_results(
     return RowsResponse(total=total, page=page, page_size=page_size, items=items)
 
 
-# 中文注释：处理 get_report_data 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /{run_id}/report-data` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/{run_id}/report-data")
 def get_report_data(run_id: str, request: Request):
     artifacts_dir = _artifacts_dir(request)
@@ -1374,7 +1374,7 @@ def get_report_data(run_id: str, request: Request):
     return _without_retired_result_fields(apply_compatible_report_data(read_json(p, {})))
 
 
-# 中文注释：处理 get_cases 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /{run_id}/cases` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/{run_id}/cases", response_model=RowsResponse)
 def get_cases(
     run_id: str,
@@ -1396,7 +1396,7 @@ def get_cases(
     return RowsResponse(total=total, page=page, page_size=page_size, items=items)
 
 
-# 中文注释：处理 get_case_detail 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /{run_id}/cases/{sample_id}` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/{run_id}/cases/{sample_id}", response_model=CaseDetailResponse)
 def get_case_detail(run_id: str, sample_id: str, request: Request) -> CaseDetailResponse:
     artifacts_dir = _artifacts_dir(request)
@@ -1442,7 +1442,7 @@ def get_case_detail(run_id: str, sample_id: str, request: Request) -> CaseDetail
     return CaseDetailResponse(run_id=run_id, sample_id=sample_id, case_bundle=bundle, attack_debug=debug_payload)
 
 
-# 中文注释：处理 get_run_asset 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /{run_id}/assets/{asset_path:path}` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/{run_id}/assets/{asset_path:path}")
 def get_run_asset(run_id: str, asset_path: str, request: Request):
     artifacts_dir = _artifacts_dir(request)

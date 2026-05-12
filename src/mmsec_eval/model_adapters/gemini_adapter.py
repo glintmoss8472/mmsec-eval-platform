@@ -18,9 +18,9 @@ PROMPT_TEXT = (
 )
 
 
-# 中文注释：定义 GeminiVisionAdapter 的结构化职责，作为模型适配层中状态、配置或行为的边界。
+# 实现 `GeminiVisionAdapter.__init__` 的对象行为，维护该类在模型适配层中的调用契约。
 class GeminiVisionAdapter(ModelAdapter):
-    # 中文注释：封装 GeminiVisionAdapter.__init__ 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 封装 GeminiVisionAdapter.__init__ 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         self.base_url = os.getenv("MMSEC_GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta").rstrip("/")
         self.model_name = os.getenv("MMSEC_GEMINI_MODEL_NAME", "gemini-2.5-pro").strip()
@@ -30,7 +30,7 @@ class GeminiVisionAdapter(ModelAdapter):
         if not self.api_key:
             raise RuntimeError(f"GeminiVisionAdapter requires API key env: {self.api_key_env}")
 
-    # 中文注释：封装 GeminiVisionAdapter._payload 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 组装 `载荷`，把分散字段整理成后端任务或风险评分使用的载荷。
     def _payload(self, image: np.ndarray, text: str) -> dict[str, Any]:
         image_b64 = encode_image_b64(image)
         return {
@@ -49,7 +49,7 @@ class GeminiVisionAdapter(ModelAdapter):
             },
         }
 
-    # 中文注释：封装 GeminiVisionAdapter._generation_payload 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 组装 `生成式评测 载荷`，把分散字段整理成后端任务或风险评分使用的载荷。
     def _generation_payload(self, image: np.ndarray, prompt: str, *, max_tokens: int) -> dict[str, Any]:
         image_b64 = encode_image_b64(image)
         return {
@@ -68,7 +68,7 @@ class GeminiVisionAdapter(ModelAdapter):
             },
         }
 
-    # 中文注释：封装 GeminiVisionAdapter._request_pair 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `GeminiVisionAdapter._request_pair` 的对象行为，维护该类在模型适配层中的调用契约。
     def _request_pair(self, image: np.ndarray, text: str) -> dict[str, Any]:
         url = f"{self.base_url}/models/{self.model_name}:generateContent?key={self.api_key}"
         resp = requests.post(url, json=self._payload(image, text), timeout=self.timeout)
@@ -89,7 +89,7 @@ class GeminiVisionAdapter(ModelAdapter):
             "raw": data,
         }
 
-    # 中文注释：封装 GeminiVisionAdapter._candidate_text 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `GeminiVisionAdapter._candidate_text` 的对象行为，维护该类在模型适配层中的调用契约。
     @staticmethod
     def _candidate_text(data: dict[str, Any]) -> str:
         candidates = data.get("candidates") or []
@@ -102,7 +102,7 @@ class GeminiVisionAdapter(ModelAdapter):
                 chunks.append(str(part.get("text", "")))
         return "\n".join(chunks).strip()
 
-    # 中文注释：封装 GeminiVisionAdapter._request_generation 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `GeminiVisionAdapter._request_generation` 的对象行为，维护该类在模型适配层中的调用契约。
     def _request_generation(self, sample: Sample, prompt: str, *, max_tokens: int) -> ModelOutput:
         url = f"{self.base_url}/models/{self.model_name}:generateContent?key={self.api_key}"
         resp = requests.post(url, json=self._generation_payload(sample.image, prompt, max_tokens=max_tokens), timeout=self.timeout)
@@ -121,7 +121,7 @@ class GeminiVisionAdapter(ModelAdapter):
             },
         )
 
-    # 中文注释：实现 GeminiVisionAdapter.score_pairs 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 计算 `pairs`，为指标、风险或调度决策提供数值依据。
     def score_pairs(self, pairs: list[tuple[np.ndarray, str]], batch_size: int = 1) -> np.ndarray:
         del batch_size
         if not pairs:
@@ -129,7 +129,7 @@ class GeminiVisionAdapter(ModelAdapter):
         scores = [self._request_pair(image, text)["score"] for image, text in pairs]
         return np.asarray(scores, dtype=np.float32)
 
-    # 中文注释：实现 GeminiVisionAdapter.predict 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `GeminiVisionAdapter.predict` 的对象行为，维护该类在模型适配层中的调用契约。
     def predict(self, sample: Sample) -> ModelOutput:
         out = self._request_pair(sample.image, sample.text)
         score = float(out["score"])
@@ -146,18 +146,18 @@ class GeminiVisionAdapter(ModelAdapter):
             },
         )
 
-    # 中文注释：实现 GeminiVisionAdapter.generate_answer 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 生成 `answer`，补齐前端展示或后续评测需要的样本资产。
     def generate_answer(self, sample: Sample, question: str, *, prompt: str = "", max_tokens: int = 64) -> ModelOutput:
         template = str(prompt or "Answer the question about the image. Use a short answer.\nQuestion: {question}")
         rendered = template.format(question=str(question))
         return self._request_generation(sample, rendered, max_tokens=max_tokens)
 
-    # 中文注释：实现 GeminiVisionAdapter.generate_caption 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 生成 `图像描述`，补齐前端展示或后续评测需要的样本资产。
     def generate_caption(self, sample: Sample, *, prompt: str = "", max_tokens: int = 96) -> ModelOutput:
         rendered = str(prompt or "Describe only the visible content of this image in one concise sentence.")
         return self._request_generation(sample, rendered, max_tokens=max_tokens)
 
-    # 中文注释：实现 GeminiVisionAdapter.object_probe 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `GeminiVisionAdapter.object_probe` 的对象行为，维护该类在模型适配层中的调用契约。
     def object_probe(self, sample: Sample, object_name: str, *, prompt: str = "", max_tokens: int = 8) -> ModelOutput:
         template = str(prompt or "Is there a {object_name} in the image? Answer yes or no.")
         rendered = template.format(object_name=str(object_name))

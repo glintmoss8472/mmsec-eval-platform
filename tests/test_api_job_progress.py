@@ -6,12 +6,12 @@ from pathlib import Path
 from api_test_utils import make_client, wait_job_done, write_toy_eval_cfg
 
 
-# 中文注释：实现 write_cfg 的核心流程，支撑自动化测试中的业务语义和异常边界。
+# 写出 `配置`，保证后续报告、页面或复现实验能读取。
 def write_cfg(path: Path) -> None:
     write_toy_eval_cfg(path)
 
 
-# 中文注释：验证 test_job_progress_endpoint_tracks_stage_and_run_id 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `任务 进度 endpoint tracks stage and 运行记录 id` 场景，防止相关行为在后续修改中退化。
 def test_job_progress_endpoint_tracks_stage_and_run_id(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch, skip_model_preflight=True) as client:
         cfg = tmp_path / "cfg.yaml"

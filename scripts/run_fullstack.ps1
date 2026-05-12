@@ -24,7 +24,7 @@ Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File
 $ready = $false
 for ($i = 0; $i -lt 25; $i++) {
   Start-Sleep -Milliseconds 800
-  # 中文注释：实现 try 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+  # 处理 `try` 步骤，封装脚本中的可复用命令片段。
   try {
     $resp = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:$ApiPort/api/v1/health" -TimeoutSec 3
     if ($resp.StatusCode -eq 200) {

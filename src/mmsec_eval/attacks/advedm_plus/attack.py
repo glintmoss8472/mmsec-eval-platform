@@ -16,7 +16,7 @@ from mmsec_eval.plugins.base import AttackPlugin
 from mmsec_eval.types import AttackContext, AttackedSample, Sample
 
 
-# 中文注释：封装 _resolve_ablation_flags 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 解析 `消融 标志` 的真实位置或配置值，减少调用方重复分支。
 def _resolve_ablation_flags(ctx: AttackContext) -> dict[str, bool]:
     extra = getattr(ctx.config, "extra", {})
     payload = extra if isinstance(extra, dict) else {}
@@ -33,7 +33,7 @@ def _resolve_ablation_flags(ctx: AttackContext) -> dict[str, bool]:
     }
 
 
-# 中文注释：封装 _normalize_map 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 归一化 `map`，把不同来源的数值或文本压到统一尺度。
 def _normalize_map(values: np.ndarray) -> np.ndarray:
     arr = np.asarray(values, dtype=np.float32)
     if arr.size <= 0:
@@ -45,7 +45,7 @@ def _normalize_map(values: np.ndarray) -> np.ndarray:
     return ((arr - mn) / (mx - mn)).astype(np.float32)
 
 
-# 中文注释：封装 _patch_reduce 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `补丁 聚合` 辅助逻辑，保持AdvEDM-plus 攻击模块中的输入处理和结果输出一致。
 def _patch_reduce(values: np.ndarray, patch_size: int, out_shape: tuple[int, int]) -> np.ndarray:
     arr = np.asarray(values, dtype=np.float32)
     gh, gw = out_shape
@@ -62,7 +62,7 @@ def _patch_reduce(values: np.ndarray, patch_size: int, out_shape: tuple[int, int
     return out
 
 
-# 中文注释：封装 _budget_focus_terms 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 计算 `聚焦 因子` 因子，为自适应扰动预算提供缩放依据。
 def _budget_focus_terms(scores: np.ndarray, fixation: np.ndarray, text: str) -> dict[str, float]:
     scores_arr = np.asarray(scores, dtype=np.float32)
     fixation_arr = np.asarray(fixation, dtype=np.float32)
@@ -83,7 +83,7 @@ def _budget_focus_terms(scores: np.ndarray, fixation: np.ndarray, text: str) -> 
     }
 
 
-# 中文注释：封装 _budget_scales 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 计算 `缩放系数` 因子，为自适应扰动预算提供缩放依据。
 def _budget_scales(terms: dict[str, float]) -> dict[str, float]:
     semantic_focus = float(terms["semantic_focus"])
     fixation_mean = float(terms["fixation_mean"])
@@ -99,7 +99,7 @@ def _budget_scales(terms: dict[str, float]) -> dict[str, float]:
     }
 
 
-# 中文注释：实现 compute_adaptive_budget 的核心流程，支撑AdvEDM-plus 攻击模块中的业务语义和异常边界。
+# 计算 `自适应 budget`，为指标、风险或调度决策提供数值依据。
 def compute_adaptive_budget(
     *,
     scores: np.ndarray,
@@ -132,7 +132,7 @@ def compute_adaptive_budget(
     }
 
 
-# 中文注释：封装 _scope_plan 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 确定 `计划`，约束图像分支和文本分支的实际执行范围。
 def _scope_plan(ctx: AttackContext) -> tuple[str, dict[str, bool], bool, bool]:
     task_kind = str(getattr(ctx.config.task, "kind", "pairwise"))
     scope = str(getattr(ctx.config.task, "eval_scope", "joint") or "joint")
@@ -150,7 +150,7 @@ def _scope_plan(ctx: AttackContext) -> tuple[str, dict[str, bool], bool, bool]:
     return scope, ablation, do_img, do_txt
 
 
-# 中文注释：封装 _joint_score_maps 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 融合 `分数 maps` 信息，把语义得分和视觉注视区域合成为攻击依据。
 def _joint_score_maps(image: np.ndarray, text: str, target: str, surrogate: Any, cfg: Any, ablation: dict[str, bool]) -> dict[str, np.ndarray]:
     scores = patch_similarity_scores(image, target, patch_size=int(cfg.patch_size), model_adapter=surrogate)
     fixation = attention_fixation_map(image, text or target, surrogate)
@@ -167,7 +167,7 @@ def _joint_score_maps(image: np.ndarray, text: str, target: str, surrogate: Any,
     return {"scores": scores, "fixation": fixation, "fixation_for_budget": fixation_for_budget, "fixation_patch": fixation_patch, "joint_scores": joint_scores}
 
 
-# 中文注释：封装 _base_budget 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `基础 budget` 辅助逻辑，保持AdvEDM-plus 攻击模块中的输入处理和结果输出一致。
 def _base_budget(cfg: Any, fixation_for_budget: np.ndarray, text: str) -> dict[str, float]:
     return {
         "semantic_focus": 0.0,
@@ -186,7 +186,7 @@ def _base_budget(cfg: Any, fixation_for_budget: np.ndarray, text: str) -> dict[s
     }
 
 
-# 中文注释：封装 _adaptive_budget 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `自适应 budget` 辅助逻辑，保持AdvEDM-plus 攻击模块中的输入处理和结果输出一致。
 def _adaptive_budget(cfg: Any, maps: dict[str, np.ndarray], text: str, ablation: dict[str, bool]) -> dict[str, float]:
     if ablation["disable_adaptive_budget"]:
         return _base_budget(cfg, maps["fixation_for_budget"], text)
@@ -212,7 +212,7 @@ def _adaptive_budget(cfg: Any, maps: dict[str, np.ndarray], text: str, ablation:
     return budget
 
 
-# 中文注释：封装 _adaptive_topk 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `自适应 topk` 辅助逻辑，保持AdvEDM-plus 攻击模块中的输入处理和结果输出一致。
 def _adaptive_topk(configured_topk: int, budget: dict[str, float], ablation: dict[str, bool]) -> int:
     if ablation["disable_fixation_constraint"]:
         return max(1, int(np.ceil(configured_topk * 0.25)))
@@ -220,11 +220,11 @@ def _adaptive_topk(configured_topk: int, budget: dict[str, float], ablation: dic
     return max(configured_topk, int(np.ceil(configured_topk * topk_scale)))
 
 
-# 中文注释：定义 ADVEDMPlusAttack 的结构化职责，作为AdvEDM-plus 攻击模块中状态、配置或行为的边界。
+# 定义 `ADVEDMPlusAttack` 的状态和行为边界，供AdvEDM-plus 攻击模块在固定职责内复用。
 class ADVEDMPlusAttack(AttackPlugin):
     """Joint AdvEDM-inspired attack with adaptive image/text budget scheduling."""
 
-    # 中文注释：封装 ADVEDMPlusAttack._run_image_branch 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+    # 执行 `图像 branch` 流程，按配置驱动AdvEDM-plus 攻击模块完成一次任务。
     def _run_image_branch(self, *, image: np.ndarray, mask: np.ndarray, target: str, text: str, surrogate: Any, cfg: Any, budget: dict[str, float], fixation_for_budget: np.ndarray, objective: str, do_img: bool):
         if not do_img:
             return image, []
@@ -245,7 +245,7 @@ class ADVEDMPlusAttack(AttackPlugin):
             objective=objective,
         )
 
-    # 中文注释：封装 ADVEDMPlusAttack._run_text_branch 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+    # 执行 `文本 branch` 流程，按配置驱动AdvEDM-plus 攻击模块完成一次任务。
     def _run_text_branch(self, *, image: np.ndarray, clean_image: np.ndarray, text: str, surrogate: Any, cfg: Any, budget: dict[str, float], do_img: bool, do_txt: bool) -> tuple[str, dict[str, Any]]:
         if not do_txt or not text:
             return text, {"method": "noop", "reason": "scope=image"}
@@ -261,7 +261,7 @@ class ADVEDMPlusAttack(AttackPlugin):
         text_edit["adaptive_eps_t"] = adaptive_eps_t
         return adv_text, text_edit
 
-    # 中文注释：封装 ADVEDMPlusAttack._debug_paths 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+    # 整理 `调试 paths` 路径信息，把本地文件或产物引用转换成统一表示。
     def _debug_paths(self, *, ctx: AttackContext, mask: np.ndarray, maps: dict[str, np.ndarray], budget: dict[str, float], text_edit: dict[str, Any], scope: str, target: str) -> tuple[str, str, str]:
         if not ctx.sample_debug_dir:
             return "", "", ""
@@ -278,7 +278,7 @@ class ADVEDMPlusAttack(AttackPlugin):
             target_text=target,
         )
 
-    # 中文注释：封装 ADVEDMPlusAttack._metadata 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+    # 实现 `ADVEDMPlusAttack._metadata` 的对象行为，维护该类在AdvEDM-plus 攻击模块中的调用契约。
     def _metadata(self, *, mode: str, objective: str, scope: str, target: str, mask: np.ndarray, cfg: Any, adaptive_topk: int, budget: dict[str, float], text_edit: dict[str, Any], debug_paths: tuple[str, str, str], ablation: dict[str, bool], trace: list[Any]) -> dict[str, Any]:
         mask_debug_path, attention_debug_path, joint_debug_path = debug_paths
         return {
@@ -312,7 +312,7 @@ class ADVEDMPlusAttack(AttackPlugin):
             "loss_decomposition": trace[-1].loss_parts if trace else {},
         }
 
-    # 中文注释：实现 ADVEDMPlusAttack.attack 的核心行为，维护AdvEDM-plus 攻击模块在该对象上的调用契约。
+    # 推断 `攻击`，从样本、配置或运行记录中提取统一名称。
     def attack(self, sample: Sample, ctx: AttackContext) -> AttackedSample:
         cfg = ctx.config.attack
         scope, ablation, do_img, do_txt = _scope_plan(ctx)
@@ -392,7 +392,7 @@ class ADVEDMPlusAttack(AttackPlugin):
         )
 
 
-# 中文注释：封装 _write_debug_artifacts 的内部步骤，让AdvEDM-plus 攻击模块主流程保持清晰并隔离边界细节。
+# 写出 `调试 产物`，保证后续报告、页面或复现实验能读取。
 def _write_debug_artifacts(
     *,
     sample_debug_dir: str,

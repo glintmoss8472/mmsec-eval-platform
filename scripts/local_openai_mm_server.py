@@ -47,7 +47,7 @@ except ImportError:
 
 
 if not hasattr(hf_import_utils, "is_torch_fx_available"):
-    # 中文注释：封装 _is_torch_fx_available 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 判断 `是否 PyTorch fx available` 条件是否成立，为调用方提供布尔决策。
     def _is_torch_fx_available() -> bool:
         try:
             import torch.fx  # noqa: F401
@@ -95,7 +95,7 @@ try:
 
     _qwen3_rotary_init = Qwen3RotaryEmbedding.__init__
 
-    # 中文注释：封装 _patched_qwen3_rotary_init 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 执行 `patched qwen3 rotary init` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
     def _patched_qwen3_rotary_init(self: Any, *args: Any, **kwargs: Any) -> None:
         config = kwargs.get("config")
         if config is None and args:
@@ -112,7 +112,7 @@ except (ImportError, AttributeError, TypeError, ValueError) as exc:
     LOGGER.debug("Qwen3 rotary compatibility patch skipped: %s", exc)
 
 
-# 中文注释：封装 _decode_image_url 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 拼接 `decode 图像 URL`，把配置中的主机、端口和路径合成实际访问入口。
 def _decode_image_url(url: str) -> Image.Image:
     value = str(url or "").strip()
     if not value:
@@ -131,7 +131,7 @@ def _decode_image_url(url: str) -> Image.Image:
     return Image.open(value).convert("RGB")
 
 
-# 中文注释：封装 _normalize_messages 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 归一化 `messages`，把不同来源的数值或文本压到统一尺度。
 def _normalize_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     normalized: list[dict[str, Any]] = []
     for msg in messages:
@@ -165,13 +165,13 @@ def _normalize_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return normalized
 
 
-# 中文注释：封装 _is_qwen_processor 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 判断 `是否 qwen processor` 条件是否成立，为调用方提供布尔决策。
 def _is_qwen_processor(processor: Any) -> bool:
     marker = f"{processor.__class__.__module__}.{processor.__class__.__name__}".lower()
     return "qwen" in marker
 
 
-# 中文注释：封装 _apply_chat_template_no_thinking 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 应用 `chat template no thinking` 规则，把兼容字段写回报告或风险载荷。
 def _apply_chat_template_no_thinking(processor: Any, messages: list[dict[str, Any]], **kwargs: Any) -> Any:
     """Apply a chat template while disabling Qwen-style thinking when supported."""
     if not _is_qwen_processor(processor):
@@ -184,7 +184,7 @@ def _apply_chat_template_no_thinking(processor: Any, messages: list[dict[str, An
         return processor.apply_chat_template(messages, **kwargs)
 
 
-# 中文注释：定义 ChatCompletionRequest 的结构化职责，作为运维与实验脚本中状态、配置或行为的边界。
+# 定义 `ChatCompletionRequest` 的接口字段和默认值，保证前后端传输的数据结构稳定。
 class ChatCompletionRequest(BaseModel):
     model: str | None = None
     messages: list[dict[str, Any]]
@@ -192,7 +192,7 @@ class ChatCompletionRequest(BaseModel):
     max_tokens: int | None = 128
 
 
-# 中文注释：封装 _load_minicpm_tokenizer 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 加载 `minicpm tokenizer`，把外部文件、配置或运行产物转换为内存结构。
 def _load_minicpm_tokenizer(model_id: str, *, local_files_only: bool) -> Any:
     model_path = Path(model_id).expanduser()
     wrapper_cls = None
@@ -224,7 +224,7 @@ def _load_minicpm_tokenizer(model_id: str, *, local_files_only: bool) -> Any:
     return _patch_minicpm_tokenizer_attrs(tokenizer)
 
 
-# 中文注释：封装 _patch_minicpm_tokenizer_attrs 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `补丁 minicpm tokenizer attrs` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _patch_minicpm_tokenizer_attrs(tokenizer: Any) -> Any:
     fallback_tokens = {
         "im_start": "<image>",
@@ -254,13 +254,13 @@ def _patch_minicpm_tokenizer_attrs(tokenizer: Any) -> Any:
     return tokenizer
 
 
-# 中文注释：封装 _patch_minicpm_runtime 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 整理 `补丁 minicpm runtime`，描述当前服务器运行环境、模型入口或部署状态。
 def _patch_minicpm_runtime(model: Any) -> None:
     if not hasattr(model, "vpm_forward_features"):
         return
     original_vpm_forward_features = model.vpm_forward_features
 
-    # 中文注释：封装 _patched_vpm_forward_features 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 执行 `patched vpm forward features` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
     def _patched_vpm_forward_features(pixel_value: Any) -> Any:
         features = original_vpm_forward_features(pixel_value)
         try:
@@ -300,7 +300,7 @@ def _patch_minicpm_runtime(model: Any) -> None:
             LOGGER.debug("MiniCPM generation mixin patch skipped: %s", exc)
 
 
-# 中文注释：封装 _has_meta_tensors 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 判断 `是否包含 meta tensors` 条件是否成立，为调用方提供布尔决策。
 def _has_meta_tensors(model: Any) -> bool:
     for getter_name in ("parameters", "buffers"):
         getter = getattr(model, getter_name, None)
@@ -317,7 +317,7 @@ def _has_meta_tensors(model: Any) -> bool:
     return False
 
 
-# 中文注释：封装 _patch_ovis_model_class 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 推断 `补丁 ovis 模型 class`，从样本、配置或运行记录中提取统一名称。
 def _patch_ovis_model_class(model_id: str) -> Any:
     model_cls = get_class_from_dynamic_module(
         "modeling_ovis2_5.Ovis2_5",
@@ -327,7 +327,7 @@ def _patch_ovis_model_class(model_id: str) -> Any:
     )
     original_tie_weights = getattr(model_cls, "tie_weights", None)
     if original_tie_weights is not None and not getattr(model_cls, "_mmsec_tie_weights_patched", False):
-        # 中文注释：封装 _patched_tie_weights 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+        # 执行 `patched tie weights` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
         def _patched_tie_weights(self: Any, *args: Any, **kwargs: Any) -> Any:
             return original_tie_weights(self)
 
@@ -336,9 +336,9 @@ def _patch_ovis_model_class(model_id: str) -> Any:
     return model_cls
 
 
-# 中文注释：定义 LocalMultimodalServer 的结构化职责，作为运维与实验脚本中状态、配置或行为的边界。
+# 实现 `LocalMultimodalServer._torch_dtype` 的对象行为，维护该类在运维与实验脚本中的调用契约。
 class LocalMultimodalServer:
-    # 中文注释：封装 LocalMultimodalServer._torch_dtype 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 封装 LocalMultimodalServer._torch_dtype 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
     @staticmethod
     def _torch_dtype(dtype_name: str) -> torch.dtype:
         dtype_map = {
@@ -351,7 +351,7 @@ class LocalMultimodalServer:
         }
         return dtype_map.get(str(dtype_name).strip().lower(), torch.float16)
 
-    # 中文注释：封装 LocalMultimodalServer.__init__ 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 实现 `LocalMultimodalServer.__init__` 的对象行为，维护该类在运维与实验脚本中的调用契约。
     def __init__(self, model_id: str, *, public_model_id: str | None = None, dtype_name: str = "float16") -> None:
         self.model_id = model_id
         self.local_files_only = Path(model_id).expanduser().is_dir()
@@ -377,14 +377,14 @@ class LocalMultimodalServer:
             is_ovis=is_ovis,
         )
 
-    # 中文注释：封装 LocalMultimodalServer._name_based_model_flags 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 推断 `名称 based 模型 标志`，从样本、配置或运行记录中提取统一名称。
     def _name_based_model_flags(self) -> tuple[bool, bool]:
         labels = f"{self.public_model_id} {self.model_id}".lower()
         is_minicpm = "minicpm" in labels
         is_phi35_vision = "phi-3.5-vision" in labels or "phi35_vision" in labels
         return is_minicpm, is_phi35_vision
 
-    # 中文注释：封装 LocalMultimodalServer._load_processor 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 加载 `processor`，把外部文件、配置或运行产物转换为内存结构。
     def _load_processor(self, *, is_minicpm: bool, is_phi35_vision: bool) -> Any:
         if is_minicpm:
             return None
@@ -398,7 +398,7 @@ class LocalMultimodalServer:
             processor_kwargs["num_crops"] = 4
         return AutoProcessor.from_pretrained(self.model_id, **processor_kwargs)
 
-    # 中文注释：封装 LocalMultimodalServer._load_config 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 加载 `配置`，把外部文件、配置或运行产物转换为内存结构。
     def _load_config(self, *, is_minicpm: bool, is_phi35_vision: bool) -> Any:
         config = AutoConfig.from_pretrained(
             self.model_id,
@@ -419,7 +419,7 @@ class LocalMultimodalServer:
             setattr(config, "_attn_implementation_internal", "eager")
         return config
 
-    # 中文注释：封装 LocalMultimodalServer._model_kwargs 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 推断 `模型 kwargs`，从样本、配置或运行记录中提取统一名称。
     def _model_kwargs(self, *, config: Any, torch_dtype: torch.dtype, is_phi35_vision: bool) -> dict[str, Any]:
         kwargs = {
             "config": config,
@@ -432,7 +432,7 @@ class LocalMultimodalServer:
             kwargs["attn_implementation"] = "eager"
         return kwargs
 
-    # 中文注释：封装 LocalMultimodalServer._load_model 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 加载 `模型`，把外部文件、配置或运行产物转换为内存结构。
     def _load_model(self, *, model_kwargs: dict[str, Any], is_minicpm: bool, is_ovis: bool) -> None:
         if is_minicpm:
             self.loader_name = "AutoModel"
@@ -453,7 +453,7 @@ class LocalMultimodalServer:
         else:
             self._load_transformers_vision_or_causal_model(model_kwargs)
 
-    # 中文注释：封装 LocalMultimodalServer._load_transformers_vision_or_causal_model 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 加载 `transformers vision or causal 模型`，把外部文件、配置或运行产物转换为内存结构。
     def _load_transformers_vision_or_causal_model(self, model_kwargs: dict[str, Any]) -> None:
         self.loader_name = "AutoModelForImageTextToText"
         try:
@@ -480,12 +480,12 @@ class LocalMultimodalServer:
             )
             self._move_model_to_primary_device()
 
-    # 中文注释：封装 LocalMultimodalServer._move_model_to_primary_device 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 推断 `move 模型 to primary device`，从样本、配置或运行记录中提取统一名称。
     def _move_model_to_primary_device(self) -> None:
         target_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(target_device)
 
-    # 中文注释：封装 LocalMultimodalServer._reload_meta_model_if_needed 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 推断 `reload meta 模型 if needed`，从样本、配置或运行记录中提取统一名称。
     def _reload_meta_model_if_needed(self, *, model_kwargs: dict[str, Any], is_minicpm: bool) -> None:
         if _has_meta_tensors(self.model) and (is_minicpm or not getattr(self.model, "hf_device_map", None)):
             manual_device_kwargs = dict(model_kwargs)
@@ -502,7 +502,7 @@ class LocalMultimodalServer:
             )
             self._move_model_to_primary_device()
 
-    # 中文注释：封装 LocalMultimodalServer._configure_runtime 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 整理 `configure runtime`，描述当前服务器运行环境、模型入口或部署状态。
     def _configure_runtime(self, *, is_minicpm: bool, is_phi35_vision: bool, is_qwen_vl: bool, is_ovis: bool) -> None:
         if is_minicpm:
             self.runtime_mode = "minicpm_chat"
@@ -531,7 +531,7 @@ class LocalMultimodalServer:
         elif is_ovis:
             self.runtime_mode = "ovis"
 
-    # 中文注释：封装 LocalMultimodalServer._extract_single_prompt 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 提取 `single 提示词`，从归档、结果或响应中取出后续流程需要的字段。
     @staticmethod
     def _extract_single_prompt(messages: list[dict[str, Any]]) -> tuple[Image.Image | None, str]:
         prompt_parts: list[str] = []
@@ -548,7 +548,7 @@ class LocalMultimodalServer:
                         prompt_image = image
         return prompt_image, "\n".join(prompt_parts).strip()
 
-    # 中文注释：封装 LocalMultimodalServer._generate_minicpm 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 生成 `minicpm`，补齐前端展示或后续评测需要的样本资产。
     def _generate_minicpm(self, prepared: list[dict[str, Any]], max_tokens: int, temperature: float) -> str:
         image, prompt = self._extract_single_prompt(prepared)
         result = self.model.chat(
@@ -564,7 +564,7 @@ class LocalMultimodalServer:
         )
         return str((result[0] if isinstance(result, tuple) else result) or "").strip()
 
-    # 中文注释：封装 LocalMultimodalServer._generate_phi 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 生成 `phi`，补齐前端展示或后续评测需要的样本资产。
     def _generate_phi(self, prepared: list[dict[str, Any]], max_tokens: int, temperature: float) -> str:
         image, prompt = self._extract_single_prompt(prepared)
         if image is not None:
@@ -582,7 +582,7 @@ class LocalMultimodalServer:
         texts = self.processor.batch_decode(output_ids[:, inputs["input_ids"].shape[1] :], skip_special_tokens=True, clean_up_tokenization_spaces=False)
         return str(texts[0] if texts else "").strip()
 
-    # 中文注释：封装 LocalMultimodalServer._generate_qwen 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 生成 `qwen`，补齐前端展示或后续评测需要的样本资产。
     def _generate_qwen(self, prepared: list[dict[str, Any]], max_tokens: int, temperature: float) -> str:
         prompt_text = _apply_chat_template_no_thinking(self.processor, prepared, tokenize=False, add_generation_prompt=True)
         image_inputs, video_inputs = process_vision_info(prepared)
@@ -597,7 +597,7 @@ class LocalMultimodalServer:
         texts = self.processor.batch_decode(trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False)
         return str(texts[0] if texts else "").strip()
 
-    # 中文注释：封装 LocalMultimodalServer._generate_ovis 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 生成 `ovis`，补齐前端展示或后续评测需要的样本资产。
     def _generate_ovis(self, prepared: list[dict[str, Any]], max_tokens: int, temperature: float) -> str:
         input_ids, pixel_values, grid_thws = self.model.preprocess_inputs(messages=prepared, add_generation_prompt=True, enable_thinking=False, max_pixels=896 * 896)
         device = self.model.device
@@ -617,7 +617,7 @@ class LocalMultimodalServer:
             output_ids = self.model.generate(**gen_kwargs)
         return str(self.model.text_tokenizer.decode(output_ids[0], skip_special_tokens=True)).strip()
 
-    # 中文注释：封装 LocalMultimodalServer._generate_default 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+    # 生成 `default`，补齐前端展示或后续评测需要的样本资产。
     def _generate_default(self, prepared: list[dict[str, Any]], max_tokens: int, temperature: float) -> str:
         inputs = _apply_chat_template_no_thinking(
             self.processor,
@@ -644,7 +644,7 @@ class LocalMultimodalServer:
         texts = self.processor.batch_decode(trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False)
         return str(texts[0] if texts else "").strip()
 
-    # 中文注释：实现 LocalMultimodalServer.generate 的核心行为，维护运维与实验脚本在该对象上的调用契约。
+    # 实现 `LocalMultimodalServer.generate` 的对象行为，维护该类在运维与实验脚本中的调用契约。
     def generate(self, messages: list[dict[str, Any]], *, max_tokens: int, temperature: float) -> str:
         prepared = _normalize_messages(messages)
         if self.runtime_mode == "minicpm_chat" and self.tokenizer is not None and hasattr(self.model, "chat"):
@@ -658,11 +658,11 @@ class LocalMultimodalServer:
         return self._generate_default(prepared, max_tokens, temperature)
 
 
-# 中文注释：实现 build_app 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 构建 `应用` 数据，集中整理运维与实验脚本需要的输出结构。
 def build_app(server: LocalMultimodalServer) -> FastAPI:
     app = FastAPI(title="Local Multimodal OpenAI-Compatible Server", version="0.1.0")
 
-    # 中文注释：实现 health 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+    # 处理 `GET /health` 接口，完成请求校验、存储访问和响应模型组装。
     @app.get("/health")
     def health() -> dict[str, Any]:
         return {
@@ -672,7 +672,7 @@ def build_app(server: LocalMultimodalServer) -> FastAPI:
             "loader": server.loader_name,
         }
 
-    # 中文注释：实现 list_models 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+    # 处理 `GET /v1/models` 接口，完成请求校验、存储访问和响应模型组装。
     @app.get("/v1/models")
     def list_models() -> dict[str, Any]:
         return {
@@ -686,7 +686,7 @@ def build_app(server: LocalMultimodalServer) -> FastAPI:
             ],
         }
 
-    # 中文注释：实现 chat_completions 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+    # 处理 `POST /v1/chat/completions` 接口，完成请求校验、存储访问和响应模型组装。
     @app.post("/v1/chat/completions")
     def chat_completions(req: ChatCompletionRequest) -> dict[str, Any]:
         requested = str(req.model or "").strip()
@@ -741,7 +741,7 @@ def build_app(server: LocalMultimodalServer) -> FastAPI:
     return app
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `local_openai_mm_server.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-id", required=True)

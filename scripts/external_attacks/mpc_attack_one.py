@@ -17,7 +17,7 @@ from PIL import Image
 from torchvision import transforms
 
 
-# 中文注释：封装 _install_compat_stubs 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `install compat stubs` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _install_compat_stubs() -> None:
     if "config_schema" not in sys.modules:
         module = ModuleType("config_schema")
@@ -31,7 +31,7 @@ def _install_compat_stubs() -> None:
         print(f"transformers DINOv3 compatibility patch skipped: {exc}", file=sys.stderr)
 
 
-# 中文注释：封装 _load_module 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 加载 `module`，把外部文件、配置或运行产物转换为内存结构。
 def _load_module(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
@@ -42,7 +42,7 @@ def _load_module(name: str, path: Path):
     return module
 
 
-# 中文注释：封装 _prepare_official_modules 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 准备 `official modules` 数据，补齐后续运行、报告或测试需要的字段。
 def _prepare_official_modules(repo: Path):
     _install_compat_stubs()
     sys.path.insert(0, str(repo))
@@ -62,13 +62,13 @@ def _prepare_official_modules(repo: Path):
 
 
 
-# 中文注释：封装 _manual_model_path 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 定位 `manual 模型 路径`，把配置值或请求上下文转换成实际文件系统路径。
 def _manual_model_path(repo_id: str) -> Path:
     hf_home = Path(os.environ.get("HF_HOME", "/root/autodl-tmp/hf-cache"))
     return hf_home / "manual" / repo_id
 
 
-# 中文注释：封装 _set_hf_cache_env 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `set Hugging Face cache 环境` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _set_hf_cache_env() -> None:
     hf_home = Path(os.environ.get("HF_HOME", "/root/autodl-tmp/hf-cache")).expanduser().resolve()
     os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
@@ -80,7 +80,7 @@ def _set_hf_cache_env() -> None:
     os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 
-# 中文注释：封装 _cached_model_path 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 定位 `cached 模型 路径`，把配置值或请求上下文转换成实际文件系统路径。
 def _cached_model_path(repo_id: str) -> Path:
     manual = _manual_model_path(repo_id)
     if manual.exists():
@@ -95,7 +95,7 @@ def _cached_model_path(repo_id: str) -> Path:
     return manual
 
 
-# 中文注释：封装 _patch_from_pretrained 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `补丁 来源 pretrained` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _patch_from_pretrained(module, class_names: tuple[str, ...], repo_id: str, local_path: Path) -> None:
     if not local_path.exists():
         return
@@ -105,7 +105,7 @@ def _patch_from_pretrained(module, class_names: tuple[str, ...], repo_id: str, l
             continue
         original = cls.from_pretrained
 
-        # 中文注释：封装 _from_pretrained 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+        # 执行 `来源 pretrained` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
         def _from_pretrained(path_or_repo_id, *args, _original=original, **kwargs):
             if str(path_or_repo_id) == repo_id:
                 kwargs.setdefault("local_files_only", True)
@@ -115,7 +115,7 @@ def _patch_from_pretrained(module, class_names: tuple[str, ...], repo_id: str, l
         cls.from_pretrained = _from_pretrained
 
 
-# 中文注释：封装 _patch_clip_repos 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `补丁 CLIP repos` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _patch_clip_repos(mods) -> None:
     for module, repo_id in (
         (mods.clip_b16, "openai/clip-vit-base-patch16"),
@@ -125,9 +125,9 @@ def _patch_clip_repos(mods) -> None:
         _patch_from_pretrained(module, ("CLIPModel", "CLIPProcessor", "AutoTokenizer"), repo_id, _cached_model_path(repo_id))
 
 
-# 中文注释：封装 _patch_clip_forward 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `forward` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _patch_clip_forward(cls) -> None:
-    # 中文注释：封装 _forward 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 封装 _forward 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
     def _forward(self, x):
         inputs = dict(pixel_values=self.normalizer(x))
         out = self.model.get_image_features(**inputs)
@@ -139,7 +139,7 @@ def _patch_clip_forward(cls) -> None:
                 out = projection(out)
         return out / out.norm(dim=1, keepdim=True)
 
-    # 中文注释：封装 _text_features_get 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 规范化 `文本 features get` 字段，把空值和非字符串输入转换为稳定文本。
     def _text_features_get(self, text):
         inputs = self.tokenizer(text, padding=True, return_tensors="pt").to(self.model.device)
         out = self.model.get_text_features(**inputs)
@@ -156,9 +156,9 @@ def _patch_clip_forward(cls) -> None:
 
 
 
-# 中文注释：封装 _patch_internvl_forward 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `forward` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _patch_internvl_forward(cls) -> None:
-    # 中文注释：封装 _forward 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 封装 _forward 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
     def _forward(self, x):
         pixel_values = self.get_input_pixel_values(x)
         pixel_values = pixel_values.to(self.model.device, dtype=torch.bfloat16)
@@ -175,7 +175,7 @@ def _patch_internvl_forward(cls) -> None:
 
     cls.forward = _forward
 
-# 中文注释：封装 _set_seed 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `set seed` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _set_seed(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
@@ -184,14 +184,14 @@ def _set_seed(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
-# 中文注释：封装 _to_tensor 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 转换 `tensor` 输入，在类型不匹配时回退到安全默认值。
 def _to_tensor(pic: Image.Image) -> torch.Tensor:
     arr = torch.from_numpy(np.array(pic, np.uint8, copy=True))
     arr = arr.view(pic.size[1], pic.size[0], len(pic.getbands()))
     return arr.permute((2, 0, 1)).contiguous().float()
 
 
-# 中文注释：封装 _load_image 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 加载 `图像`，把外部文件、配置或运行产物转换为内存结构。
 def _load_image(path: Path, input_res: int, device: torch.device) -> torch.Tensor:
     transform_fn = transforms.Compose([
         transforms.Resize((input_res, input_res), interpolation=torchvision.transforms.InterpolationMode.BICUBIC),
@@ -201,7 +201,7 @@ def _load_image(path: Path, input_res: int, device: torch.device) -> torch.Tenso
     return transform_fn(Image.open(path)).unsqueeze(0).to(device)
 
 
-# 中文注释：封装 _build_clip_models 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 构建 `CLIP 模型` 数据，集中整理外部攻击脚本需要的输出结构。
 def _build_clip_models(mods, names: list[str], device: torch.device):
     mapping = {
         "B16": mods.clip_b16.ClipB16FeatureExtractor,
@@ -221,22 +221,22 @@ def _build_clip_models(mods, names: list[str], device: torch.device):
     return mods.base.EnsembleFeatureExtractor_our(models), models
 
 
-# 中文注释：封装 _cat_clip_features 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `cat CLIP features` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _cat_clip_features(feat_dict: dict) -> torch.Tensor:
     return torch.cat([feat_dict[idx] for idx in sorted(feat_dict.keys())], dim=1).float()
 
 
-# 中文注释：封装 _join_features 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `join features` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _join_features(parts: list[torch.Tensor]) -> torch.Tensor:
     return torch.cat([p.float() for p in parts], dim=1)
 
 
-# 中文注释：封装 _text_features 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 规范化 `文本 features` 字段，把空值和非字符串输入转换为稳定文本。
 def _text_features(clip_models, text: str) -> dict:
     return clip_models.get_text_features(text or "a photo")
 
 
-# 中文注释：封装 _resolve_device 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 解析 `device` 的真实位置或配置值，减少调用方重复分支。
 def _resolve_device(device_name: str) -> torch.device:
     if device_name == "cuda":
         device_name = "cuda:0"
@@ -245,7 +245,7 @@ def _resolve_device(device_name: str) -> torch.device:
     return torch.device(device_name)
 
 
-# 中文注释：封装 _build_official_models 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 构建 `official 模型` 数据，集中整理外部攻击脚本需要的输出结构。
 def _build_official_models(args, mods, device: torch.device):
     internvl_path = Path(args.internvl_model_path).expanduser().resolve() if args.internvl_model_path else _cached_model_path("OpenGVLab/InternVL3-1B-hf")
     dino_path = Path(args.dino_model_path).expanduser().resolve() if args.dino_model_path else _cached_model_path("facebook/dinov2-base")
@@ -264,7 +264,7 @@ def _build_official_models(args, mods, device: torch.device):
     return clip_models, internvl_model, dino_model
 
 
-# 中文注释：封装 _reference_features 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `reference features` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _reference_features(args, clip_models, internvl_model, dino_model, img_src: torch.Tensor, img_tgt: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     lam = float(args.lam)
     with torch.no_grad():
@@ -288,7 +288,7 @@ def _reference_features(args, clip_models, internvl_model, dino_model, img_src: 
         return _join_features(z_src_parts), _join_features(z_tgt_parts)
 
 
-# 中文注释：封装 _optimize_delta 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `optimize delta` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _optimize_delta(args, mods, clip_models, internvl_model, dino_model, source_crop, img_src: torch.Tensor, z_src: torch.Tensor, z_tgt: torch.Tensor, epsilon: float, alpha: float) -> torch.Tensor:
     device = img_src.device
     delta = (min(epsilon, 16.0) / 255.0) * torch.randn_like(img_src, device=device)
@@ -314,7 +314,7 @@ def _optimize_delta(args, mods, clip_models, internvl_model, dino_model, source_
     return delta.detach()
 
 
-# 中文注释：封装 _save_adv 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 写出 `adv`，保证后续报告、页面或复现实验能读取。
 def _save_adv(output_image: str, input_image: str, img_src: torch.Tensor, delta: torch.Tensor) -> None:
     adv = torch.clamp((img_src + delta) / 255.0, 0.0, 1.0)
     output = Path(output_image).expanduser().resolve()
@@ -327,7 +327,7 @@ def _save_adv(output_image: str, input_image: str, img_src: torch.Tensor, delta:
     torchvision.utils.save_image(out.squeeze(0), str(output))
 
 
-# 中文注释：串联 run 的主流程，集中处理外部攻击脚本的初始化、执行和退出条件。
+# 作为 `mpc_attack_one.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def run(args) -> None:
     repo = Path(args.repo_dir).expanduser().resolve()
     if not repo.exists():
@@ -351,7 +351,7 @@ def run(args) -> None:
     _save_adv(args.output_image, args.input_image, img_src, delta)
 
 
-# 中文注释：串联 main 的主流程，集中处理外部攻击脚本的初始化、执行和退出条件。
+# 作为 `mpc_attack_one.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     _set_hf_cache_env()
     parser = argparse.ArgumentParser(description="Run official MPCAttack feature extractors for one target-transfer image attack.")

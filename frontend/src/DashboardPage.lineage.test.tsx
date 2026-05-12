@@ -61,7 +61,7 @@ vi.mock("./lib/api", () => ({
   listJobs: vi.fn(async () => ({ total: 0, items: [] })),
 }));
 
-/** 中文注释：实现 createClient 的核心流程，支撑前端工程配置中的业务语义和异常边界。 */
+/** 构建 `create client` 结构，供页面渲染或测试断言复用。 */
 function createClient() {
   return new QueryClient({
     defaultOptions: {

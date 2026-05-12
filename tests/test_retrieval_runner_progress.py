@@ -7,15 +7,15 @@ from mmsec_eval.retrieval.metrics import VLRIndex
 from mmsec_eval.runner.retrieval_runner import _score_matrix
 
 
-# 中文注释：定义 _DummyCrossEncoder 的结构化职责，作为自动化测试中状态、配置或行为的边界。
+# 计算 `pairs`，为指标、风险或调度决策提供数值依据。
 class _DummyCrossEncoder:
-    # 中文注释：实现 _DummyCrossEncoder.score_pairs 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 实现 _DummyCrossEncoder.score_pairs 的核心行为，维护自动化测试在该对象上的调用契约。
     def score_pairs(self, pairs, batch_size: int = 1):  # noqa: ANN001
         del batch_size
         return np.asarray([0.5 for _ in pairs], dtype=np.float32)
 
 
-# 中文注释：验证 test_score_matrix_reports_pair_progress 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `分数 矩阵 报告 pair 进度` 场景，防止相关行为在后续修改中退化。
 def test_score_matrix_reports_pair_progress():
     index = VLRIndex(
         images=[np.zeros((8, 8, 3), dtype=np.float32) for _ in range(2)],

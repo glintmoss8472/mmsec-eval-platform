@@ -26,7 +26,7 @@ export interface ValidationBlockerRow {
   scientific_quality_ok?: boolean;
 }
 
-/** 中文注释：实现 deriveValidationEvidence 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 整理 `derive 验证 证据` 数据，把接口响应转换成页面可直接渲染的结构。 */
 export function deriveValidationEvidence(
   overview: SystemOverview | undefined,
   _jobs: JobItem[] | undefined,

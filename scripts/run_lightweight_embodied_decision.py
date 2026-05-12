@@ -14,7 +14,7 @@ if str(SRC_DIR) not in sys.path:
 from mmsec_eval.embodied.decision_benchmark import evaluate_decision_cases, load_decision_cases, summarize_decision_cases
 
 
-# 中文注释：实现 parse_args 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 解析 `args`，把文本或载荷转换成可校验的字段。
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate a lightweight embodied decision benchmark from JSONL cases.")
     parser.add_argument("--cases-jsonl", default="seed/data/embodied_decision/cases.jsonl")
@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `run_lightweight_embodied_decision.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     args = parse_args()
     rows = load_decision_cases(args.cases_jsonl)

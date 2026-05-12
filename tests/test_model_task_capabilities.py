@@ -4,7 +4,7 @@ from __future__ import annotations
 from mmsec_api.services.model_runtime import model_supports_task, task_capabilities_for_adapter
 
 
-# 中文注释：验证 test_fixture_is_not_formal_task_model 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `fixture 是否 not 正式结果 任务 模型` 场景，防止相关行为在后续修改中退化。
 def test_fixture_is_not_formal_task_model() -> None:
     assert task_capabilities_for_adapter("fixture_vlm") == []
     assert model_supports_task("fixture_vlm", "vqa") is False
@@ -12,7 +12,7 @@ def test_fixture_is_not_formal_task_model() -> None:
     assert model_supports_task("fixture_vlm", "vlr") is False
 
 
-# 中文注释：验证 test_task_specific_model_capabilities 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `任务 specific 模型 capabilities` 场景，防止相关行为在后续修改中退化。
 def test_task_specific_model_capabilities() -> None:
     assert task_capabilities_for_adapter("clip_hf") == ["vlr"]
     assert model_supports_task("clip_hf", "vlr") is True

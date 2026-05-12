@@ -16,11 +16,12 @@ const CaseReviewPage = lazy(() => import("./pages/CaseReviewPage"));
 const ReportDetailPage = lazy(() => import("./pages/ReportDetailPage"));
 const CaseReplayPage = lazy(() => import("./pages/CaseReplayPage"));
 
-/** 中文注释：实现 PageFallback 的核心流程，支撑前端工程配置中的业务语义和异常边界。 */
+/** 渲染 `PageFallback` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 function PageFallback() {
   return <div className="gov-empty-state">正在加载页面。</div>;
 }
 
+/** 渲染 `App` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export default function App() {
   return (
     <Suspense fallback={<PageFallback />}>

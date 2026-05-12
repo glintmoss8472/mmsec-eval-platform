@@ -14,14 +14,14 @@ SHAPES = ["circle", "square", "triangle"]
 COLORS = ["red", "green", "blue"]
 
 
-# 中文注释：定义 ToyShapesDataset 的结构化职责，作为数据集加载层中状态、配置或行为的边界。
+# 定义 `ToyShapesDataset` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class ToyShapesDataset:
     num_samples: int = 16
     image_size: int = 96
     seed: int = 42
 
-    # 中文注释：实现 ToyShapesDataset.generate 的核心行为，维护数据集加载层在该对象上的调用契约。
+    # 实现 `ToyShapesDataset.generate` 的对象行为，维护该类在数据集加载层中的调用契约。
     def generate(self) -> list[Sample]:
         rng = np.random.default_rng(self.seed)
         items: list[Sample] = []
@@ -42,7 +42,7 @@ class ToyShapesDataset:
             )
         return items
 
-    # 中文注释：封装 ToyShapesDataset._draw 的内部步骤，让数据集加载层主流程保持清晰并隔离边界细节。
+    # 实现 `ToyShapesDataset._draw` 的对象行为，维护该类在数据集加载层中的调用契约。
     def _draw(self, shape: str, color: str, rng: np.random.Generator) -> np.ndarray:
         s = self.image_size
         image = Image.new("RGB", (s, s), (245, 245, 245))

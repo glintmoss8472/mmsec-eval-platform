@@ -5,7 +5,7 @@ import torch
 import torch.nn.functional as F
 
 
-# 中文注释：实现 contrastive_infonce_loss 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
+# 执行 `contrastive infonce loss` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def contrastive_infonce_loss(image_features: torch.Tensor, text_features: torch.Tensor, *, tau: float = 0.07) -> torch.Tensor:
     """CLIP-style symmetric InfoNCE loss (lower is better alignment).
 
@@ -26,7 +26,7 @@ def contrastive_infonce_loss(image_features: torch.Tensor, text_features: torch.
     return 0.5 * (loss_i + loss_t)
 
 
-# 中文注释：实现 topology_deviation_ce 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
+# 执行 `topology deviation ce` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def topology_deviation_ce(
     clean_features: torch.Tensor,
     adv_features: torch.Tensor,
@@ -78,6 +78,6 @@ def topology_deviation_ce(
     return (kl_main + kl_comp).mean()
 
 
-# 中文注释：实现 reconstruction_mse 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
+# 执行 `reconstruction mse` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def reconstruction_mse(clean: torch.Tensor, adv: torch.Tensor) -> torch.Tensor:
     return F.mse_loss(adv.float(), clean.float())

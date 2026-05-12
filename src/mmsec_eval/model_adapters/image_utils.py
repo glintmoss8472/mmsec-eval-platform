@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 
 
-# 中文注释：实现 image_to_rgb01 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 执行 `图像 to rgb01` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def image_to_rgb01(image: Any) -> np.ndarray:
     """Convert grayscale/RGB/RGBA image-like input to HWC RGB float32 in [0, 1]."""
     arr = np.asarray(image, dtype=np.float32)
@@ -29,17 +29,17 @@ def image_to_rgb01(image: Any) -> np.ndarray:
     return np.clip(arr, 0.0, 1.0).astype(np.float32)
 
 
-# 中文注释：实现 rgb01_to_uint8 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 执行 `rgb01 to uint8` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def rgb01_to_uint8(image: Any) -> np.ndarray:
     return (image_to_rgb01(image) * 255.0).round().astype(np.uint8)
 
 
-# 中文注释：实现 image_to_pil_rgb 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 执行 `图像 to pil rgb` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def image_to_pil_rgb(image: Any) -> Image.Image:
     return Image.fromarray(rgb01_to_uint8(image))
 
 
-# 中文注释：实现 resize_rgb01 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 执行 `resize rgb01` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def resize_rgb01(image: Any, *, size_hw: tuple[int, int], resample: int = Image.BICUBIC) -> np.ndarray:
     th, tw = int(size_hw[0]), int(size_hw[1])
     if th <= 0 or tw <= 0:
@@ -52,7 +52,7 @@ def resize_rgb01(image: Any, *, size_hw: tuple[int, int], resample: int = Image.
     return np.asarray(pil, dtype=np.float32) / 255.0
 
 
-# 中文注释：实现 processor_target_hw 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 执行 `processor target hw` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def processor_target_hw(
     processor: Any,
     *,
@@ -72,12 +72,12 @@ def processor_target_hw(
     return int(default_hw[0]), int(default_hw[1])
 
 
-# 中文注释：实现 stack_resized_rgb01 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 执行 `stack resized rgb01` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def stack_resized_rgb01(images: list[Any], *, size_hw: tuple[int, int]) -> np.ndarray:
     return np.stack([resize_rgb01(image, size_hw=size_hw).astype(np.float32) for image in images], axis=0).astype(np.float32)
 
 
-# 中文注释：实现 bchw_to_pil_images 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 执行 `bchw to pil 图像` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def bchw_to_pil_images(images_bchw: Any) -> list[Image.Image]:
     ndim = int(getattr(images_bchw, "ndim", -1))
     if ndim != 4:

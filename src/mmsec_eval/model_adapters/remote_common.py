@@ -12,7 +12,7 @@ import numpy as np
 from mmsec_eval.model_adapters.image_utils import image_to_pil_rgb
 
 
-# 中文注释：实现 encode_image_b64 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 执行 `encode 图像 b64` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def encode_image_b64(image: np.ndarray, *, image_format: str = "PNG") -> str:
     pil = image_to_pil_rgb(image)
     buf = BytesIO()
@@ -20,7 +20,7 @@ def encode_image_b64(image: np.ndarray, *, image_format: str = "PNG") -> str:
     return base64.b64encode(buf.getvalue()).decode("ascii")
 
 
-# 中文注释：实现 extract_json_payload 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 提取 `JSON 载荷`，从归档、结果或响应中取出后续流程需要的字段。
 def extract_json_payload(text: str) -> dict[str, Any]:
     raw = str(text or "").strip()
     if not raw:
@@ -45,7 +45,7 @@ def extract_json_payload(text: str) -> dict[str, Any]:
     return payload
 
 
-# 中文注释：实现 normalize_score 的核心流程，支撑模型适配层中的业务语义和异常边界。
+# 归一化 `分数`，把不同来源的数值或文本压到统一尺度。
 def normalize_score(value: Any, default: float = 0.0) -> float:
     try:
         score = float(value)

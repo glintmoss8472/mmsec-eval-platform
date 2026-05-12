@@ -6,7 +6,7 @@ from fastapi import APIRouter
 router = APIRouter(prefix="/api/v1/reports", tags=["reports"])
 
 
-# 中文注释：处理 report_ping 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /ping` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/ping")
 def report_ping() -> dict[str, str]:
     return {"status": "ok"}

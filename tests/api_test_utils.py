@@ -12,7 +12,7 @@ pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient
 
 
-# 中文注释：实现 make_client 的核心流程，支撑自动化测试中的业务语义和异常边界。
+# 构建 `client` 数据，集中整理自动化测试需要的输出结构。
 def make_client(tmp_path: Path, monkeypatch, *, skip_model_preflight: bool = False) -> TestClient:
     art = tmp_path / "artifacts"
     monkeypatch.setenv("MMSEC_ARTIFACTS_DIR", str(art))
@@ -27,7 +27,7 @@ def make_client(tmp_path: Path, monkeypatch, *, skip_model_preflight: bool = Fal
     return TestClient(api_main.app)
 
 
-# 中文注释：实现 wait_job_done 的核心流程，支撑自动化测试中的业务语义和异常边界。
+# 执行 `wait 任务 done` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
 def wait_job_done(client: TestClient, job_id: str, timeout_s: float = 240.0) -> str:
     deadline = time.time() + float(timeout_s)
     status = "queued"
@@ -41,7 +41,7 @@ def wait_job_done(client: TestClient, job_id: str, timeout_s: float = 240.0) -> 
     return status
 
 
-# 中文注释：实现 write_toy_eval_cfg 的核心流程，支撑自动化测试中的业务语义和异常边界。
+# 写出 `toy 评测 配置`，保证后续报告、页面或复现实验能读取。
 def write_toy_eval_cfg(
     path: Path,
     *,

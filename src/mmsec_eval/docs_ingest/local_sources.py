@@ -10,7 +10,7 @@ from mmsec_eval.config.schema import AppConfig
 from mmsec_eval.io.yaml_io import read_yaml
 
 
-# 中文注释：定义 LocalSource 的结构化职责，作为资料摄取层中状态、配置或行为的边界。
+# 定义 `LocalSource` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class LocalSource:
     requested_path: str
@@ -23,7 +23,7 @@ class LocalSource:
     error: str = ""
 
 
-# 中文注释：封装 _sha256 的内部步骤，让资料摄取层主流程保持清晰并隔离边界细节。
+# 执行 `sha256` 辅助逻辑，保持资料摄取层中的输入处理和结果输出一致。
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -32,7 +32,7 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-# 中文注释：封装 _select_parser 的内部步骤，让资料摄取层主流程保持清晰并隔离边界细节。
+# 筛选 `parser`，按配置条件保留可用于评测或展示的数据。
 def _select_parser(path: Path) -> tuple[str, str]:
     ext = path.suffix.lower()
     if ext == ".pdf":
@@ -42,7 +42,7 @@ def _select_parser(path: Path) -> tuple[str, str]:
     return "text", "parse_text"
 
 
-# 中文注释：封装 _resolve_one 的内部步骤，让资料摄取层主流程保持清晰并隔离边界细节。
+# 解析 `one` 的真实位置或配置值，减少调用方重复分支。
 def _resolve_one(raw_path: str, mapping: dict[str, str]) -> Path:
     requested = Path(raw_path)
     if requested.exists():
@@ -66,7 +66,7 @@ def _resolve_one(raw_path: str, mapping: dict[str, str]) -> Path:
     return default_path
 
 
-# 中文注释：实现 resolve_local_sources 的核心流程，支撑资料摄取层中的业务语义和异常边界。
+# 解析 `本地 sources` 的真实位置或配置值，减少调用方重复分支。
 def resolve_local_sources(cfg: AppConfig) -> list[LocalSource]:
     map_path = Path(cfg.docs.local_paths_file)
     mapping_data = read_yaml(str(map_path)) if map_path.exists() else {}
@@ -94,7 +94,7 @@ def resolve_local_sources(cfg: AppConfig) -> list[LocalSource]:
     return out
 
 
-# 中文注释：实现 local_source_to_dict 的核心流程，支撑资料摄取层中的业务语义和异常边界。
+# 执行 `本地 source to dict` 辅助逻辑，保持资料摄取层中的输入处理和结果输出一致。
 def local_source_to_dict(src: LocalSource) -> dict[str, Any]:
     return asdict(src)
 

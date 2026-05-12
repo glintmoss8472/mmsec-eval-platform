@@ -2,14 +2,14 @@
 from mmsec_eval.config.loader import load_config
 
 
-# 中文注释：验证 test_load_config_returns_object 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `load 配置 returns object` 场景，防止相关行为在后续修改中退化。
 def test_load_config_returns_object():
     cfg = load_config("configs/mvp.yaml")
     assert cfg.seed >= 0
     assert cfg.plugins.attack
 
 
-# 中文注释：验证 test_load_config_migrates_legacy_task_limits 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `load 配置 migrates legacy 任务 limits` 场景，防止相关行为在后续修改中退化。
 def test_load_config_migrates_legacy_task_limits(tmp_path):
     cfg_path = tmp_path / "legacy_task_limits.yaml"
     cfg_path.write_text(
@@ -33,7 +33,7 @@ runner:
     assert cfg.runner.max_samples == 16
 
 
-# 中文注释：验证 test_load_config_migrates_legacy_report_metadata 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `load 配置 migrates legacy 报告 metadata` 场景，防止相关行为在后续修改中退化。
 def test_load_config_migrates_legacy_report_metadata(tmp_path):
     cfg_path = tmp_path / "legacy_report_metadata.yaml"
     cfg_path.write_text(

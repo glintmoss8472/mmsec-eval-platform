@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Mapping
 
 
-# 中文注释：定义 RiskComponentSpec 的结构化职责，作为风险评分层中状态、配置或行为的边界。
+# 定义 `RiskComponentSpec` 的状态和行为边界，供风险评分层在固定职责内复用。
 @dataclass(frozen=True)
 class RiskComponentSpec:
     key: str
@@ -113,18 +113,18 @@ DEFAULT_SCENARIO_WEIGHTS: dict[str, dict[str, float]] = {
 }
 
 
-# 中文注释：实现 component_keys 的核心流程，支撑风险评分层中的业务语义和异常边界。
+# 执行 `component keys` 辅助逻辑，保持风险评分层中的输入处理和结果输出一致。
 def component_keys() -> list[str]:
     return [item.key for item in RISK_COMPONENTS]
 
 
-# 中文注释：实现 scenario_weights 的核心流程，支撑风险评分层中的业务语义和异常边界。
+# 执行 `scenario weights` 辅助逻辑，保持风险评分层中的输入处理和结果输出一致。
 def scenario_weights(scenario: str) -> dict[str, float]:
     key = str(scenario or "general").strip().lower()
     return dict(DEFAULT_SCENARIO_WEIGHTS.get(key, DEFAULT_SCENARIO_WEIGHTS["general"]))
 
 
-# 中文注释：实现 normalize_weights 的核心流程，支撑风险评分层中的业务语义和异常边界。
+# 归一化 `weights`，把不同来源的数值或文本压到统一尺度。
 def normalize_weights(weights: Mapping[str, float], scenario: str) -> dict[str, float]:
     base = scenario_weights(scenario)
     out = {k: float(base.get(k, 0.0)) for k in component_keys()}
@@ -137,7 +137,7 @@ def normalize_weights(weights: Mapping[str, float], scenario: str) -> dict[str, 
     return {k: float(v / total) for k, v in out.items()}
 
 
-# 中文注释：实现 component_catalog 的核心流程，支撑风险评分层中的业务语义和异常边界。
+# 执行 `component catalog` 辅助逻辑，保持风险评分层中的输入处理和结果输出一致。
 def component_catalog() -> list[dict[str, str]]:
     return [
         {
@@ -151,7 +151,7 @@ def component_catalog() -> list[dict[str, str]]:
     ]
 
 
-# 中文注释：实现 component_audit_rows 的核心流程，支撑风险评分层中的业务语义和异常边界。
+# 整理 `component audit rows` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def component_audit_rows(values: Mapping[str, float], weights: Mapping[str, float]) -> list[dict[str, object]]:
     specs = {item.key: item for item in RISK_COMPONENTS}
     rows: list[dict[str, object]] = []

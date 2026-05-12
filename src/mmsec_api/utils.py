@@ -4,6 +4,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 
-# 中文注释：实现 utc_now_iso 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 执行 `utc now iso` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()

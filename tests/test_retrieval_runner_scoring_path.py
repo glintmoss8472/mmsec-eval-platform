@@ -7,39 +7,39 @@ from mmsec_eval.retrieval.metrics import VLRIndex
 from mmsec_eval.runner.retrieval_runner import _score_matrix, _uses_pairwise_scoring
 
 
-# 中文注释：定义 DualStreamWithPairScore 的结构化职责，作为自动化测试中状态、配置或行为的边界。
+# 实现 `DualStreamWithPairScore.__init__` 的对象行为，维护该类在自动化测试中的调用契约。
 class DualStreamWithPairScore:
-    # 中文注释：封装 DualStreamWithPairScore.__init__ 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+    # 封装 DualStreamWithPairScore.__init__ 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         self.pair_calls = 0
 
-    # 中文注释：实现 DualStreamWithPairScore.encode_images_batch 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 实现 `DualStreamWithPairScore.encode_images_batch` 的对象行为，维护该类在自动化测试中的调用契约。
     def encode_images_batch(self, images):
         return np.asarray([[1.0, 0.0], [0.0, 1.0]], dtype=np.float32)[: len(images)]
 
-    # 中文注释：实现 DualStreamWithPairScore.encode_texts_batch 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 实现 `DualStreamWithPairScore.encode_texts_batch` 的对象行为，维护该类在自动化测试中的调用契约。
     def encode_texts_batch(self, texts):
         return np.asarray([[1.0, 0.0], [0.0, 1.0]], dtype=np.float32)[: len(texts)]
 
-    # 中文注释：实现 DualStreamWithPairScore.score_pairs 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 计算 `pairs`，为指标、风险或调度决策提供数值依据。
     def score_pairs(self, pairs, batch_size=16):
         self.pair_calls += len(pairs)
         return np.zeros((len(pairs),), dtype=np.float32)
 
 
-# 中文注释：定义 PairwiseOnly 的结构化职责，作为自动化测试中状态、配置或行为的边界。
+# 实现 `PairwiseOnly.__init__` 的对象行为，维护该类在自动化测试中的调用契约。
 class PairwiseOnly:
-    # 中文注释：封装 PairwiseOnly.__init__ 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+    # 封装 PairwiseOnly.__init__ 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         self.pair_calls = 0
 
-    # 中文注释：实现 PairwiseOnly.score_pairs 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 计算 `pairs`，为指标、风险或调度决策提供数值依据。
     def score_pairs(self, pairs, batch_size=16):
         self.pair_calls += len(pairs)
         return np.asarray([1.0 if text == "a" else 0.0 for _, text in pairs], dtype=np.float32)
 
 
-# 中文注释：封装 _index 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 执行 `索引` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
 def _index() -> VLRIndex:
     img = np.zeros((2, 2, 3), dtype=np.float32)
     return VLRIndex(
@@ -52,7 +52,7 @@ def _index() -> VLRIndex:
     )
 
 
-# 中文注释：验证 test_dual_stream_adapter_prefers_embedding_matrix_over_pairwise_scoring 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `dual stream adapter prefers embedding 矩阵 over pairwise 评分` 场景，防止相关行为在后续修改中退化。
 def test_dual_stream_adapter_prefers_embedding_matrix_over_pairwise_scoring() -> None:
     adapter = DualStreamWithPairScore()
 
@@ -63,7 +63,7 @@ def test_dual_stream_adapter_prefers_embedding_matrix_over_pairwise_scoring() ->
     assert not _uses_pairwise_scoring(adapter)
 
 
-# 中文注释：验证 test_pairwise_only_adapter_still_uses_pairwise_scoring 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `pairwise only adapter still uses pairwise 评分` 场景，防止相关行为在后续修改中退化。
 def test_pairwise_only_adapter_still_uses_pairwise_scoring() -> None:
     adapter = PairwiseOnly()
 

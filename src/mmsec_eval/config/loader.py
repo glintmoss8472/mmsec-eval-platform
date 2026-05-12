@@ -49,7 +49,7 @@ KNOWN_TOP_LEVEL = {
 }
 
 
-# 中文注释：封装 _deep_merge 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 执行 `deep merge` 辅助逻辑，保持配置系统中的输入处理和结果输出一致。
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     merged = dict(base)
     for k, v in override.items():
@@ -60,7 +60,7 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
     return merged
 
 
-# 中文注释：封装 _migrate_legacy_runtime_fields 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 整理 `migrate legacy runtime fields`，描述当前服务器运行环境、模型入口或部署状态。
 def _migrate_legacy_runtime_fields(raw: dict[str, Any]) -> dict[str, Any]:
     """Keep API-submitted legacy overrides compatible with the typed config.
 
@@ -90,7 +90,7 @@ def _migrate_legacy_runtime_fields(raw: dict[str, Any]) -> dict[str, Any]:
     return migrated
 
 
-# 中文注释：封装 _to_config 的内部步骤，让配置系统主流程保持清晰并隔离边界细节。
+# 转换 `配置` 输入，在类型不匹配时回退到安全默认值。
 def _to_config(raw: dict[str, Any]) -> AppConfig:
     raw = _migrate_legacy_runtime_fields(raw)
     extra_payload = dict(raw.get("extra", {}) or {})
@@ -122,7 +122,7 @@ def _to_config(raw: dict[str, Any]) -> AppConfig:
     )
 
 
-# 中文注释：实现 load_config 的核心流程，支撑配置系统中的业务语义和异常边界。
+# 加载 `配置`，把外部文件、配置或运行产物转换为内存结构。
 def load_config(path: str) -> AppConfig:
     default_path = Path("configs/default.yaml")
     base = read_yaml(str(default_path)) if default_path.exists() else asdict(AppConfig())

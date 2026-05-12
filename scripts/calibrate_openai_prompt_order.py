@@ -23,7 +23,7 @@ from mmsec_eval.model_adapters.openai_compat_adapter import OpenAICompatAdapter
 ADAPTER_VARIANTS = local_vlm_calibration_map()
 
 
-# 中文注释：封装 _load_coco_pairs 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 加载 `COCO pairs`，把外部文件、配置或运行产物转换为内存结构。
 def _load_coco_pairs(max_items: int) -> list[tuple[np.ndarray, str, str]]:
     root = Path("data/coco")
     data = json.loads((root / "annotations/captions_val2017_subset.json").read_text(encoding="utf-8"))
@@ -39,7 +39,7 @@ def _load_coco_pairs(max_items: int) -> list[tuple[np.ndarray, str, str]]:
     return out
 
 
-# 中文注释：封装 _score_order 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 计算 `order`，为指标、风险或调度决策提供数值依据。
 def _score_order(adapter_name: str, order: str, pairs: list[tuple[np.ndarray, str, str]]) -> dict[str, Any]:
     variant, model_name, base_url = ADAPTER_VARIANTS[adapter_name]
     os.environ[f"MMSEC_OPENAI_{variant}_MODEL_NAME"] = model_name
@@ -71,7 +71,7 @@ def _score_order(adapter_name: str, order: str, pairs: list[tuple[np.ndarray, st
     }
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `calibrate_openai_prompt_order.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Calibrate image/text message order for OpenAI-compatible local VLM scorers.")
     parser.add_argument("--adapter", required=True, choices=sorted(ADAPTER_VARIANTS))

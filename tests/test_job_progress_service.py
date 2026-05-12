@@ -4,13 +4,13 @@ from __future__ import annotations
 from mmsec_api.services.job_progress import estimate_eta_seconds, estimate_pair_eta_seconds, parse_pair_progress
 
 
-# 中文注释：验证 test_parse_pair_progress_extracts_counts 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `parse pair 进度 extracts counts` 场景，防止相关行为在后续修改中退化。
 def test_parse_pair_progress_extracts_counts():
     parsed = parse_pair_progress("正在评测正常输入在各受测模型上的表现：openai_qwen3_vl，已完成 192/12100 对图文配对。")
     assert parsed == (192, 12100)
 
 
-# 中文注释：验证 test_estimate_pair_eta_seconds_uses_real_pair_rate 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `estimate pair eta seconds uses real pair rate` 场景，防止相关行为在后续修改中退化。
 def test_estimate_pair_eta_seconds_uses_real_pair_rate():
     eta = estimate_pair_eta_seconds(
         elapsed_seconds=1311.0,
@@ -20,7 +20,7 @@ def test_estimate_pair_eta_seconds_uses_real_pair_rate():
     assert 81000 <= eta <= 81500
 
 
-# 中文注释：验证 test_estimate_eta_seconds_prefers_pair_progress_over_stage_percent 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `estimate eta seconds prefers pair 进度 over stage percent` 场景，防止相关行为在后续修改中退化。
 def test_estimate_eta_seconds_prefers_pair_progress_over_stage_percent():
     eta = estimate_eta_seconds(
         job_type="run_vlr",
@@ -35,7 +35,7 @@ def test_estimate_eta_seconds_prefers_pair_progress_over_stage_percent():
     assert eta > 80000
 
 
-# 中文注释：验证 test_estimate_eta_seconds_falls_back_when_pair_progress_is_missing 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `estimate eta seconds falls back when pair 进度 是否 missing` 场景，防止相关行为在后续修改中退化。
 def test_estimate_eta_seconds_falls_back_when_pair_progress_is_missing():
     eta = estimate_eta_seconds(
         job_type="run_vlr",

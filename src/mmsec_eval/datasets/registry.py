@@ -11,7 +11,7 @@ from mmsec_eval.datasets.toy_shapes import ToyShapesDataset
 from mmsec_eval.types import Sample
 
 
-# 中文注释：实现 load_dataset 的核心流程，支撑数据集加载层中的业务语义和异常边界。
+# 加载 `数据集`，把外部文件、配置或运行产物转换为内存结构。
 def load_dataset(cfg: AppConfig) -> list[Sample]:
     kind = cfg.dataset.kind
     if kind == "toy_shapes":

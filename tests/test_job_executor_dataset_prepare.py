@@ -4,18 +4,18 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 
-# 中文注释：定义 _DummyStore 的结构化职责，作为自动化测试中状态、配置或行为的边界。
+# 实现 `_DummyStore.__init__` 的对象行为，维护该类在自动化测试中的调用契约。
 class _DummyStore:
-    # 中文注释：封装 _DummyStore.__init__ 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+    # 封装 _DummyStore.__init__ 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         self.datasets: list[dict[str, object]] = []
 
-    # 中文注释：实现 _DummyStore.upsert_dataset 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 推断 `upsert 数据集`，从样本、配置或运行记录中提取统一名称。
     def upsert_dataset(self, **kwargs):
         self.datasets.append(kwargs)
 
 
-# 中文注释：验证 test_flickr1k_dataset_prepare_uses_unified_flickr30k_slice_defaults 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `Flickr1k 数据集 prepare uses unified Flickr30k slice defaults` 场景，防止相关行为在后续修改中退化。
 def test_flickr1k_dataset_prepare_uses_unified_flickr30k_slice_defaults(monkeypatch):
     from mmsec_api.services.job_executor import JobExecutor
 
@@ -23,7 +23,7 @@ def test_flickr1k_dataset_prepare_uses_unified_flickr30k_slice_defaults(monkeypa
     executor = JobExecutor(store=store)
     captured: dict[str, object] = {}
 
-    # 中文注释：实现 fake_run 的核心流程，支撑自动化测试中的业务语义和异常边界。
+    # 执行 `fake 运行记录` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
     def fake_run(cmd, capture_output, text, cwd):
         captured["cmd"] = list(cmd)
         captured["cwd"] = cwd
@@ -45,7 +45,7 @@ def test_flickr1k_dataset_prepare_uses_unified_flickr30k_slice_defaults(monkeypa
     assert store.datasets[-1]["root_path"] == "data/flickr30k"
 
 
-# 中文注释：验证 test_mini_flickr_dataset_prepare_registers_demo_fixture 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `mini Flickr 数据集 prepare registers demo fixture` 场景，防止相关行为在后续修改中退化。
 def test_mini_flickr_dataset_prepare_registers_demo_fixture(tmp_path):
     from mmsec_api.services.job_executor import JobExecutor
 

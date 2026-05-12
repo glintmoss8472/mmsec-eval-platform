@@ -10,9 +10,9 @@ from mmsec_api.worker.queue import JobQueue
 from mmsec_eval.exceptions import ConfigError
 
 
-# 中文注释：定义 _NoopExecutor 的结构化职责，作为自动化测试中状态、配置或行为的边界。
+# 实现 `_NoopExecutor.execute` 的对象行为，维护该类在自动化测试中的调用契约。
 class _NoopExecutor:
-    # 中文注释：实现 _NoopExecutor.execute 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 实现 _NoopExecutor.execute 的核心行为，维护自动化测试在该对象上的调用契约。
     def execute(
         self,
         job: dict[str, Any],
@@ -24,9 +24,9 @@ class _NoopExecutor:
         return {"run_id": "recovered-run"}
 
 
-# 中文注释：定义 _ConfigErrorExecutor 的结构化职责，作为自动化测试中状态、配置或行为的边界。
+# 实现 `_ConfigErrorExecutor.execute` 的对象行为，维护该类在自动化测试中的调用契约。
 class _ConfigErrorExecutor:
-    # 中文注释：实现 _ConfigErrorExecutor.execute 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 实现 _ConfigErrorExecutor.execute 的核心行为，维护自动化测试在该对象上的调用契约。
     def execute(
         self,
         job: dict[str, Any],
@@ -38,7 +38,7 @@ class _ConfigErrorExecutor:
         raise ConfigError("runtime.device must be cuda")
 
 
-# 中文注释：验证 test_queue_recovers_queued_job_after_process_restart 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `队列 recovers queued 任务 after process restart` 场景，防止相关行为在后续修改中退化。
 def test_queue_recovers_queued_job_after_process_restart(tmp_path: Path):
     store = SQLiteStore(str(tmp_path / "app.db"))
     store.init_db()
@@ -70,7 +70,7 @@ def test_queue_recovers_queued_job_after_process_restart(tmp_path: Path):
         queue.stop()
 
 
-# 中文注释：验证 test_queue_marks_running_job_interrupted_after_process_restart 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `队列 marks running 任务 interrupted after process restart` 场景，防止相关行为在后续修改中退化。
 def test_queue_marks_running_job_interrupted_after_process_restart(tmp_path: Path):
     store = SQLiteStore(str(tmp_path / "app.db"))
     store.init_db()
@@ -97,7 +97,7 @@ def test_queue_marks_running_job_interrupted_after_process_restart(tmp_path: Pat
         queue.stop()
 
 
-# 中文注释：验证 test_queue_marks_project_config_error_failed 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `队列 marks project 配置 error failed` 场景，防止相关行为在后续修改中退化。
 def test_queue_marks_project_config_error_failed(tmp_path: Path):
     store = SQLiteStore(str(tmp_path / "app.db"))
     store.init_db()

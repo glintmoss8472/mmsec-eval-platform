@@ -7,7 +7,7 @@ import random
 import numpy as np
 
 
-# 中文注释：实现 set_seed 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 执行 `set seed` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 def set_seed(seed: int) -> None:
     os.environ["PYTHONHASHSEED"] = str(seed)
     random.seed(seed)

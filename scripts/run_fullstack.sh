@@ -6,7 +6,7 @@ API_PORT="${API_PORT:-8000}"
 WEB_PORT="${WEB_PORT:-5173}"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# 中文注释：实现 cleanup 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `cleanup` 步骤，封装脚本中的可复用命令片段。
 cleanup() {
   if [[ -n "${BACKEND_PID:-}" ]]; then
     kill "${BACKEND_PID}" >/dev/null 2>&1 || true

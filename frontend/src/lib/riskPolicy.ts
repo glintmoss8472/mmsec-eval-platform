@@ -28,7 +28,7 @@ export const RETRIEVAL_RISK_COMPONENTS: RiskComponentRow[] = [
   { key: "tail_case", label: "尾部案例风险", defaultWeight: "0.15", meaning: "最坏样本或历史稳定性信号越突出，风险越高。" },
 ];
 
-/** 中文注释：实现 riskLevelFromScore 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 整理 `风险 level 来源 分数` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function riskLevelFromScore(score: number): string {
   if (!Number.isFinite(score)) return "待判定";
   if (score >= 0.8) return "极高";
@@ -38,7 +38,7 @@ export function riskLevelFromScore(score: number): string {
   return "极低";
 }
 
-/** 中文注释：实现 riskTone 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 生成 `风险 tone` 展示值，统一页面标签、颜色和缺省文案。 */
 export function riskTone(level: string): "red" | "orange" | "green" {
   const text = String(level || "");
   if (text.includes("高")) return "red";

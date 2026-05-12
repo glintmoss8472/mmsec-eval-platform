@@ -7,7 +7,7 @@ from mmsec_eval.risk.components import component_catalog, component_keys
 from mmsec_eval.risk.scoring import compute_risk_score
 
 
-# 中文注释：验证 test_risk_score_weighted_sum_and_level 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `风险 分数 weighted sum and level` 场景，防止相关行为在后续修改中退化。
 def test_risk_score_weighted_sum_and_level():
     out = compute_risk_score(
         scenario="retrieval",
@@ -39,7 +39,7 @@ def test_risk_score_weighted_sum_and_level():
     assert isinstance(out["risk_recommendations"], list)
 
 
-# 中文注释：验证 test_risk_score_uses_scenario_defaults_when_weights_empty 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `风险 分数 uses scenario defaults when weights empty` 场景，防止相关行为在后续修改中退化。
 def test_risk_score_uses_scenario_defaults_when_weights_empty():
     out = compute_risk_score(
         scenario="embodied",
@@ -58,7 +58,7 @@ def test_risk_score_uses_scenario_defaults_when_weights_empty():
     assert float(w["stability"]) > float(w["cost"])
 
 
-# 中文注释：验证 test_risk_component_catalog_is_auditable 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `风险 component catalog 是否 auditable` 场景，防止相关行为在后续修改中退化。
 def test_risk_component_catalog_is_auditable():
     catalog = component_catalog()
     assert len(catalog) == 5

@@ -11,19 +11,19 @@ from mmsec_eval.runner.retrieval_runner import (
 )
 
 
-# 中文注释：验证 test_victim_stage_asr_at_1_averages_ir_and_tr 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `victim stage ASR at 1 averages ir and tr` 场景，防止相关行为在后续修改中退化。
 def test_victim_stage_asr_at_1_averages_ir_and_tr():
     metrics = {"ir_asr@1": 0.8, "tr_asr@1": 0.4}
     assert _victim_stage_asr_at_1(metrics) == pytest.approx(0.6)
 
 
-# 中文注释：验证 test_victim_conditional_asr_at_1_averages_ir_and_tr 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `victim conditional ASR at 1 averages ir and tr` 场景，防止相关行为在后续修改中退化。
 def test_victim_conditional_asr_at_1_averages_ir_and_tr():
     metrics = {"ir_cond_asr@1": 0.25, "tr_cond_asr@1": 0.75}
     assert _victim_conditional_asr_at_1(metrics) == pytest.approx(0.5)
 
 
-# 中文注释：验证 test_victim_transfer_score_uses_cross_victim_coverage 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `victim transfer 分数 uses cross victim coverage` 场景，防止相关行为在后续修改中退化。
 def test_victim_transfer_score_uses_cross_victim_coverage():
     victim_metrics = {
         "clip_hf": {"attacked": {"ir_asr@1": 0.8, "tr_asr@1": 0.6}},
@@ -41,7 +41,7 @@ def test_victim_transfer_score_uses_cross_victim_coverage():
     assert score == pytest.approx(2 / 3)
 
 
-# 中文注释：验证 test_victim_transfer_score_prefers_conditional_asr_when_available 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `victim transfer 分数 prefers conditional ASR when available` 场景，防止相关行为在后续修改中退化。
 def test_victim_transfer_score_prefers_conditional_asr_when_available():
     victim_metrics = {
         "qwen25_vl": {
@@ -64,7 +64,7 @@ def test_victim_transfer_score_prefers_conditional_asr_when_available():
     assert score == pytest.approx(0.0)
 
 
-# 中文注释：验证 test_victim_transfer_score_does_not_reuse_attack_mean_for_single_victim 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `victim transfer 分数 does not reuse 攻击 均值 所属 single victim` 场景，防止相关行为在后续修改中退化。
 def test_victim_transfer_score_does_not_reuse_attack_mean_for_single_victim():
     victim_metrics = {
         "clip_hf": {"attacked": {"ir_asr@1": 0.9, "tr_asr@1": 0.7}},
@@ -80,7 +80,7 @@ def test_victim_transfer_score_does_not_reuse_attack_mean_for_single_victim():
     assert score == pytest.approx(0.0)
 
 
-# 中文注释：验证 test_summarize_attack_outcomes_keeps_conditional_asr_separate_from_error_rate 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `summarize 攻击 outcomes keeps conditional ASR separate 来源 error rate` 场景，防止相关行为在后续修改中退化。
 def test_summarize_attack_outcomes_keeps_conditional_asr_separate_from_error_rate():
     victim_metrics = {
         "qwen25_vl": {

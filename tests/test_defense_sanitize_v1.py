@@ -11,7 +11,7 @@ from mmsec_eval.defenses.sanitize_v1 import SanitizeDefenseV1
 from mmsec_eval.types import DefenseContext, Sample
 
 
-# 中文注释：验证 test_sanitize_v1_deterministic_and_range 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `sanitize v1 deterministic and range` 场景，防止相关行为在后续修改中退化。
 def test_sanitize_v1_deterministic_and_range(tmp_path: Path):
     cfg = load_config("configs/mvp.yaml")
     cfg.defense.enabled = True

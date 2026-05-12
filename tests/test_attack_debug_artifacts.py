@@ -9,7 +9,7 @@ from mmsec_eval.plugins.builtin import register_builtin_plugins
 from mmsec_eval.runner.eval_runner import run
 
 
-# 中文注释：验证 test_attack_debug_artifacts_exist 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `攻击 调试 产物 exist` 场景，防止相关行为在后续修改中退化。
 def test_attack_debug_artifacts_exist(tmp_path: Path):
     register_builtin_plugins()
     cfg = load_config("configs/mvp.yaml")

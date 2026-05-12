@@ -7,7 +7,7 @@ import { formatJobStatus } from "../lib/uiLabels";
 import { GlossaryLink } from "./GlossaryLink";
 import { useDismissible } from "../hooks/useDismissible";
 
-/** 中文注释：实现 formatDuration 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 格式化 `format duration`，统一页面展示文本和缺省值。 */
 function formatDuration(seconds: number | undefined) {
   if (!Number.isFinite(seconds) || Number(seconds) <= 0) {
     return "正在估算";
@@ -26,7 +26,7 @@ type JobProgressPanelProps = {
   panelId?: string;
 };
 
-/** 中文注释：实现 JobProgressPanel 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `JobProgressPanel` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function JobProgressPanel({ progress, panelId }: JobProgressPanelProps) {
   const { visible, dismiss, restore } = useDismissible(panelId);
   const currentStage = useMemo(

@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 
-# 中文注释：封装 _normalize_scores 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
+# 归一化 `scores`，把不同来源的数值或文本压到统一尺度。
 def _normalize_scores(scores: np.ndarray) -> np.ndarray:
     arr = np.asarray(scores, dtype=np.float32)
     if arr.size == 0:
@@ -18,7 +18,7 @@ def _normalize_scores(scores: np.ndarray) -> np.ndarray:
     return ((arr - mn) / (mx - mn)).astype(np.float32)
 
 
-# 中文注释：实现 patch_similarity_scores 的核心流程，支撑AdvEDM 攻击模块中的业务语义和异常边界。
+# 执行 `补丁 similarity scores` 辅助逻辑，保持AdvEDM 攻击模块中的输入处理和结果输出一致。
 def patch_similarity_scores(
     image: np.ndarray,
     target_text: str,
@@ -81,7 +81,7 @@ def patch_similarity_scores(
     return _normalize_scores(scores)
 
 
-# 中文注释：实现 attention_fixation_map 的核心流程，支撑AdvEDM 攻击模块中的业务语义和异常边界。
+# 执行 `attention fixation map` 辅助逻辑，保持AdvEDM 攻击模块中的输入处理和结果输出一致。
 def attention_fixation_map(
     image: np.ndarray,
     text: str,
@@ -104,7 +104,7 @@ def attention_fixation_map(
     return _normalize_scores(np.clip(att, 0.0, 1.0))
 
 
-# 中文注释：实现 select_mask 的核心流程，支撑AdvEDM 攻击模块中的业务语义和异常边界。
+# 筛选 `mask`，按配置条件保留可用于评测或展示的数据。
 def select_mask(
     scores: np.ndarray,
     patch_size: int,

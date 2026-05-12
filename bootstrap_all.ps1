@@ -9,7 +9,7 @@ Param(
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "scripts\_python_env.ps1")
 
-# 中文注释：实现 Assert-Command 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 处理 `assert command` 步骤，封装脚本中的可复用命令片段。
 function Assert-Command($name) {
   if (-not (Get-Command $name -ErrorAction SilentlyContinue)) {
     Write-Host "[ERR] Missing command: $name"
@@ -17,7 +17,7 @@ function Assert-Command($name) {
   }
 }
 
-# 中文注释：实现 try 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 处理 `try` 步骤，封装脚本中的可复用命令片段。
 try {
   Write-Host "[INFO] Bootstrapping mmsec-eval-platform ..."
   Assert-Command "git"

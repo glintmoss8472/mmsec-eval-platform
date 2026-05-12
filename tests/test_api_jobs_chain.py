@@ -8,12 +8,12 @@ from mmsec_eval.cli import cmd_train_advclip
 from api_test_utils import make_client, wait_job_done, write_toy_eval_cfg
 
 
-# 中文注释：封装 _write_cfg 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 写出 `配置`，保证后续报告、页面或复现实验能读取。
 def _write_cfg(path: Path) -> None:
     write_toy_eval_cfg(path)
 
 
-# 中文注释：封装 _write_cfg_vlr 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 写出 `配置 图文检索`，保证后续报告、页面或复现实验能读取。
 def _write_cfg_vlr(path: Path) -> None:
     write_toy_eval_cfg(
         path,
@@ -39,7 +39,7 @@ def _write_cfg_vlr(path: Path) -> None:
     )
 
 
-# 中文注释：封装 _write_cfg_train_advclip 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 写出 `配置 train advclip`，保证后续报告、页面或复现实验能读取。
 def _write_cfg_train_advclip(path: Path) -> None:
     write_toy_eval_cfg(
         path,
@@ -60,7 +60,7 @@ def _write_cfg_train_advclip(path: Path) -> None:
     )
 
 
-# 中文注释：验证 test_api_job_run_eval_chain 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `API 任务 运行记录 评测 chain` 场景，防止相关行为在后续修改中退化。
 def test_api_job_run_eval_chain(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch, skip_model_preflight=True) as client:
         cfg = tmp_path / "cfg.yaml"
@@ -96,7 +96,7 @@ def test_api_job_run_eval_chain(tmp_path: Path, monkeypatch):
         assert logs.json()["total"] >= 1
 
 
-# 中文注释：验证 test_api_job_run_vlr_chain 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `API 任务 运行记录 图文检索 chain` 场景，防止相关行为在后续修改中退化。
 def test_api_job_run_vlr_chain(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch, skip_model_preflight=True) as client:
         # Train a patch first (synchronously): run-vlr must not use random init patches.
@@ -135,7 +135,7 @@ def test_api_job_run_vlr_chain(tmp_path: Path, monkeypatch):
         assert logs.json()["total"] >= 1
 
 
-# 中文注释：验证 test_api_job_rejects_incompatible_surrogate_for_joint_attack 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `API 任务 rejects incompatible surrogate 所属 联合 攻击` 场景，防止相关行为在后续修改中退化。
 def test_api_job_rejects_incompatible_surrogate_for_joint_attack(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch, skip_model_preflight=True) as client:
         cfg = tmp_path / "vlr_cfg.yaml"
@@ -161,7 +161,7 @@ def test_api_job_rejects_incompatible_surrogate_for_joint_attack(tmp_path: Path,
     assert "当前只支持 clip_hf 作为代理模型" in resp.json()["detail"]
 
 
-# 中文注释：验证 test_api_job_rejects_openai_surrogate_for_classic_gradient_attack 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `API 任务 rejects OpenAI surrogate 所属 classic gradient 攻击` 场景，防止相关行为在后续修改中退化。
 def test_api_job_rejects_openai_surrogate_for_classic_gradient_attack(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch, skip_model_preflight=True) as client:
         cfg = tmp_path / "vlr_cfg.yaml"
@@ -187,7 +187,7 @@ def test_api_job_rejects_openai_surrogate_for_classic_gradient_attack(tmp_path: 
         assert "经典梯度攻击当前只支持具备 score_pairs_torch 的本地代理模型" in resp.json()["detail"]
 
 
-# 中文注释：验证 test_api_job_rejects_fixture_vlr_victim_at_route 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `API 任务 rejects fixture 图文检索 victim at 路由` 场景，防止相关行为在后续修改中退化。
 def test_api_job_rejects_fixture_vlr_victim_at_route(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch, skip_model_preflight=True) as client:
         cfg = tmp_path / "vlr_fixture_cfg.yaml"
@@ -214,7 +214,7 @@ def test_api_job_rejects_fixture_vlr_victim_at_route(tmp_path: Path, monkeypatch
         assert "不支持 VLR 图文检索真实测评" in resp.json()["detail"]
 
 
-# 中文注释：验证 test_api_job_rejects_configured_fixture_generation_model_without_override 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `API 任务 rejects configured fixture 生成式评测 模型 移除 override` 场景，防止相关行为在后续修改中退化。
 def test_api_job_rejects_configured_fixture_generation_model_without_override(tmp_path: Path, monkeypatch):
     import yaml
 
@@ -248,7 +248,7 @@ def test_api_job_rejects_configured_fixture_generation_model_without_override(tm
         assert "不支持 VQA 生成式真实测评" in resp.json()["detail"]
 
 
-# 中文注释：验证 test_api_job_rejects_mismatched_generation_dataset_for_task 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `API 任务 rejects mismatched 生成式评测 数据集 所属 任务` 场景，防止相关行为在后续修改中退化。
 def test_api_job_rejects_mismatched_generation_dataset_for_task(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch, skip_model_preflight=True) as client:
         cases = tmp_path / "coco_caption_object_val.jsonl"
@@ -304,7 +304,7 @@ def test_api_job_rejects_mismatched_generation_dataset_for_task(tmp_path: Path, 
         assert "Caption task requires the COCO caption object JSONL" in caption_resp.json()["detail"]
 
 
-# 中文注释：验证 test_api_job_rejects_unknown_override_field 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `API 任务 rejects unknown override field` 场景，防止相关行为在后续修改中退化。
 def test_api_job_rejects_unknown_override_field(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch, skip_model_preflight=True) as client:
         cfg = tmp_path / "cfg.yaml"
@@ -325,7 +325,7 @@ def test_api_job_rejects_unknown_override_field(tmp_path: Path, monkeypatch):
         assert any(item.get("loc") == ["body", "overrides"] for item in detail)
 
 
-# 中文注释：验证 test_api_job_train_advclip_chain 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `API 任务 train advclip chain` 场景，防止相关行为在后续修改中退化。
 def test_api_job_train_advclip_chain(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch, skip_model_preflight=True) as client:
         cfg = tmp_path / "advclip_train_cfg.yaml"

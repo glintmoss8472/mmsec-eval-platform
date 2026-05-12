@@ -10,33 +10,33 @@ from mmsec_eval.model_adapters.openai_compat_adapter import OpenAICompatAdapter
 from mmsec_eval.types import Sample
 
 
-# 中文注释：定义 _Resp 的结构化职责，作为自动化测试中状态、配置或行为的边界。
+# 实现 `_Resp.__init__` 的对象行为，维护该类在自动化测试中的调用契约。
 class _Resp:
-    # 中文注释：封装 _Resp.__init__ 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+    # 封装 _Resp.__init__ 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
     def __init__(self, payload):
         self._payload = payload
 
-    # 中文注释：实现 _Resp.raise_for_status 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 判断或归一 `抛错 所属 状态` 状态，让调用方可以稳定渲染能力和可用性。
     def raise_for_status(self):
         return None
 
-    # 中文注释：实现 _Resp.json 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 实现 `_Resp.json` 的对象行为，维护该类在自动化测试中的调用契约。
     def json(self):
         return self._payload
 
 
-# 中文注释：封装 _sample 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 执行 `样本` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
 def _sample() -> Sample:
     return Sample(sample_id="s1", image=np.zeros((16, 16, 3), dtype=np.float32), text="a red square")
 
 
-# 中文注释：验证 test_openai_compat_predict 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `OpenAI compat predict` 场景，防止相关行为在后续修改中退化。
 def test_openai_compat_predict(monkeypatch):
     monkeypatch.setenv("MMSEC_OPENAI_COMPAT_BASE_URL", "http://localhost:8001/v1")
     monkeypatch.setenv("MMSEC_OPENAI_COMPAT_MODEL_NAME", "chatgpt-4o-latest")
     monkeypatch.setenv("MMSEC_OPENAI_COMPAT_TIMEOUT", "12")
 
-    # 中文注释：封装 _post 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+    # 执行 `post` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
     def _post(self, url, headers, json, timeout):  # noqa: ANN001
         assert url == "http://localhost:8001/v1/chat/completions"
         assert json["model"] == "chatgpt-4o-latest"
@@ -60,14 +60,14 @@ def test_openai_compat_predict(monkeypatch):
     assert "strongly aligned" in out.text
 
 
-# 中文注释：验证 test_openai_compat_variant_predict 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `OpenAI compat variant predict` 场景，防止相关行为在后续修改中退化。
 def test_openai_compat_variant_predict(monkeypatch):
     monkeypatch.setenv("MMSEC_OPENAI_QWEN3_VL_BASE_URL", "http://127.0.0.1:8012/v1")
     monkeypatch.setenv("MMSEC_OPENAI_QWEN3_VL_MODEL_NAME", "Qwen/Qwen3-VL-8B-Instruct")
     monkeypatch.setenv("MMSEC_OPENAI_QWEN3_VL_TIMEOUT", "90")
     monkeypatch.setenv("MMSEC_OPENAI_QWEN3_VL_API_KEY_ENV", "LOCAL_QWEN3_VL_API_KEY")
 
-    # 中文注释：封装 _post 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+    # 执行 `post` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
     def _post(self, url, headers, json, timeout):  # noqa: ANN001
         assert url == "http://127.0.0.1:8012/v1/chat/completions"
         assert json["model"] == "Qwen/Qwen3-VL-8B-Instruct"
@@ -81,12 +81,12 @@ def test_openai_compat_variant_predict(monkeypatch):
     assert out.raw["adapter"] == "openai_qwen3_vl"
 
 
-# 中文注释：验证 test_openai_compat_additional_variant_predict 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `OpenAI compat additional variant predict` 场景，防止相关行为在后续修改中退化。
 def test_openai_compat_additional_variant_predict(monkeypatch):
     monkeypatch.setenv("MMSEC_OPENAI_GEMMA3_12B_BASE_URL", "http://127.0.0.1:8017/v1")
     monkeypatch.setenv("MMSEC_OPENAI_GEMMA3_12B_MODEL_NAME", "google/gemma-3-12b-it")
 
-    # 中文注释：封装 _post 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+    # 执行 `post` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
     def _post(self, url, headers, json, timeout):  # noqa: ANN001
         assert url == "http://127.0.0.1:8017/v1/chat/completions"
         assert json["model"] == "google/gemma-3-12b-it"
@@ -99,13 +99,13 @@ def test_openai_compat_additional_variant_predict(monkeypatch):
     assert out.raw["adapter"] == "openai_gemma3_12b"
 
 
-# 中文注释：验证 test_openai_compat_max_tokens_env_override 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `OpenAI compat max tokens 环境 override` 场景，防止相关行为在后续修改中退化。
 def test_openai_compat_max_tokens_env_override(monkeypatch):
     monkeypatch.setenv("MMSEC_OPENAI_COMPAT_BASE_URL", "http://127.0.0.1:8001/v1")
     monkeypatch.setenv("MMSEC_OPENAI_COMPAT_MODEL_NAME", "local-vlm")
     monkeypatch.setenv("MMSEC_OPENAI_COMPAT_MAX_TOKENS", "24")
 
-    # 中文注释：封装 _post 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+    # 执行 `post` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
     def _post(self, url, headers, json, timeout):  # noqa: ANN001
         del self, url, headers, timeout
         assert json["max_tokens"] == 24
@@ -116,13 +116,13 @@ def test_openai_compat_max_tokens_env_override(monkeypatch):
     assert OpenAICompatAdapter().predict(_sample()).score == 0.5
 
 
-# 中文注释：验证 test_openai_compat_score_pairs_preserves_order_under_concurrency 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `OpenAI compat 分数 pairs preserves order under concurrency` 场景，防止相关行为在后续修改中退化。
 def test_openai_compat_score_pairs_preserves_order_under_concurrency(monkeypatch):
     monkeypatch.setenv("MMSEC_OPENAI_COMPAT_BASE_URL", "http://127.0.0.1:8001/v1")
     monkeypatch.setenv("MMSEC_OPENAI_COMPAT_MODEL_NAME", "local-vlm")
     monkeypatch.setenv("MMSEC_OPENAI_COMPAT_CONCURRENCY", "4")
 
-    # 中文注释：封装 _post 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+    # 执行 `post` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
     def _post(self, url, headers, json, timeout):  # noqa: ANN001
         del headers, timeout
         assert url == "http://127.0.0.1:8001/v1/chat/completions"

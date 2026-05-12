@@ -1,22 +1,22 @@
 // 文件说明：该文件属于前端业务工具，集中实现 uiLabels 相关逻辑。
-/** 中文注释：规范化外部输入的文本形态，避免标签格式化逻辑反复处理空值和首尾空白。 */
+/** 生成 `clean 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 function cleanText(value: unknown): string {
   return String(value ?? "").trim();
 }
 
-/** 中文注释：实现 isMissingText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 判断 `是否 missing 文本` 状态，支撑页面分支渲染或按钮可用性。 */
 function isMissingText(value: unknown): boolean {
   const text = cleanText(value);
   const normalized = text.toLowerCase();
   return !text || text === "-" || normalized === "null" || normalized === "undefined";
 }
 
-/** 中文注释：实现 keyText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 生成 `key 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 function keyText(value: unknown): string {
   return cleanText(value).toLowerCase();
 }
 
-/** 中文注释：实现 formatWrapped 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format wrapped`，统一页面展示文本和缺省值。 */
 export function formatWrapped(label: string, value: unknown): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -287,7 +287,7 @@ const BACKEND_MESSAGE_LABELS: Array<[string, string]> = [
   ["job recovered after API worker startup", "任务已在后端启动后恢复排队。"],
 ];
 
-/** 中文注释：实现 formatInlineIdentifiers 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format inline identifiers`，统一页面展示文本和缺省值。 */
 function formatInlineIdentifiers(value: string): string {
   return value
     .replace(/\bcase_index\b/g, "案例索引")
@@ -315,17 +315,17 @@ function formatInlineIdentifiers(value: string): string {
     );
 }
 
-/** 中文注释：实现 formatJobType 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 任务 类型`，统一页面展示文本和缺省值。 */
 export function formatJobType(value: string): string {
   return JOB_TYPE_LABELS[keyText(value)] ?? formatWrapped("任务类型", value);
 }
 
-/** 中文注释：实现 formatJobStatus 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 任务 状态`，统一页面展示文本和缺省值。 */
 export function formatJobStatus(value: string): string {
   return JOB_STATUS_LABELS[keyText(value)] ?? formatWrapped("任务状态", value);
 }
 
-/** 中文注释：实现 formatHealthStatus 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format health 状态`，统一页面展示文本和缺省值。 */
 export function formatHealthStatus(value: string): string {
   if (keyText(value) === "launch_blocked") {
     return "当前环境不可启动";
@@ -333,27 +333,27 @@ export function formatHealthStatus(value: string): string {
   return HEALTH_STATUS_LABELS[keyText(value)] ?? formatWrapped("健康状态", value);
 }
 
-/** 中文注释：实现 formatBootstrapState 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format bootstrap state`，统一页面展示文本和缺省值。 */
 export function formatBootstrapState(value: string): string {
   return BOOTSTRAP_STATE_LABELS[keyText(value)] ?? formatWrapped("预热状态", value);
 }
 
-/** 中文注释：实现 formatAdapterRole 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format adapter role`，统一页面展示文本和缺省值。 */
 export function formatAdapterRole(value: string): string {
   return ADAPTER_ROLE_LABELS[value] ?? ADAPTER_ROLE_LABELS[keyText(value)] ?? formatWrapped("模型角色", value);
 }
 
-/** 中文注释：实现 formatRiskLevel 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 风险 level`，统一页面展示文本和缺省值。 */
 export function formatRiskLevel(value: string): string {
   return RISK_LEVEL_LABELS[keyText(value)] ?? formatWrapped("风险等级", value);
 }
 
-/** 中文注释：实现 formatLogLevel 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 日志 level`，统一页面展示文本和缺省值。 */
 export function formatLogLevel(value: string): string {
   return LOG_LEVEL_LABELS[keyText(value)] ?? formatWrapped("日志级别", value);
 }
 
-/** 中文注释：实现 formatAttackName 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 攻击 名称`，统一页面展示文本和缺省值。 */
 export function formatAttackName(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -362,7 +362,7 @@ export function formatAttackName(value: string): string {
   return ATTACK_LABELS[keyText(text)] ?? formatWrapped("攻击标识", text);
 }
 
-/** 中文注释：实现 formatModeName 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format mode 名称`，统一页面展示文本和缺省值。 */
 export function formatModeName(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -371,7 +371,7 @@ export function formatModeName(value: string): string {
   return MODE_LABELS[keyText(text)] ?? formatWrapped("模式标识", text);
 }
 
-/** 中文注释：实现 formatDatasetName 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 数据集 名称`，统一页面展示文本和缺省值。 */
 export function formatDatasetName(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -380,7 +380,7 @@ export function formatDatasetName(value: string): string {
   return DATASET_LABELS[keyText(text)] ?? formatWrapped("数据集标识", text);
 }
 
-/** 中文注释：实现 formatRunDatasetName 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 运行记录 数据集 名称`，统一页面展示文本和缺省值。 */
 export function formatRunDatasetName(datasetName: string, benchmarkTag = "", taskKind = ""): string {
   const datasetKey = keyText(cleanText(datasetName));
   const benchmarkKey = keyText(cleanText(benchmarkTag));
@@ -395,7 +395,7 @@ export function formatRunDatasetName(datasetName: string, benchmarkTag = "", tas
   return formatDatasetName(datasetName || benchmarkTag);
 }
 
-/** 中文注释：实现 formatAdapterName 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format adapter 名称`，统一页面展示文本和缺省值。 */
 export function formatAdapterName(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -404,7 +404,7 @@ export function formatAdapterName(value: string): string {
   return ADAPTER_NAME_LABELS[keyText(text)] ?? formatWrapped("适配器标识", text);
 }
 
-/** 中文注释：实现 formatModelSource 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 模型 source`，统一页面展示文本和缺省值。 */
 export function formatModelSource(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -413,7 +413,7 @@ export function formatModelSource(value: string): string {
   return MODEL_SOURCE_LABELS[keyText(text)] ?? formatWrapped("模型标识", text);
 }
 
-/** 中文注释：实现 formatEvalScope 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 评测 作用范围`，统一页面展示文本和缺省值。 */
 export function formatEvalScope(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -422,7 +422,7 @@ export function formatEvalScope(value: string): string {
   return EVAL_SCOPE_LABELS[keyText(text)] ?? formatWrapped("评测范围", text);
 }
 
-/** 中文注释：实现 formatAttackScopeName 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 攻击 作用范围 名称`，统一页面展示文本和缺省值。 */
 export function formatAttackScopeName(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -431,7 +431,7 @@ export function formatAttackScopeName(value: string): string {
   return ATTACK_SCOPE_LABELS[keyText(text)] ?? formatWrapped("扰动类型", text);
 }
 
-/** 中文注释：实现 formatJudgeReason 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format judge reason`，统一页面展示文本和缺省值。 */
 export function formatJudgeReason(value: unknown): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -443,7 +443,7 @@ export function formatJudgeReason(value: unknown): string {
   return formatWrapped("原因说明", text);
 }
 
-/** 中文注释：实现 formatFeatureMethod 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format feature method`，统一页面展示文本和缺省值。 */
 export function formatFeatureMethod(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -452,7 +452,7 @@ export function formatFeatureMethod(value: string): string {
   return FEATURE_METHOD_LABELS[keyText(text)] ?? formatWrapped("投影方法", text);
 }
 
-/** 中文注释：实现 formatStageName 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format stage 名称`，统一页面展示文本和缺省值。 */
 export function formatStageName(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -461,7 +461,7 @@ export function formatStageName(value: string): string {
   return STAGE_LABELS[keyText(text)] ?? formatWrapped("阶段标识", text);
 }
 
-/** 中文注释：实现 formatModalityName 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format modality 名称`，统一页面展示文本和缺省值。 */
 export function formatModalityName(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -470,12 +470,12 @@ export function formatModalityName(value: string): string {
   return MODALITY_LABELS[keyText(text)] ?? formatWrapped("模态标识", text);
 }
 
-/** 中文注释：实现 formatProjectionGroupName 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format projection group 名称`，统一页面展示文本和缺省值。 */
 export function formatProjectionGroupName(stage: string, modality: string): string {
   return `${formatStageName(stage)} / ${formatModalityName(modality)}`;
 }
 
-/** 中文注释：实现 formatRiskDimension 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 风险 dimension`，统一页面展示文本和缺省值。 */
 export function formatRiskDimension(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -484,7 +484,7 @@ export function formatRiskDimension(value: string): string {
   return RISK_DIMENSION_LABELS[keyText(text)] ?? "未命名风险维度";
 }
 
-/** 中文注释：实现 formatPaperStatus 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format paper 状态`，统一页面展示文本和缺省值。 */
 export function formatPaperStatus(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -493,7 +493,7 @@ export function formatPaperStatus(value: string): string {
   return PAPER_STATUS_LABELS[keyText(text)] ?? formatWrapped("复现状态", text);
 }
 
-/** 中文注释：实现 formatPlatformLabel 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format platform label`，统一页面展示文本和缺省值。 */
 export function formatPlatformLabel(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -508,7 +508,7 @@ export function formatPlatformLabel(value: string): string {
   return formatWrapped("运行平台", text);
 }
 
-/** 中文注释：实现 formatNormLabel 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format norm label`，统一页面展示文本和缺省值。 */
 export function formatNormLabel(value: string): string {
   const text = cleanText(value);
   if (keyText(text) === "l2") {
@@ -520,13 +520,13 @@ export function formatNormLabel(value: string): string {
   return formatWrapped("范数标识", text);
 }
 
-/** 中文注释：实现 formatRecallLabel 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format recall label`，统一页面展示文本和缺省值。 */
 export function formatRecallLabel(k: number, stage: "clean" | "attacked" | "delta"): string {
   const stageLabel = stage === "clean" ? "正常输入" : stage === "attacked" ? "受攻击输入" : "相对变化";
   return `${stageLabel}前 ${k} 位召回率`;
 }
 
-/** 中文注释：实现 formatLogMessage 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 日志 message`，统一页面展示文本和缺省值。 */
 export function formatLogMessage(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {
@@ -535,7 +535,7 @@ export function formatLogMessage(value: string): string {
   return `日志内容：${formatBackendMessage(text)}`;
 }
 
-/** 中文注释：实现 formatBackendMessage 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format backend message`，统一页面展示文本和缺省值。 */
 export function formatBackendMessage(value: string): string {
   const text = cleanText(value);
   if (isMissingText(text)) {

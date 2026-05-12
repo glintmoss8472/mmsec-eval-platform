@@ -13,18 +13,18 @@ from mmsec_eval.plugins.registry import create
 from mmsec_eval.types import AttackContext, Sample
 
 
-# 中文注释：定义 DummyTorchAdapter 的结构化职责，作为自动化测试中状态、配置或行为的边界。
+# 定义 `DummyTorchAdapter` 的状态和行为边界，供自动化测试在固定职责内复用。
 class DummyTorchAdapter:
     _device = "cpu"
 
-    # 中文注释：实现 DummyTorchAdapter.score_pairs_torch 的核心行为，维护自动化测试在该对象上的调用契约。
+    # 计算 `pairs PyTorch`，为指标、风险或调度决策提供数值依据。
     def score_pairs_torch(self, images_bchw, texts, output_attentions: bool = False):
         del output_attentions
         text_scale = torch.tensor([max(1.0, float(len(str(text).split()))) for text in texts], device=images_bchw.device)
         return images_bchw.mean(dim=(1, 2, 3)) * text_scale
 
 
-# 中文注释：封装 _cfg 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 执行 `配置` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
 def _cfg():
     attack = SimpleNamespace(
         mode="A",
@@ -46,13 +46,13 @@ def _cfg():
     return SimpleNamespace(attack=attack, task=task)
 
 
-# 中文注释：封装 _sample 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 执行 `样本` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
 def _sample():
     image = np.full((32, 32, 3), 0.6, dtype=np.float32)
     return Sample(sample_id="classic-001", image=image, text="a bright object")
 
 
-# 中文注释：验证 test_classic_gradient_attacks_smoke 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `classic gradient 攻击 smoke` 场景，防止相关行为在后续修改中退化。
 def test_classic_gradient_attacks_smoke(tmp_path):
     register_builtin_plugins()
     adapter = DummyTorchAdapter()
@@ -77,7 +77,7 @@ def test_classic_gradient_attacks_smoke(tmp_path):
         assert payload["implementation"] in {"torchattacks", "builtin"}
 
 
-# 中文注释：验证 test_classic_gradient_batch_splits_mixed_image_shapes 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `classic gradient 批处理 splits mixed 图像 shapes` 场景，防止相关行为在后续修改中退化。
 def test_classic_gradient_batch_splits_mixed_image_shapes(tmp_path):
     register_builtin_plugins()
     adapter = DummyTorchAdapter()

@@ -26,7 +26,7 @@ SYSTEM_PROMPT = (
 )
 
 
-# 中文注释：封装 _is_loopback_base_url 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 判断 `是否 loopback 基础 URL` 条件是否成立，为调用方提供布尔决策。
 def _is_loopback_base_url(url: str) -> bool:
     host = str(urlparse(str(url or "")).hostname or "").strip().lower()
     if not host:
@@ -39,11 +39,11 @@ def _is_loopback_base_url(url: str) -> bool:
         return False
 
 
-# 中文注释：定义 OpenAICompatAdapter 的结构化职责，作为模型适配层中状态、配置或行为的边界。
+# 定义 `OpenAICompatAdapter` 的插件适配边界，把模型、攻击或评测能力暴露为统一接口。
 class OpenAICompatAdapter(ModelAdapter):
     """Vision scorer for OpenAI and OpenAI-compatible endpoints such as vLLM."""
 
-    # 中文注释：封装 OpenAICompatAdapter.__init__ 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `OpenAICompatAdapter.__init__` 的对象行为，维护该类在模型适配层中的调用契约。
     def __init__(self, *, variant: str = "") -> None:
         self.variant = str(variant or "").strip().upper()
         self.adapter_name = "openai_compat" if not self.variant else f"openai_{self.variant.lower()}"
@@ -116,7 +116,7 @@ class OpenAICompatAdapter(ModelAdapter):
         self._thread_local = local()
         self.session = self._build_session()
 
-    # 中文注释：封装 OpenAICompatAdapter._read_setting 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 读取 `setting`，并对缺失或异常输入做边界处理。
     def _read_setting(self, suffix: str, *, generic_env: str, legacy_env: str, default: str) -> str:
         if self.variant:
             variant_key = f"MMSEC_OPENAI_{self.variant}_{suffix}"
@@ -125,7 +125,7 @@ class OpenAICompatAdapter(ModelAdapter):
                 return variant_val
         return os.getenv(generic_env, os.getenv(legacy_env, default))
 
-    # 中文注释：封装 OpenAICompatAdapter._build_session 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 构建 `session` 数据，集中整理模型适配层需要的输出结构。
     def _build_session(self) -> requests.Session:
         session = requests.Session()
         if self.loopback_base_url:
@@ -138,7 +138,7 @@ class OpenAICompatAdapter(ModelAdapter):
         session.mount("https://", adapter)
         return session
 
-    # 中文注释：封装 OpenAICompatAdapter._worker_session 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `OpenAICompatAdapter._worker_session` 的对象行为，维护该类在模型适配层中的调用契约。
     def _worker_session(self) -> requests.Session:
         session = getattr(self._thread_local, "session", None)
         if session is None:
@@ -146,14 +146,14 @@ class OpenAICompatAdapter(ModelAdapter):
             self._thread_local.session = session
         return session
 
-    # 中文注释：封装 OpenAICompatAdapter._headers 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `OpenAICompatAdapter._headers` 的对象行为，维护该类在模型适配层中的调用契约。
     def _headers(self) -> dict[str, str]:
         headers = {"Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
         return headers
 
-    # 中文注释：封装 OpenAICompatAdapter._payload 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 组装 `载荷`，把分散字段整理成后端任务或风险评分使用的载荷。
     def _payload(self, image: np.ndarray, text: str) -> dict[str, Any]:
         image_b64 = encode_image_b64(image)
         # We use chat/completions as a generic multimodal scoring interface:
@@ -179,7 +179,7 @@ class OpenAICompatAdapter(ModelAdapter):
             ],
         }
 
-    # 中文注释：封装 OpenAICompatAdapter._generation_payload 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 组装 `生成式评测 载荷`，把分散字段整理成后端任务或风险评分使用的载荷。
     def _generation_payload(self, image: np.ndarray, prompt: str, *, max_tokens: int) -> dict[str, Any]:
         image_b64 = encode_image_b64(image)
         image_part = {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}
@@ -192,7 +192,7 @@ class OpenAICompatAdapter(ModelAdapter):
             "messages": [{"role": "user", "content": content}],
         }
 
-    # 中文注释：封装 OpenAICompatAdapter._content_to_text 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `OpenAICompatAdapter._content_to_text` 的对象行为，维护该类在模型适配层中的调用契约。
     @staticmethod
     def _content_to_text(content: Any) -> str:
         if isinstance(content, str):
@@ -207,7 +207,7 @@ class OpenAICompatAdapter(ModelAdapter):
             return "\n".join(chunks).strip()
         return str(content or "")
 
-    # 中文注释：封装 OpenAICompatAdapter._fallback_score_from_text 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `OpenAICompatAdapter._fallback_score_from_text` 的对象行为，维护该类在模型适配层中的调用契约。
     @staticmethod
     def _fallback_score_from_text(text: str) -> float:
         raw = str(text or "").strip()
@@ -231,7 +231,7 @@ class OpenAICompatAdapter(ModelAdapter):
             return 0.8
         return 0.0
 
-    # 中文注释：封装 OpenAICompatAdapter._request_pair 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `OpenAICompatAdapter._request_pair` 的对象行为，维护该类在模型适配层中的调用契约。
     def _request_pair(self, image: np.ndarray, text: str) -> dict[str, Any]:
         resp = self._worker_session().post(
             f"{self.base_url}/chat/completions",
@@ -257,7 +257,7 @@ class OpenAICompatAdapter(ModelAdapter):
             "raw": data,
         }
 
-    # 中文注释：封装 OpenAICompatAdapter._request_generation 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `OpenAICompatAdapter._request_generation` 的对象行为，维护该类在模型适配层中的调用契约。
     def _request_generation(self, sample: Sample, prompt: str, *, max_tokens: int) -> ModelOutput:
         resp = self._worker_session().post(
             f"{self.base_url}/chat/completions",
@@ -283,7 +283,7 @@ class OpenAICompatAdapter(ModelAdapter):
             },
         )
 
-    # 中文注释：实现 OpenAICompatAdapter.score_pairs 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 计算 `pairs`，为指标、风险或调度决策提供数值依据。
     def score_pairs(self, pairs: list[tuple[np.ndarray, str]], batch_size: int = 1) -> np.ndarray:
         if not pairs:
             return np.zeros((0,), dtype=np.float32)
@@ -305,7 +305,7 @@ class OpenAICompatAdapter(ModelAdapter):
                 scores[idx] = float(fut.result()["score"])
         return np.asarray(scores, dtype=np.float32)
 
-    # 中文注释：实现 OpenAICompatAdapter.predict 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `OpenAICompatAdapter.predict` 的对象行为，维护该类在模型适配层中的调用契约。
     def predict(self, sample: Sample) -> ModelOutput:
         out = self._request_pair(sample.image, sample.text)
         score = float(out["score"])
@@ -323,18 +323,18 @@ class OpenAICompatAdapter(ModelAdapter):
             },
         )
 
-    # 中文注释：实现 OpenAICompatAdapter.generate_answer 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 生成 `answer`，补齐前端展示或后续评测需要的样本资产。
     def generate_answer(self, sample: Sample, question: str, *, prompt: str = "", max_tokens: int = 64) -> ModelOutput:
         template = str(prompt or "Answer the question about the image. Use a short answer.\nQuestion: {question}")
         rendered = template.format(question=str(question))
         return self._request_generation(sample, rendered, max_tokens=max_tokens)
 
-    # 中文注释：实现 OpenAICompatAdapter.generate_caption 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 生成 `图像描述`，补齐前端展示或后续评测需要的样本资产。
     def generate_caption(self, sample: Sample, *, prompt: str = "", max_tokens: int = 96) -> ModelOutput:
         rendered = str(prompt or "Describe only the visible content of this image in one concise sentence.")
         return self._request_generation(sample, rendered, max_tokens=max_tokens)
 
-    # 中文注释：实现 OpenAICompatAdapter.object_probe 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `OpenAICompatAdapter.object_probe` 的对象行为，维护该类在模型适配层中的调用契约。
     def object_probe(self, sample: Sample, object_name: str, *, prompt: str = "", max_tokens: int = 8) -> ModelOutput:
         template = str(prompt or "Is there a {object_name} in the image? Answer yes or no.")
         rendered = template.format(object_name=str(object_name))

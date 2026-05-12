@@ -7,7 +7,7 @@ from pathlib import Path
 from mmsec_eval.model_adapters.local_vlm_catalog import LOCAL_OPENAI_COMPAT_LOCAL_DIRS
 
 
-# 中文注释：封装 _load_check_portable_assets 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 加载 `check portable 资产`，把外部文件、配置或运行产物转换为内存结构。
 def _load_check_portable_assets():
     script_path = Path("scripts", "check_portable_assets.py").resolve()
     spec = importlib.util.spec_from_file_location("check_portable_assets", script_path)
@@ -18,7 +18,7 @@ def _load_check_portable_assets():
     return module
 
 
-# 中文注释：封装 _write_model_tree 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 写出 `模型 tree`，保证后续报告、页面或复现实验能读取。
 def _write_model_tree(root: Path, name: str) -> None:
     model_dir = root / name
     model_dir.mkdir(parents=True, exist_ok=True)
@@ -26,7 +26,7 @@ def _write_model_tree(root: Path, name: str) -> None:
     (model_dir / "model.safetensors").write_text("stub", encoding="utf-8")
 
 
-# 中文注释：验证 test_build_summary_passes_with_all_required_assets 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `build 摘要 passes with all required 资产` 场景，防止相关行为在后续修改中退化。
 def test_build_summary_passes_with_all_required_assets(tmp_path: Path) -> None:
     module = _load_check_portable_assets()
     artifacts_root = tmp_path / "artifacts"
@@ -44,7 +44,7 @@ def test_build_summary_passes_with_all_required_assets(tmp_path: Path) -> None:
     assert summary["missing_local_vlm_models"] == []
 
 
-# 中文注释：验证 test_build_summary_reports_missing_local_vlm_assets 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `build 摘要 报告 missing 本地 视觉语言模型 资产` 场景，防止相关行为在后续修改中退化。
 def test_build_summary_reports_missing_local_vlm_assets(tmp_path: Path) -> None:
     module = _load_check_portable_assets()
     artifacts_root = tmp_path / "artifacts"

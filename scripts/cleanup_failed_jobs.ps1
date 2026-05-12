@@ -41,7 +41,7 @@ print(json.dumps({"before": before, "after": after, "removed": len(bad_ids)}, en
 '@
 
 Set-Content -Path $tmpPy -Value $py -Encoding UTF8
-# 中文注释：实现 try 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `try` 步骤，封装脚本中的可复用命令片段。
 try {
   .\.venv313\Scripts\python.exe $tmpPy
 } finally {

@@ -27,7 +27,7 @@ const modelAdapters = [
   "openai_gemma3_12b",
 ];
 
-/** 中文注释：构造模型依赖已就绪的测试条件，确保模型选择流程只验证前端业务分支。 */
+/** 整理 `ready requirement` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 const readyRequirement = (label: string, required = true) => ({
   label,
   required,
@@ -38,7 +38,7 @@ const readyRequirement = (label: string, required = true) => ({
   note: "已配置并存在",
 });
 
-/** 中文注释：实现 notRequiredRequirement 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `not required requirement` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 const notRequiredRequirement = (label: string) => ({
   label,
   required: false,
@@ -123,7 +123,7 @@ vi.mock("../lib/api", () => ({
   createJob: vi.fn(),
 }));
 
-/** 中文注释：实现 createClient 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 构建 `create client` 结构，供页面渲染或测试断言复用。 */
 function createClient() {
   return new QueryClient({
     defaultOptions: {
@@ -135,7 +135,7 @@ function createClient() {
   });
 }
 
-/** 中文注释：实现 renderPage 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `render page` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function renderPage() {
   return render(
     <MemoryRouter initialEntries={["/testing"]}>
@@ -146,7 +146,7 @@ function renderPage() {
   );
 }
 
-/** 中文注释：实现 findDatasetSelect 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `find 数据集 select` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 async function findDatasetSelect() {
   await screen.findByRole("heading", { name: "选择数据集" });
   const datasetSelect = document.querySelector('select[name="datasetId"]') as HTMLSelectElement | null;

@@ -1,7 +1,7 @@
 # 文件说明：该文件属于运维与实验脚本，集中实现 python env 相关逻辑。
 Set-StrictMode -Version Latest
 
-# 中文注释：实现 Get-ProjectRoot 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `get project root` 步骤，封装脚本中的可复用命令片段。
 function Get-ProjectRoot {
   param([string]$ScriptRoot)
   if ([string]::IsNullOrWhiteSpace($ScriptRoot)) {
@@ -18,7 +18,7 @@ function Get-ProjectRoot {
   return $selfPath
 }
 
-# 中文注释：实现 Get-VenvPythonCandidates 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `get venv python candidates` 步骤，封装脚本中的可复用命令片段。
 function Get-VenvPythonCandidates {
   param([string]$ProjectRoot)
   return @(
@@ -29,7 +29,7 @@ function Get-VenvPythonCandidates {
   )
 }
 
-# 中文注释：实现 Find-ProjectPython 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `find project python` 步骤，封装脚本中的可复用命令片段。
 function Find-ProjectPython {
   param([string]$ProjectRoot)
   foreach ($candidate in (Get-VenvPythonCandidates -ProjectRoot $ProjectRoot)) {
@@ -38,11 +38,11 @@ function Find-ProjectPython {
   return ""
 }
 
-# 中文注释：实现 Find-SystemPython 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `find system python` 步骤，封装脚本中的可复用命令片段。
 function Find-SystemPython {
   $versions = @("3.13", "3.12", "3.11")
   foreach ($ver in $versions) {
-    # 中文注释：实现 try 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+    # 处理 `try` 步骤，封装脚本中的可复用命令片段。
     try {
       $exe = (& py "-$ver" -c "import sys; print(sys.executable)" 2>$null).Trim()
       if (-not [string]::IsNullOrWhiteSpace($exe)) {
@@ -60,7 +60,7 @@ function Find-SystemPython {
   throw "Python 3.11+ not found. Install Python 3.11/3.12/3.13 first."
 }
 
-# 中文注释：实现 Ensure-ProjectVenv 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `ensure project venv` 步骤，封装脚本中的可复用命令片段。
 function Ensure-ProjectVenv {
   param([string]$ProjectRoot)
   $existing = Find-ProjectPython -ProjectRoot $ProjectRoot
@@ -90,7 +90,7 @@ function Ensure-ProjectVenv {
   return $venvPython
 }
 
-# 中文注释：实现 Get-ProjectPython 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `get project python` 步骤，封装脚本中的可复用命令片段。
 function Get-ProjectPython {
   param(
     [string]$ProjectRoot,
@@ -103,7 +103,7 @@ function Get-ProjectPython {
   return ""
 }
 
-# 中文注释：实现 Use-DirectProxyForPip 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `use direct proxy 所属 pip` 步骤，封装脚本中的可复用命令片段。
 function Use-DirectProxyForPip {
   $env:HTTP_PROXY = ""
   $env:HTTPS_PROXY = ""

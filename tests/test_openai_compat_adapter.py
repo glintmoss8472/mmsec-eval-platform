@@ -6,23 +6,23 @@ import numpy as np
 from mmsec_eval.model_adapters.openai_compat_adapter import OpenAICompatAdapter
 
 
-# 中文注释：验证 test_fallback_score_from_plain_decimal 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `fallback 分数 来源 plain decimal` 场景，防止相关行为在后续修改中退化。
 def test_fallback_score_from_plain_decimal():
     assert OpenAICompatAdapter._fallback_score_from_text("0.83") == 0.83
 
 
-# 中文注释：验证 test_fallback_score_from_ratio 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `fallback 分数 来源 ratio` 场景，防止相关行为在后续修改中退化。
 def test_fallback_score_from_ratio():
     assert OpenAICompatAdapter._fallback_score_from_text("I would rate it 8/10.") == 0.8
 
 
-# 中文注释：验证 test_fallback_score_from_yes_no_terms 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `fallback 分数 来源 yes no 因子` 场景，防止相关行为在后续修改中退化。
 def test_fallback_score_from_yes_no_terms():
     assert OpenAICompatAdapter._fallback_score_from_text("yes, the image matches") == 0.8
     assert OpenAICompatAdapter._fallback_score_from_text("no, it does not match") == 0.1
 
 
-# 中文注释：验证 test_prompt_order_defaults_to_image_first 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `提示词 order defaults to 图像 first` 场景，防止相关行为在后续修改中退化。
 def test_prompt_order_defaults_to_image_first(monkeypatch):
     monkeypatch.delenv("MMSEC_OPENAI_QWEN2_VL_PROMPT_ORDER", raising=False)
     adapter = OpenAICompatAdapter(variant="QWEN2_VL")
@@ -33,7 +33,7 @@ def test_prompt_order_defaults_to_image_first(monkeypatch):
     assert content[1]["type"] == "text"
 
 
-# 中文注释：验证 test_prompt_order_can_be_text_first 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `提示词 order 是否可以 be 文本 first` 场景，防止相关行为在后续修改中退化。
 def test_prompt_order_can_be_text_first(monkeypatch):
     monkeypatch.setenv("MMSEC_OPENAI_QWEN2_VL_PROMPT_ORDER", "text_first")
     adapter = OpenAICompatAdapter(variant="QWEN2_VL")

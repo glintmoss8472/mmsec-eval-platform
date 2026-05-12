@@ -11,7 +11,7 @@ type GlossaryLinkProps = {
   subtle?: boolean;
 };
 
-/** 中文注释：实现 GlossaryLink 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `GlossaryLink` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function GlossaryLink({ entryId, children, className, subtle = false }: GlossaryLinkProps) {
   const entry = getGlossaryEntry(entryId);
   if (!entry) {

@@ -9,7 +9,7 @@ from typing import Any
 from mmsec_api.services.risk_compat import derive_compatible_risk
 
 
-# 中文注释：实现 read_json 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 读取 `JSON`，并对缺失或异常输入做边界处理。
 def read_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
@@ -19,7 +19,7 @@ def read_json(path: Path, default: Any) -> Any:
         return default
 
 
-# 中文注释：实现 read_jsonl 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 读取 `JSONL`，并对缺失或异常输入做边界处理。
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -37,7 +37,7 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-# 中文注释：实现 paginate 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 计算分页窗口，把完整列表裁剪成接口本次响应需要的记录范围。
 def paginate(items: list[Any], page: int, page_size: int) -> tuple[int, list[Any]]:
     total = len(items)
     start = max(0, (page - 1) * page_size)
@@ -45,7 +45,7 @@ def paginate(items: list[Any], page: int, page_size: int) -> tuple[int, list[Any
     return total, items[start:end]
 
 
-# 中文注释：封装 _created_at_from_run_id 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 执行 `created at 来源 运行记录 id` 辅助逻辑，保持后端业务服务中的输入处理和结果输出一致。
 def _created_at_from_run_id(run_id: str) -> str:
     parts = str(run_id or "").split("_")
     if len(parts) < 2:
@@ -60,7 +60,7 @@ def _created_at_from_run_id(run_id: str) -> str:
     return captured.replace(tzinfo=server_tz).isoformat()
 
 
-# 中文注释：封装 _as_float 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 转换 `as float` 输入，在无法解析时返回 None 或调用方默认值。
 def _as_float(value: Any) -> float | None:
     try:
         if value is None:
@@ -70,7 +70,7 @@ def _as_float(value: Any) -> float | None:
         return None
 
 
-# 中文注释：封装 _mean 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 计算 `均值` 均值，空输入时返回可控的默认结果。
 def _mean(values: list[float | None]) -> float | None:
     valid = [value for value in values if value is not None]
     if not valid:
@@ -78,7 +78,7 @@ def _mean(values: list[float | None]) -> float | None:
     return sum(valid) / len(valid)
 
 
-# 中文注释：封装 _victim_payloads 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 组装 `victim 载荷`，把分散字段整理成后端任务或风险评分使用的载荷。
 def _victim_payloads(summary: dict[str, Any]) -> list[dict[str, Any]]:
     victims = summary.get("victims")
     if isinstance(victims, dict):
@@ -86,7 +86,7 @@ def _victim_payloads(summary: dict[str, Any]) -> list[dict[str, Any]]:
     return []
 
 
-# 中文注释：封装 _stage_metric 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 标记 `指标` 阶段，区分 clean、attacked 和 defended 样本。
 def _stage_metric(payloads: list[dict[str, Any]], stage: str, keys: list[str]) -> float | None:
     values: list[float | None] = []
     for payload in payloads:
@@ -100,7 +100,7 @@ def _stage_metric(payloads: list[dict[str, Any]], stage: str, keys: list[str]) -
     return _mean(values)
 
 
-# 中文注释：封装 _conditional_metric 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 计算 `指标` 条件指标，只在满足前置条件的样本上统计。
 def _conditional_metric(payloads: list[dict[str, Any]], keys: list[str]) -> float | None:
     values: list[float | None] = []
     for payload in payloads:
@@ -114,7 +114,7 @@ def _conditional_metric(payloads: list[dict[str, Any]], keys: list[str]) -> floa
     return _mean(values)
 
 
-# 中文注释：封装 _summary_dashboard_metrics 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 计算 `摘要 dashboard 指标`，把原始模型输出汇总成页面和报告使用的指标字段。
 def _summary_dashboard_metrics(summary: dict[str, Any]) -> dict[str, Any]:
     payloads = _victim_payloads(summary)
     clean_ir = _stage_metric(payloads, "clean", ["ir_r@1"])
@@ -178,7 +178,7 @@ def _summary_dashboard_metrics(summary: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-# 中文注释：实现 discover_runs_from_artifacts 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 发现 `运行记录 来源 产物`，从文件系统产物中恢复可展示的运行记录。
 def discover_runs_from_artifacts(artifacts_dir: str = "artifacts") -> list[dict[str, Any]]:
     runs_root = Path(artifacts_dir) / "runs"
     if not runs_root.exists():

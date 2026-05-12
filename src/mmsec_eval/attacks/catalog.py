@@ -22,7 +22,7 @@ PAPER_ATTACKS: FrozenSet[str] = frozenset(
 )
 
 
-# 中文注释：定义 AttackSurrogatePolicy 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
+# 定义 `AttackSurrogatePolicy` 的状态和行为边界，供攻击算法公共层在固定职责内复用。
 @dataclass(frozen=True)
 class AttackSurrogatePolicy:
     attacks: FrozenSet[str]
@@ -30,7 +30,7 @@ class AttackSurrogatePolicy:
     message: str
 
 
-# 中文注释：定义 ExternalAttackMetadata 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
+# 定义 `ExternalAttackMetadata` 的状态和行为边界，供攻击算法公共层在固定职责内复用。
 @dataclass(frozen=True)
 class ExternalAttackMetadata:
     attack_id: str
@@ -84,7 +84,7 @@ SURROGATE_POLICIES: tuple[AttackSurrogatePolicy, ...] = (
 )
 
 
-# 中文注释：实现 surrogate_policy_for_attack 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
+# 推断 `surrogate policy 所属 攻击`，从样本、配置或运行记录中提取统一名称。
 def surrogate_policy_for_attack(attack: str) -> AttackSurrogatePolicy | None:
     attack_id = str(attack or "").strip()
     for policy in SURROGATE_POLICIES:
@@ -93,7 +93,7 @@ def surrogate_policy_for_attack(attack: str) -> AttackSurrogatePolicy | None:
     return None
 
 
-# 中文注释：实现 attack_surrogate_error 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
+# 推断 `攻击 surrogate error`，从样本、配置或运行记录中提取统一名称。
 def attack_surrogate_error(attack: str, surrogate: str) -> str | None:
     attack_id = str(attack or "").strip()
     surrogate_id = str(surrogate or "").strip()

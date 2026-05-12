@@ -78,7 +78,7 @@ const CURATED_ENTRY_IDS = new Set([
   "dataset-mini-flickr",
 ]);
 
-/** 中文注释：实现 useActiveAnchor 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 封装 `useActiveAnchor` Hook，把页面状态、副作用和持久化逻辑集中管理。 */
 function useActiveAnchor() {
   const location = useLocation();
   const [activeAnchor, setActiveAnchor] = useState("");
@@ -100,19 +100,19 @@ function useActiveAnchor() {
   return activeAnchor;
 }
 
-/** 中文注释：实现 shortParagraphs 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `short paragraphs` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function shortParagraphs(entry: GlossaryEntry) {
   return entry.detailSections
     .slice(0, 1)
     .flatMap((section) => section.paragraphs.slice(0, 2));
 }
 
-/** 中文注释：实现 shouldRenderFormula 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 判断 `是否需要 render formula` 状态，支撑页面分支渲染或按钮可用性。 */
 function shouldRenderFormula(entry: GlossaryEntry) {
   return entry.category === "metric" || entry.category === "parameter";
 }
 
-/** 中文注释：实现 GlossaryEntryCard 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `GlossaryEntryCard` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 function GlossaryEntryCard({ entry, active }: { entry: GlossaryEntry; active: boolean }) {
   const shortCopy = shortParagraphs(entry);
   const formulaBlocks = shouldRenderFormula(entry) ? entry.formulaBlocks ?? [] : [];
@@ -178,6 +178,7 @@ function GlossaryEntryCard({ entry, active }: { entry: GlossaryEntry; active: bo
   );
 }
 
+/** 渲染 `GlossaryPage` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export default function GlossaryPage() {
   const navigate = useNavigate();
   const location = useLocation();

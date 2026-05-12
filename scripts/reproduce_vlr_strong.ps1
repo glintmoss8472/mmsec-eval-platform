@@ -14,10 +14,10 @@ Set-Location $projectRoot
 
 $pythonExe = Get-ProjectPython -ProjectRoot $projectRoot -EnsureVenv
 
-# 中文注释：实现 Get-TorchInfo 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `get PyTorch info` 步骤，封装脚本中的可复用命令片段。
 function Get-TorchInfo {
   param([string]$Py)
-  # 中文注释：实现 try 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+  # 处理 `try` 步骤，封装脚本中的可复用命令片段。
   try {
     $raw = & $Py -c "import json; import torch; print(json.dumps({'torch': torch.__version__, 'cuda': torch.version.cuda, 'cuda_available': bool(torch.cuda.is_available())}))"
     if ($LASTEXITCODE -ne 0) { return $null }
@@ -62,7 +62,7 @@ $env:HF_HUB_OFFLINE = ""
 $env:TRANSFORMERS_OFFLINE = ""
 
 
-# 中文注释：实现 Test-HFWeightsReady 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `测试 hfweights ready` 步骤，封装脚本中的可复用命令片段。
 function Test-HFWeightsReady {
   param([string]$LocalDir)
   if (Test-Path (Join-Path $LocalDir "pytorch_model.bin")) { return $true }
@@ -71,7 +71,7 @@ function Test-HFWeightsReady {
   return $false
 }
 
-# 中文注释：实现 Prefetch-HFModel 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `prefetch hfmodel` 步骤，封装脚本中的可复用命令片段。
 function Prefetch-HFModel {
   param(
     [string]$RepoId,
@@ -98,7 +98,7 @@ function Prefetch-HFModel {
       $wait = [Math]::Min(30, 2 * $i)
       Write-Host "[HF] Prefetch: $RepoId -> $LocalDir (endpoint=$ep try=$i/$Retries workers=$MaxWorkers)"
       $rc = 1
-      # 中文注释：实现 try 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+      # 处理 `try` 步骤，封装脚本中的可复用命令片段。
       try {
         $args = @("download", $RepoId, "--local-dir", $LocalDir, "--max-workers", "$MaxWorkers")
         foreach ($x in $Exclude) { $args += @("--exclude", "$x") }
@@ -132,7 +132,7 @@ function Prefetch-HFModel {
   throw "HF prefetch failed for $RepoId. If your network is unstable/blocked, try setting HF_ENDPOINT=https://hf-mirror.com and/or HF_TOKEN."
 }
 
-# 中文注释：实现 Clear-HFLocks 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `clear hflocks` 步骤，封装脚本中的可复用命令片段。
 function Clear-HFLocks {
   param([string]$ProjectRootPath)
   $lockRoot = Join-Path $ProjectRootPath "artifacts\\hf\\hub\\.locks"

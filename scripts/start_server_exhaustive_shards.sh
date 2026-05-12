@@ -27,7 +27,7 @@ BACKEND_TIMEOUT="${MMSEC_EXHAUSTIVE_TIMEOUT_SECONDS:-86400}"
 POLL_SECONDS="${MMSEC_EXHAUSTIVE_POLL_SECONDS:-15}"
 RUNNER_BIN="${PROJECT_ROOT}/.venv/bin/python"
 
-# 中文注释：实现 wait_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `wait backend` 步骤，封装脚本中的可复用命令片段。
 wait_backend() {
   local port="$1"
   "${RUNNER_BIN}" - <<PY
@@ -51,7 +51,7 @@ raise SystemExit(1)
 PY
 }
 
-# 中文注释：实现 start_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 启动 `start backend` 进程，并准备日志、端口或运行目录。
 start_backend() {
   local port="$1"
   local backend_artifacts="$2"
@@ -74,7 +74,7 @@ start_backend() {
   wait_backend "${port}"
 }
 
-# 中文注释：实现 start_runner 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 启动 `start runner` 进程，并准备日志、端口或运行目录。
 start_runner() {
   local api_base="$1"
   local shard_name="$2"

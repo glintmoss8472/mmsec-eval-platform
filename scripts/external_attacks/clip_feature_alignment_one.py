@@ -15,7 +15,7 @@ from PIL import Image
 from torchvision import transforms
 
 
-# 中文注释：封装 _install_compat_stubs 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `install compat stubs` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _install_compat_stubs() -> None:
     if "config_schema" not in sys.modules:
         module = ModuleType("config_schema")
@@ -23,7 +23,7 @@ def _install_compat_stubs() -> None:
         sys.modules["config_schema"] = module
 
 
-# 中文注释：封装 _to_module 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 转换 `module` 输入，在类型不匹配时回退到安全默认值。
 def _to_module(repo: Path, module_name: str):
     _install_compat_stubs()
     repo_text = str(repo)
@@ -47,15 +47,15 @@ def _to_module(repo: Path, module_name: str):
 
 
 
-# 中文注释：封装 _to_tensor 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 转换 `tensor` 输入，在类型不匹配时回退到安全默认值。
 def _to_tensor(pic: Image.Image) -> torch.Tensor:
     img = torch.from_numpy(__import__("numpy").array(pic, __import__("numpy").uint8, copy=True))
     img = img.view(pic.size[1], pic.size[0], len(pic.getbands()))
     return img.permute((2, 0, 1)).contiguous().float()
 
-# 中文注释：封装 _patch_transformers_clip_outputs 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `forward` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _patch_transformers_clip_outputs(module) -> None:
-    # 中文注释：封装 _forward 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 封装 _forward 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
     def _forward(self, x):
         inputs = dict(pixel_values=self.normalizer(x))
         out = self.model.get_image_features(**inputs)
@@ -73,7 +73,7 @@ def _patch_transformers_clip_outputs(module) -> None:
             cls.forward = _forward
 
 
-# 中文注释：封装 _patch_kmeans_compat 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `补丁 kmeans compat` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _patch_kmeans_compat() -> None:
     try:
         import kmeans_pytorch
@@ -81,7 +81,7 @@ def _patch_kmeans_compat() -> None:
         return
     original = kmeans_pytorch.kmeans
 
-    # 中文注释：封装 _kmeans_compat 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 执行 `kmeans compat` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
     def _kmeans_compat(*args, **kwargs):
         kwargs.pop("iter_limit", None)
         return original(*args, **kwargs)
@@ -91,9 +91,9 @@ def _patch_kmeans_compat() -> None:
         if getattr(module, "__name__", "").endswith("FeatureExtractors.Base") and hasattr(module, "kmeans"):
             module.kmeans = _kmeans_compat
 
-# 中文注释：封装 _patch_logging 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `no 日志` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _patch_logging(module) -> None:
-    # 中文注释：封装 _no_log 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 封装 _no_log 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
     def _no_log(*args, **kwargs):
         return None
     module.log_metrics = _no_log
@@ -103,7 +103,7 @@ def _patch_logging(module) -> None:
         module.wandb.define_metric = _no_log
 
 
-# 中文注释：封装 _image_folder 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `图像 folder` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _image_folder(path: Path, image: Path) -> Path:
     cls = path / "class0"
     cls.mkdir(parents=True, exist_ok=True)
@@ -113,7 +113,7 @@ def _image_folder(path: Path, image: Path) -> Path:
     return path
 
 
-# 中文注释：封装 _cfg 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `配置` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _cfg(args, *, backbone: list[str], ensemble: bool):
     epsilon_255 = float(args.epsilon)
     if epsilon_255 <= 1.0:
@@ -134,7 +134,7 @@ def _cfg(args, *, backbone: list[str], ensemble: bool):
     )
 
 
-# 中文注释：封装 _load_pair 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 加载 `pair`，把外部文件、配置或运行产物转换为内存结构。
 def _load_pair(module, cfg, clean_image: Path, target_image: Path):
     transform_fn = transforms.Compose([
         transforms.Resize((cfg.model.input_res, cfg.model.input_res), interpolation=torchvision.transforms.InterpolationMode.BICUBIC),
@@ -146,7 +146,7 @@ def _load_pair(module, cfg, clean_image: Path, target_image: Path):
     return image_org, image_tgt
 
 
-# 中文注释：封装 _save 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `save` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _save(output: Path, adv: torch.Tensor, clean_small_255: torch.Tensor, clean_image: Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     orig = _to_tensor(Image.open(clean_image).convert("RGB")).unsqueeze(0) / 255.0
@@ -157,7 +157,7 @@ def _save(output: Path, adv: torch.Tensor, clean_small_255: torch.Tensor, clean_
     torchvision.utils.save_image(out.squeeze(0), str(output))
 
 
-# 中文注释：实现 run_m_attack 的核心流程，支撑外部攻击脚本中的业务语义和异常边界。
+# 执行 `m 攻击` 流程，按配置驱动外部攻击脚本完成一次任务。
 def run_m_attack(args) -> None:
     repo = Path(args.repo_dir).expanduser().resolve()
     module = _to_module(repo, "generate_adversarial_samples")
@@ -179,7 +179,7 @@ def run_m_attack(args) -> None:
     _save(Path(args.output_image), adv, image_org, Path(args.input_image))
 
 
-# 中文注释：实现 run_foa 的核心流程，支撑外部攻击脚本中的业务语义和异常边界。
+# 执行 `foa` 流程，按配置驱动外部攻击脚本完成一次任务。
 def run_foa(args) -> None:
     repo = Path(args.repo_dir).expanduser().resolve()
     module = _to_module(repo, "FOAttack")
@@ -197,7 +197,7 @@ def run_foa(args) -> None:
     _save(Path(args.output_image), adv, image_org, Path(args.input_image))
 
 
-# 中文注释：串联 main 的主流程，集中处理外部攻击脚本的初始化、执行和退出条件。
+# 作为 `clip_feature_alignment_one.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run official FOA/M-Attack feature-alignment attack functions for one image pair.")
     parser.add_argument("--method", choices=["foa_attack", "m_attack"], required=True)

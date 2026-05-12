@@ -98,12 +98,12 @@ DEFAULT_DURATION_HINTS: dict[str, int] = {
 PAIR_PROGRESS_RE = re.compile(r"已完成\s*(?P<done>\d+)\s*/\s*(?P<total>\d+)\s*对图文配对")
 
 
-# 中文注释：实现 stage_template 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 标记 `template` 阶段，区分 clean、attacked 和 defended 样本。
 def stage_template(job_type: str) -> list[StageDef]:
     return JOB_STAGE_TEMPLATES.get(str(job_type or ""), DEFAULT_TEMPLATE)
 
 
-# 中文注释：实现 initial_stage_rows 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 整理 `initial stage rows` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def initial_stage_rows(job_type: str, now_iso: str) -> list[dict[str, Any]]:
     rows = []
     for order, (stage_key, stage_label, progress_percent) in enumerate(stage_template(job_type), start=1):
@@ -121,7 +121,7 @@ def initial_stage_rows(job_type: str, now_iso: str) -> list[dict[str, Any]]:
     return rows
 
 
-# 中文注释：实现 parse_iso_ts 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 解析 `iso ts`，把文本或载荷转换成可校验的字段。
 def parse_iso_ts(value: str | None) -> datetime | None:
     text = str(value or "").strip()
     if not text:
@@ -132,7 +132,7 @@ def parse_iso_ts(value: str | None) -> datetime | None:
         return None
 
 
-# 中文注释：实现 duration_seconds 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 计算 `duration seconds` 进度或耗时，用于任务中心展示剩余时间和阶段完成度。
 def duration_seconds(started_at: str | None, finished_at: str | None) -> float:
     start_dt = parse_iso_ts(started_at)
     end_dt = parse_iso_ts(finished_at)
@@ -141,7 +141,7 @@ def duration_seconds(started_at: str | None, finished_at: str | None) -> float:
     return max(0.0, (end_dt - start_dt).total_seconds())
 
 
-# 中文注释：实现 median_duration_seconds 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 计算 `median duration seconds` 进度或耗时，用于任务中心展示剩余时间和阶段完成度。
 def median_duration_seconds(job_type: str, durations: list[float]) -> float:
     values = [float(item) for item in durations if float(item) > 0]
     if values:
@@ -149,7 +149,7 @@ def median_duration_seconds(job_type: str, durations: list[float]) -> float:
     return float(DEFAULT_DURATION_HINTS.get(job_type, 90))
 
 
-# 中文注释：实现 parse_pair_progress 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 解析 `pair 进度`，把文本或载荷转换成可校验的字段。
 def parse_pair_progress(message: str | None) -> tuple[int, int] | None:
     text = str(message or "").strip()
     if not text:
@@ -165,7 +165,7 @@ def parse_pair_progress(message: str | None) -> tuple[int, int] | None:
 
 
 
-# 中文注释：实现 pair_progress_percent 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 计算 `pair 进度 percent` 进度或耗时，用于任务中心展示剩余时间和阶段完成度。
 def pair_progress_percent(message: str | None) -> float:
     parsed = parse_pair_progress(message)
     if parsed is None:
@@ -175,7 +175,7 @@ def pair_progress_percent(message: str | None) -> float:
         return 0.0
     return float(round((float(done) / float(total)) * 100.0, 2))
 
-# 中文注释：实现 estimate_pair_eta_seconds 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 计算 `estimate pair eta seconds` 进度或耗时，用于任务中心展示剩余时间和阶段完成度。
 def estimate_pair_eta_seconds(*, elapsed_seconds: float, stage_message: str | None) -> float | None:
     parsed = parse_pair_progress(stage_message)
     if parsed is None:
@@ -190,7 +190,7 @@ def estimate_pair_eta_seconds(*, elapsed_seconds: float, stage_message: str | No
     return float(round(max(0.0, remaining_pairs / rate), 2))
 
 
-# 中文注释：实现 estimate_eta_seconds 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 计算 `estimate eta seconds` 进度或耗时，用于任务中心展示剩余时间和阶段完成度。
 def estimate_eta_seconds(
     *,
     job_type: str,
@@ -217,7 +217,7 @@ def estimate_eta_seconds(
     return float(round(max(0.0, inferred_total - float(elapsed_seconds)), 2))
 
 
-# 中文注释：实现 estimated_ready_at 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 判断或归一 `estimated ready at` 状态，让调用方可以稳定渲染能力和可用性。
 def estimated_ready_at(eta_seconds: float) -> str:
     if float(eta_seconds) <= 0:
         return ""

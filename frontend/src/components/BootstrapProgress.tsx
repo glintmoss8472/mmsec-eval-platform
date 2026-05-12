@@ -24,7 +24,7 @@ const STEP_STATE_LABEL: Record<string, string> = {
   skipped: "已跳过",
 };
 
-/** 中文注释：实现 progressValue 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 整理 `进度 value` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function progressValue(steps: { state: string }[]) {
   if (!steps.length) return 0;
   const score = steps.reduce((acc, step) => {
@@ -35,7 +35,7 @@ function progressValue(steps: { state: string }[]) {
   return Math.round((score / steps.length) * 100);
 }
 
-/** 中文注释：实现 BootstrapProgress 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `BootstrapProgress` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function BootstrapProgress() {
   const qc = useQueryClient();
   const statusQ = useQuery({

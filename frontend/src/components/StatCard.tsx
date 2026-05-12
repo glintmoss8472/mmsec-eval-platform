@@ -8,7 +8,7 @@ interface StatCardProps {
   dismissKey?: string;
 }
 
-/** 中文注释：实现 StatCard 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `StatCard` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function StatCard({ title, value, hint, dismissKey }: StatCardProps) {
   const { visible, dismiss, restore } = useDismissible(dismissKey);
 

@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 
-# 中文注释：定义 DocsConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `DocsConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class DocsConfig:
     paths: list[str] = field(default_factory=list)
@@ -14,7 +14,7 @@ class DocsConfig:
     local_paths_file: str = "configs/local_paths.yaml"
 
 
-# 中文注释：定义 PluginsConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `PluginsConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class PluginsConfig:
     model_adapter: str = "clip_hf"
@@ -24,7 +24,7 @@ class PluginsConfig:
     judge: str = "rule"
 
 
-# 中文注释：定义 RuntimeConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `RuntimeConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class RuntimeConfig:
     device: str = "cuda"
@@ -34,7 +34,7 @@ class RuntimeConfig:
     fallback_cpu: bool = False
 
 
-# 中文注释：定义 ModelConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `ModelConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class ModelConfig:
     clip_model_name: str = "openai/clip-vit-base-patch32"
@@ -55,7 +55,7 @@ class ModelConfig:
     gemini_timeout: float = 45.0
 
 
-# 中文注释：定义 DatasetConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `DatasetConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class DatasetConfig:
     kind: str = "toy_shapes"
@@ -72,7 +72,7 @@ class DatasetConfig:
     benchmark_tag: str = ""
 
 
-# 中文注释：定义 TaskConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `TaskConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class TaskConfig:
     # "pairwise" keeps existing run-eval behavior; "vlr" enables retrieval metrics.
@@ -97,7 +97,7 @@ class TaskConfig:
     object_probe_enabled: bool = True
 
 
-# 中文注释：定义 AttackConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `AttackConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class AttackConfig:
     mode: str = "A"
@@ -188,7 +188,7 @@ class AttackConfig:
     disable_wandb: bool = True
 
 
-# 中文注释：定义 RunnerConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `RunnerConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class RunnerConfig:
     save_plots: bool = True
@@ -210,7 +210,7 @@ class RunnerConfig:
     stop_local_vlm_after_run: bool = False
 
 
-# 中文注释：定义 RiskConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `RiskConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class RiskConfig:
     enabled: bool = True
@@ -222,7 +222,7 @@ class RiskConfig:
     transfer_success_threshold: float = 0.2
 
 
-# 中文注释：定义 DefenseConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `DefenseConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class DefenseConfig:
     enabled: bool = False
@@ -244,7 +244,7 @@ class DefenseConfig:
     text_candidates_k: int = 12
 
 
-# 中文注释：定义 ReportConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `ReportConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class ReportConfig:
     save_heatmaps: bool = True
@@ -252,7 +252,7 @@ class ReportConfig:
     top_k_cases: int = 0
 
 
-# 中文注释：定义 SampleStoreConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `SampleStoreConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class SampleStoreConfig:
     enabled: bool = True
@@ -260,7 +260,7 @@ class SampleStoreConfig:
     save_traces: bool = True
 
 
-# 中文注释：定义 JudgeConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `JudgeConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class JudgeConfig:
     llm_enabled: bool = False
@@ -269,14 +269,14 @@ class JudgeConfig:
     llm_api_key_env: str = "OPENAI_API_KEY"
 
 
-# 中文注释：定义 SweepConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `SweepConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class SweepConfig:
     enabled: bool = False
     path: str = "configs/sweep/examples.jsonl"
 
 
-# 中文注释：定义 BootstrapConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `BootstrapConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class BootstrapConfig:
     enabled: bool = True
@@ -294,7 +294,7 @@ class BootstrapConfig:
     coco_root: str = "data/coco"
 
 
-# 中文注释：定义 AppConfig 的结构化职责，作为配置系统中状态、配置或行为的边界。
+# 定义 `AppConfig` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class AppConfig:
     seed: int = 42

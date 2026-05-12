@@ -91,7 +91,7 @@ vi.mock("../lib/api", () => ({
   }),
 }));
 
-/** 中文注释：实现 renderPage 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `render page` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
   return render(

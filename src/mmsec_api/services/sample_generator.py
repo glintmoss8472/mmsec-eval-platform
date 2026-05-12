@@ -32,7 +32,7 @@ from mmsec_eval.utils.seed import set_seed
 PENDING_REUSABLE_STATUS = "pending_evaluation"
 
 
-# 中文注释：封装 _json_ready 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 判断或归一 `JSON ready` 状态，让调用方可以稳定渲染能力和可用性。
 def _json_ready(value: Any) -> Any:
     if isinstance(value, np.ndarray):
         return value.tolist()
@@ -45,26 +45,26 @@ def _json_ready(value: Any) -> Any:
     return value
 
 
-# 中文注释：封装 _safe_case_id 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 安全计算 `案例 id`，在空值或异常输入下返回可控结果。
 def _safe_case_id(value: object, idx: int) -> str:
     text = str(value or "").strip() or f"sample-{idx:04d}"
     text = re.sub(r"[^0-9A-Za-z_.:-]+", "_", text).strip("._-")
     return (text or f"sample-{idx:04d}")[:120]
 
 
-# 中文注释：封装 _sample_with_id 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 执行 `样本 with id` 辅助逻辑，保持后端业务服务中的输入处理和结果输出一致。
 def _sample_with_id(sample: Sample, sample_id: str) -> Sample:
     metadata = dict(sample.metadata or {})
     metadata["source_sample_id"] = str(sample.sample_id)
     return Sample(sample_id=sample_id, image=np.asarray(sample.image, dtype=np.float32), text=sample.text, target_text=sample.target_text, metadata=metadata)
 
 
-# 中文注释：封装 _dataset_label 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 推断 `数据集 label`，从样本、配置或运行记录中提取统一名称。
 def _dataset_label(cfg: Any) -> str:
     return str(getattr(cfg.dataset, "benchmark_tag", "") or getattr(cfg.dataset, "kind", "") or "sample_generation")
 
 
-# 中文注释：封装 _asset_scope 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 执行 `asset 作用范围` 辅助逻辑，保持后端业务服务中的输入处理和结果输出一致。
 def _asset_scope(task_kind: str, attack: str, eval_scope: str) -> str:
     attack_key = str(attack or "").lower()
     if str(eval_scope or "").lower() == "joint" or attack_key in {"tmm", "advedm_plus"}:
@@ -76,7 +76,7 @@ def _asset_scope(task_kind: str, attack: str, eval_scope: str) -> str:
     return "图像扰动"
 
 
-# 中文注释：封装 _trace_rows 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 整理 `调试轨迹 rows` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _trace_rows(trace: list[Any]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for item in trace or []:
@@ -87,7 +87,7 @@ def _trace_rows(trace: list[Any]) -> list[dict[str, Any]]:
     return rows
 
 
-# 中文注释：封装 _load_clean_samples 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 加载 `clean 样本`，把外部文件、配置或运行产物转换为内存结构。
 def _load_clean_samples(cfg: Any, progress: Callable[[str, str, float | None, str], None] | None) -> list[tuple[dict[str, Any], Sample]]:
     task_kind = str(getattr(cfg.task, "kind", "") or "").strip()
     if task_kind in {"vqa", "caption"}:
@@ -110,7 +110,7 @@ def _load_clean_samples(cfg: Any, progress: Callable[[str, str, float | None, st
     return [({}, sample) for sample in dataset]
 
 
-# 中文注释：封装 _artifact_refs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 整理 `产物 refs` 路径信息，把本地文件或产物引用转换成统一表示。
 def _artifact_refs(case_dir: Path, debug_dir: Path, cfg: Any, clean_sample: Sample, attacked: Any, attacked_sample: Sample) -> dict[str, str]:
     refs = {
         "clean_image": save_image_png(str(case_dir / "clean.png"), clean_sample.image),
@@ -130,7 +130,7 @@ def _artifact_refs(case_dir: Path, debug_dir: Path, cfg: Any, clean_sample: Samp
     return refs
 
 
-# 中文注释：封装 _case_bundle 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 整理 `证据包` 字段，统一生成式案例在 runner 内的读取口径。
 def _case_bundle(
     *,
     cfg: Any,
@@ -195,7 +195,7 @@ def _case_bundle(
     }
 
 
-# 中文注释：封装 _prepare_generation_config 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 准备 `生成式评测 配置` 数据，补齐后续运行、报告或测试需要的字段。
 def _prepare_generation_config(config_path: str, override: dict[str, Any], artifacts_dir: str) -> tuple[Any, str]:
     register_builtin_plugins()
     cfg = load_config(config_path)
@@ -211,7 +211,7 @@ def _prepare_generation_config(config_path: str, override: dict[str, Any], artif
     return cfg, surrogate_name
 
 
-# 中文注释：封装 _validate_generation_config 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 校验 `生成式评测 配置` 的约束，发现不兼容时阻止继续执行。
 def _validate_generation_config(
     cfg: Any,
     surrogate_name: str,
@@ -230,7 +230,7 @@ def _validate_generation_config(
     progress("model_preflight", "success", 16, "代理模型检查完成。")
 
 
-# 中文注释：封装 _start_generation_run 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 启动 `生成式评测 运行记录`，完成运行前的环境、端口或队列准备。
 def _start_generation_run(cfg: Any) -> tuple[str, Path]:
     setup_logging(cfg.artifacts_dir)
     set_seed(int(getattr(cfg, "seed", 0) or 0))
@@ -241,7 +241,7 @@ def _start_generation_run(cfg: Any) -> tuple[str, Path]:
     return run_id, run_dir
 
 
-# 中文注释：封装 _generated_row_payload 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 组装 `generated 行记录 载荷`，把分散字段整理成后端任务或风险评分使用的载荷。
 def _generated_row_payload(
     *,
     run_id: str,
@@ -277,7 +277,7 @@ def _generated_row_payload(
     }
 
 
-# 中文注释：封装 _pending_asset_payload 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 组装 `pending asset 载荷`，把分散字段整理成后端任务或风险评分使用的载荷。
 def _pending_asset_payload(
     *,
     row_payload: dict[str, Any],
@@ -326,7 +326,7 @@ def _pending_asset_payload(
     }
 
 
-# 中文注释：封装 _generate_pending_asset_case 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 生成 `pending asset 案例`，补齐前端展示或后续评测需要的样本资产。
 def _generate_pending_asset_case(
     *,
     cfg: Any,
@@ -384,7 +384,7 @@ def _generate_pending_asset_case(
     return row_payload, {**row_payload, "case_dir": str(case_dir)}, asset, l2, linf
 
 
-# 中文注释：封装 _generation_summary 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 汇总 `生成式评测 摘要`，从运行记录和指标中提炼页面展示所需的分析结果。
 def _generation_summary(
     *,
     cfg: Any,
@@ -426,7 +426,7 @@ def _generation_summary(
     }
 
 
-# 中文注释：封装 _write_generation_outputs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 写出 `生成式评测 outputs`，保证后续报告、页面或复现实验能读取。
 def _write_generation_outputs(
     *,
     run_dir: Path,
@@ -453,7 +453,7 @@ def _write_generation_outputs(
     return summary_path, results_path, html_path
 
 
-# 中文注释：封装 _generate_pending_assets 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 生成 `pending 资产`，补齐前端展示或后续评测需要的样本资产。
 def _generate_pending_assets(
     *,
     cfg: Any,
@@ -507,7 +507,7 @@ def _generate_pending_assets(
     return assets, result_rows, index_rows, l2_values, linf_values
 
 
-# 中文注释：实现 run_sample_generation_only 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 执行 `样本 生成式评测 only` 流程，按配置驱动后端业务服务完成一次任务。
 def run_sample_generation_only(
     *,
     config_path: str,

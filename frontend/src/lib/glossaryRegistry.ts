@@ -53,7 +53,7 @@ export interface GlossaryEntry {
   relatedIds?: string[];
 }
 
-/** 中文注释：实现 makeEntry 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 整理 `make entry` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function makeEntry(
   prefix: string,
   slug: string,
@@ -1204,7 +1204,7 @@ const progressStageEntries: GlossaryEntry[] = [
   }),
 ];
 
-/** 中文注释：实现 isCurrentTopicEntry 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 判断 `是否 current topic entry` 状态，支撑页面分支渲染或按钮可用性。 */
 function isCurrentTopicEntry(entry: GlossaryEntry): boolean {
   const raw = JSON.stringify(entry).toLowerCase();
   const blocked = ["\u9632\u5fa1", "\u653b\u9632", "defense", "defended"];
@@ -1214,18 +1214,18 @@ function isCurrentTopicEntry(entry: GlossaryEntry): boolean {
 export const glossaryEntries: GlossaryEntry[] = [...staticEntries, ...attackEntries, ...modelEntries, ...datasetEntries, ...progressStageEntries].filter(isCurrentTopicEntry);
 export const glossaryEntryMap = new Map(glossaryEntries.map((item) => [item.id, item]));
 
-/** 中文注释：实现 getGlossaryEntry 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求或读取 `get glossary entry` 数据，隔离接口路径和调用参数。 */
 export function getGlossaryEntry(id: string) {
   return glossaryEntryMap.get(id);
 }
 
-/** 中文注释：实现 glossaryHref 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 整理 `glossary href` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function glossaryHref(id: string) {
   const entry = glossaryEntryMap.get(id);
   return entry ? `/glossary#${entry.anchor}` : "/glossary";
 }
 
-/** 中文注释：实现 glossarySearchText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 生成 `glossary search 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 export function glossarySearchText(entry: GlossaryEntry) {
   const detail = entry.detailSections.flatMap((item) => item.paragraphs).join(" ");
   const formulas = (entry.formulaBlocks ?? []).flatMap((item) => [item.title, item.latex, ...item.explanation]).join(" ");

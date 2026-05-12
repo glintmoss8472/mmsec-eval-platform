@@ -42,7 +42,7 @@ from mmsec_eval.model_adapters.vilt_itm_adapter import ViltITMAdapter
 from mmsec_eval.plugins.registry import register
 
 
-# 中文注释：封装 _register_openai_compatible_adapters 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
+# 执行 `register OpenAI compatible adapters` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 def _register_openai_compatible_adapters() -> None:
     for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS:
         register(
@@ -52,7 +52,7 @@ def _register_openai_compatible_adapters() -> None:
         )
 
 
-# 中文注释：实现 register_builtin_plugins 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 执行 `register builtin 插件` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 def register_builtin_plugins() -> None:
     register("model_adapter", "clip_hf", lambda: ClipHFAdapter())
     register("model_adapter", "blip_itm", lambda: BlipITMAdapter())

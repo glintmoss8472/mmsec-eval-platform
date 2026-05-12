@@ -44,42 +44,42 @@ OFFICIAL_ALIAS: dict[str, str] = {
 }
 
 
-# 中文注释：定义 _Logger 的结构化职责，作为外部攻击脚本中状态、配置或行为的边界。
+# 实现 `_Logger.__init__` 的对象行为，维护该类在外部攻击脚本中的调用契约。
 class _Logger:
-    # 中文注释：封装 _Logger.__init__ 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 封装 _Logger.__init__ 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
     def __init__(self, log_dir: Path) -> None:
         self.log_dir = log_dir
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
-    # 中文注释：封装 _Logger._write 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 实现 `_Logger._write` 的对象行为，维护该类在外部攻击脚本中的调用契约。
     def _write(self, level: str, message: object) -> None:
         with (self.log_dir / "vqa_visual_corruption_official.log").open("a", encoding="utf-8") as handle:
             handle.write(f"{level}: {message}\n")
 
-    # 中文注释：实现 _Logger.info 的核心行为，维护外部攻击脚本在该对象上的调用契约。
+    # 整理 `info`，描述当前服务器运行环境、模型入口或部署状态。
     def info(self, message: object) -> None:
         self._write("INFO", message)
 
-    # 中文注释：实现 _Logger.warning 的核心行为，维护外部攻击脚本在该对象上的调用契约。
+    # 实现 `_Logger.warning` 的对象行为，维护该类在外部攻击脚本中的调用契约。
     def warning(self, message: object) -> None:
         self._write("WARNING", message)
 
-    # 中文注释：实现 _Logger.error 的核心行为，维护外部攻击脚本在该对象上的调用契约。
+    # 实现 `_Logger.error` 的对象行为，维护该类在外部攻击脚本中的调用契约。
     def error(self, message: object) -> None:
         self._write("ERROR", message)
 
 
-# 中文注释：定义 _SingleImageDataset 的结构化职责，作为外部攻击脚本中状态、配置或行为的边界。
+# 实现 `_SingleImageDataset.__init__` 的对象行为，维护该类在外部攻击脚本中的调用契约。
 class _SingleImageDataset:
-    # 中文注释：封装 _SingleImageDataset.__init__ 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 封装 _SingleImageDataset.__init__ 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
     def __init__(self, image_path: Path) -> None:
         self.image_path = image_path
 
-    # 中文注释：封装 _SingleImageDataset.__len__ 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 实现 `_SingleImageDataset.__len__` 的对象行为，维护该类在外部攻击脚本中的调用契约。
     def __len__(self) -> int:
         return 1
 
-    # 中文注释：封装 _SingleImageDataset.__getitem__ 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+    # 实现 `_SingleImageDataset.__getitem__` 的对象行为，维护该类在外部攻击脚本中的调用契约。
     def __getitem__(self, idx: int):
         if idx != 0:
             raise IndexError(idx)
@@ -87,7 +87,7 @@ class _SingleImageDataset:
         return image, [], [], 0, [], []
 
 
-# 中文注释：封装 _official_key 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 执行 `official key` 辅助逻辑，保持外部攻击脚本中的输入处理和结果输出一致。
 def _official_key(corruption_type: str, severity: int) -> tuple[str, dict[str, Any]]:
     normalized = str(corruption_type or "").strip()
     if not normalized:
@@ -103,7 +103,7 @@ def _official_key(corruption_type: str, severity: int) -> tuple[str, dict[str, A
     return official_key, {"official_corruption": base, "level": severity}
 
 
-# 中文注释：封装 _save_image 的内部步骤，让外部攻击脚本主流程保持清晰并隔离边界细节。
+# 写出 `图像`，保证后续报告、页面或复现实验能读取。
 def _save_image(path: Path, image: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     arr = np.asarray(image)
@@ -114,7 +114,7 @@ def _save_image(path: Path, image: np.ndarray) -> None:
     Image.fromarray(arr[:, :, :3], mode="RGB").save(path)
 
 
-# 中文注释：串联 run 的主流程，集中处理外部攻击脚本的初始化、执行和退出条件。
+# 作为 `vqa_visual_corruption_one.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def run(args: argparse.Namespace) -> dict[str, Any]:
     repo = Path(args.repo_dir).expanduser().resolve()
     if not repo.exists():
@@ -164,7 +164,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     return trace
 
 
-# 中文注释：串联 main 的主流程，集中处理外部攻击脚本的初始化、执行和退出条件。
+# 作为 `vqa_visual_corruption_one.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run one official VQA Visual Robustness Benchmark corruption.")
     parser.add_argument("--repo_dir", required=True)

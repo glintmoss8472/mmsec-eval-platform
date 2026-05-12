@@ -27,17 +27,17 @@ router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 _GENERATION_JOB_TYPES = {"run_vqa", "run_caption"}
 
 
-# 中文注释：封装 _generation_task_kind 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 推断 `生成式评测 任务 类型`，从样本、配置或运行记录中提取统一名称。
 def _generation_task_kind(job_type: str) -> str:
     return "vqa" if "vqa" in str(job_type) else "caption"
 
 
-# 中文注释：封装 _request_override 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 执行 `请求 override` 辅助逻辑，保持后端接口路由中的输入处理和结果输出一致。
 def _request_override(req: JobCreateRequest) -> dict:
     return req.override if isinstance(req.override, dict) else {}
 
 
-# 中文注释：封装 _load_request_config 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 加载 `请求 配置`，把外部文件、配置或运行产物转换为内存结构。
 def _load_request_config(req: JobCreateRequest):
     override = _request_override(req)
     try:
@@ -49,7 +49,7 @@ def _load_request_config(req: JobCreateRequest):
         return None
 
 
-# 中文注释：封装 _validate_generation_dataset_compatibility 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 校验 `生成式评测 数据集 兼容性` 的约束，发现不兼容时阻止继续执行。
 def _validate_generation_dataset_compatibility(req: JobCreateRequest) -> None:
     job_type = str(req.job_type)
     if job_type not in _GENERATION_JOB_TYPES:
@@ -65,7 +65,7 @@ def _validate_generation_dataset_compatibility(req: JobCreateRequest) -> None:
         raise HTTPException(status_code=422, detail="Caption task requires the COCO caption object JSONL, not a VQA JSONL dataset")
 
 
-# 中文注释：封装 _validate_vlr_attack_compatibility 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 校验 `图文检索 攻击 兼容性` 的约束，发现不兼容时阻止继续执行。
 def _validate_vlr_attack_compatibility(req: JobCreateRequest) -> None:
     job_type = str(req.job_type)
     if job_type not in {"run_vlr", *_GENERATION_JOB_TYPES}:
@@ -92,7 +92,7 @@ def _validate_vlr_attack_compatibility(req: JobCreateRequest) -> None:
         raise HTTPException(status_code=422, detail=error)
 
 
-# 中文注释：封装 _validate_model_task_compatibility 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 校验 `模型 任务 兼容性` 的约束，发现不兼容时阻止继续执行。
 def _validate_model_task_compatibility(req: JobCreateRequest) -> None:
     job_type = str(req.job_type)
     if job_type not in {"run_vlr", *_GENERATION_JOB_TYPES}:
@@ -132,7 +132,7 @@ def _validate_model_task_compatibility(req: JobCreateRequest) -> None:
         )
 
 
-# 中文注释：处理 create_job 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `POST /` 接口，完成请求校验、存储访问和响应模型组装。
 @router.post("", response_model=JobResponse)
 def create_job(
     req: JobCreateRequest,
@@ -154,7 +154,7 @@ def create_job(
     return JobResponse(**job)
 
 
-# 中文注释：处理 list_jobs 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("", response_model=JobListResponse)
 def list_jobs(
     page: int = Query(default=1, ge=1),
@@ -166,7 +166,7 @@ def list_jobs(
     return JobListResponse(total=total, page=page, page_size=page_size, items=[JobResponse(**x) for x in items])
 
 
-# 中文注释：处理 get_job 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /{job_id}` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/{job_id}", response_model=JobResponse)
 def get_job(job_id: str, store: SQLiteStore = Depends(get_store)) -> JobResponse:
     row = store.get_job(job_id)
@@ -175,7 +175,7 @@ def get_job(job_id: str, store: SQLiteStore = Depends(get_store)) -> JobResponse
     return JobResponse(**row)
 
 
-# 中文注释：处理 get_job_logs 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /{job_id}/logs` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/{job_id}/logs", response_model=JobLogListResponse)
 def get_job_logs(
     job_id: str,
@@ -189,7 +189,7 @@ def get_job_logs(
     return JobLogListResponse(total=total, page=page, page_size=page_size, items=[JobLogResponse(**x) for x in rows])
 
 
-# 中文注释：处理 get_job_progress 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /{job_id}/progress` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/{job_id}/progress", response_model=JobProgressResponse)
 def get_job_progress(job_id: str, store: SQLiteStore = Depends(get_store), q: JobQueue = Depends(get_queue)) -> JobProgressResponse:
     row = store.get_job(job_id)
@@ -260,7 +260,7 @@ def get_job_progress(job_id: str, store: SQLiteStore = Depends(get_store), q: Jo
     )
 
 
-# 中文注释：处理 cancel_job 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `POST /{job_id}/cancel` 接口，完成请求校验、存储访问和响应模型组装。
 @router.post("/{job_id}/cancel", response_model=JobResponse)
 def cancel_job(job_id: str, store: SQLiteStore = Depends(get_store)) -> JobResponse:
     row = store.get_job(job_id)

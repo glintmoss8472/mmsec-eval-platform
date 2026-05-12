@@ -13,7 +13,7 @@ from mmsec_eval.model_adapters.hf_local import resolve_hf_model_source
 _BERT_CACHE: dict[str, Any] = {}
 
 
-# 中文注释：定义 _MlmEditMode 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
+# 定义 `_MlmEditMode` 的状态和行为边界，供攻击算法公共层在固定职责内复用。
 @dataclass(frozen=True)
 class _MlmEditMode:
     method: str
@@ -22,7 +22,7 @@ class _MlmEditMode:
     minimize_score: bool
 
 
-# 中文注释：封装 _load_bert_mlm 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 加载 `bert mlm`，把外部文件、配置或运行产物转换为内存结构。
 def _load_bert_mlm(device: str):
     key = f"bert:{device}"
     if key in _BERT_CACHE:
@@ -41,23 +41,23 @@ def _load_bert_mlm(device: str):
     return tokenizer, model
 
 
-# 中文注释：封装 _score_text 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 计算 `文本`，为指标、风险或调度决策提供数值依据。
 def _score_text(adapter: Any, image: np.ndarray, text: str) -> float:
     return float(adapter.score_pairs([(image, str(text))], batch_size=1)[0])
 
 
-# 中文注释：封装 _tokens_from_text 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 执行 `tokens 来源 文本` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def _tokens_from_text(text: str) -> list[str]:
     return [tok for tok in str(text).split() if tok]
 
 
-# 中文注释：封装 _noop_text_result 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 执行 `noop 文本 result` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def _noop_text_result(*, image: np.ndarray, text: str, adapter: Any, reason: str) -> tuple[str, dict[str, Any]]:
     score = float(_score_text(adapter, image, text))
     return str(text), {"method": "noop", "reason": reason, "score_orig": score, "score_new": score}
 
 
-# 中文注释：封装 _greedy_token_drop 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 执行 `greedy token drop` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def _greedy_token_drop(
     *,
     image: np.ndarray,
@@ -131,7 +131,7 @@ def _greedy_token_drop(
     }
 
 
-# 中文注释：封装 _fallback_token_drop_attack 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 推断 `fallback token drop 攻击`，从样本、配置或运行记录中提取统一名称。
 def _fallback_token_drop_attack(
     *,
     image: np.ndarray,
@@ -151,7 +151,7 @@ def _fallback_token_drop_attack(
     )
 
 
-# 中文注释：封装 _fallback_token_drop_repair 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 执行 `fallback token drop repair` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def _fallback_token_drop_repair(
     *,
     image: np.ndarray,
@@ -171,12 +171,12 @@ def _fallback_token_drop_repair(
     )
 
 
-# 中文注释：封装 _score_is_better 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 计算 `是否 better`，为指标、风险或调度决策提供数值依据。
 def _score_is_better(candidate: float, best: float, *, minimize_score: bool) -> bool:
     return candidate < best if minimize_score else candidate > best
 
 
-# 中文注释：封装 _select_mask_position 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 筛选 `mask position`，按配置条件保留可用于评测或展示的数据。
 def _select_mask_position(
     *,
     tokenizer: Any,
@@ -206,13 +206,13 @@ def _select_mask_position(
     return best_pos, float(best_delta)
 
 
-# 中文注释：封装 _encode_mlm_inputs 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 执行 `encode mlm inputs` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def _encode_mlm_inputs(*, tokenizer: Any, text: str, device: str) -> tuple[Any, Any]:
     enc = tokenizer(text, return_tensors="pt")
     return enc["input_ids"].to(device), enc["attention_mask"].to(device)
 
 
-# 中文注释：封装 _candidate_token_ids 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 执行 `candidate token ids` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def _candidate_token_ids(*, torch_mod: Any, mlm: Any, input_ids: Any, attention_mask: Any, best_pos: int, candidates_k: int) -> list[int]:
     with torch_mod.no_grad():
         out = mlm(input_ids=input_ids, attention_mask=attention_mask)
@@ -221,7 +221,7 @@ def _candidate_token_ids(*, torch_mod: Any, mlm: Any, input_ids: Any, attention_
     return [int(token_id) for token_id in top_ids]
 
 
-# 中文注释：封装 _choose_best_replacement 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 执行 `choose best replacement` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def _choose_best_replacement(
     *,
     tokenizer: Any,
@@ -255,7 +255,7 @@ def _choose_best_replacement(
     return best_text, best_score, best_token
 
 
-# 中文注释：封装 _mlm_edit_result 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 执行 `mlm edit result` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def _mlm_edit_result(
     *,
     mode: _MlmEditMode,
@@ -274,7 +274,7 @@ def _mlm_edit_result(
     }
 
 
-# 中文注释：封装 _mlm_edit_record 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 确认 `mlm edit record` 是字典记录，避免后续字段读取直接接触异常类型。
 def _mlm_edit_record(
     *,
     mode: _MlmEditMode,
@@ -296,7 +296,7 @@ def _mlm_edit_record(
     }
 
 
-# 中文注释：封装 _run_mlm_text_edit 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
+# 执行 `mlm 文本 edit` 流程，按配置驱动攻击算法公共层完成一次任务。
 def _run_mlm_text_edit(
     *,
     image: np.ndarray,
@@ -377,7 +377,7 @@ def _run_mlm_text_edit(
     )
 
 
-# 中文注释：实现 run_text_replacement_attack 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
+# 执行 `文本 replacement 攻击` 流程，按配置驱动攻击算法公共层完成一次任务。
 def run_text_replacement_attack(
     *,
     image: np.ndarray,
@@ -420,7 +420,7 @@ def run_text_replacement_attack(
     return _fallback_token_drop_attack(image=image, text=text, adapter=adapter, eps_t=eps_t)
 
 
-# 中文注释：实现 run_text_repair 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
+# 执行 `文本 repair` 流程，按配置驱动攻击算法公共层完成一次任务。
 def run_text_repair(
     *,
     image: np.ndarray,

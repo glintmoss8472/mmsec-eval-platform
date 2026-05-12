@@ -13,7 +13,7 @@ vi.mock("../lib/api", () => ({
   runAssetUrl: vi.fn((_runId: string, path: string) => `/assets/${path}`),
 }));
 
-/** 中文注释：实现 createClient 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 构建 `create client` 结构，供页面渲染或测试断言复用。 */
 function createClient() {
   return new QueryClient({
     defaultOptions: {
@@ -25,7 +25,7 @@ function createClient() {
   });
 }
 
-/** 中文注释：实现 renderPage 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `render page` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function renderPage() {
   return render(
     <QueryClientProvider client={createClient()}>

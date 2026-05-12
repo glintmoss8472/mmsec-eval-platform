@@ -7,6 +7,6 @@ from mmsec_eval.datasets.flickr30k import load_flickr_like
 from mmsec_eval.types import Sample
 
 
-# 中文注释：实现 load_flickr1k 的核心流程，支撑数据集加载层中的业务语义和异常边界。
+# 加载 `Flickr1k`，把外部文件、配置或运行产物转换为内存结构。
 def load_flickr1k(dataset_cfg: Any) -> list[Sample]:
     return load_flickr_like(dataset_cfg, dataset_name="flickr1k")

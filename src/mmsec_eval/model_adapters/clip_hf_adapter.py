@@ -15,7 +15,7 @@ from mmsec_eval.types import ModelOutput, Sample
 LOG = logging.getLogger(__name__)
 
 
-# 中文注释：封装 _extract_feature_tensor 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 提取 `feature tensor`，从归档、结果或响应中取出后续流程需要的字段。
 def _extract_feature_tensor(out: Any, *, attr_name: str):
     if hasattr(out, "detach") and hasattr(out, "shape"):
         return out
@@ -32,9 +32,9 @@ def _extract_feature_tensor(out: Any, *, attr_name: str):
     raise TypeError(f"unsupported CLIP feature output type: {type(out)!r}")
 
 
-# 中文注释：定义 ClipHFAdapter 的结构化职责，作为模型适配层中状态、配置或行为的边界。
+# 实现 `ClipHFAdapter.__init__` 的对象行为，维护该类在模型适配层中的调用契约。
 class ClipHFAdapter(ModelAdapter):
-    # 中文注释：封装 ClipHFAdapter.__init__ 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 封装 ClipHFAdapter.__init__ 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         import torch
         from transformers import CLIPModel, CLIPProcessor
@@ -61,12 +61,12 @@ class ClipHFAdapter(ModelAdapter):
                 )
             ) from e
 
-    # 中文注释：实现 ClipHFAdapter.device 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.device` 的对象行为，维护该类在模型适配层中的调用契约。
     @property
     def device(self) -> str:
         return str(self._device)
 
-    # 中文注释：封装 ClipHFAdapter._preprocess_images_torch 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `ClipHFAdapter._preprocess_images_torch` 的对象行为，维护该类在模型适配层中的调用契约。
     def _preprocess_images_torch(self, images_bchw):
         import torch
         import torch.nn.functional as F
@@ -90,20 +90,20 @@ class ClipHFAdapter(ModelAdapter):
         std_t = torch.tensor(std, device=self._device, dtype=x.dtype).view(1, 3, 1, 1)
         return (x - mean_t) / std_t
 
-    # 中文注释：封装 ClipHFAdapter._target_hw 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `ClipHFAdapter._target_hw` 的对象行为，维护该类在模型适配层中的调用契约。
     def _target_hw(self) -> tuple[int, int]:
         return processor_target_hw(self._processor, default_hw=(224, 224), prefer_shortest_edge=True)
 
-    # 中文注释：封装 ClipHFAdapter._prepare_numpy_batch 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 准备 `numpy 批处理` 数据，补齐后续运行、报告或测试需要的字段。
     def _prepare_numpy_batch(self, images: list[np.ndarray]) -> np.ndarray:
         return stack_resized_rgb01(images, size_hw=self._target_hw())
 
-    # 中文注释：封装 ClipHFAdapter._encode_texts_torch 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `ClipHFAdapter._encode_texts_torch` 的对象行为，维护该类在模型适配层中的调用契约。
     def _encode_texts_torch(self, texts: list[str]):
         tok = self._processor(text=texts, return_tensors="pt", padding=True, truncation=True)
         return {k: v.to(self._device) for k, v in tok.items()}
 
-    # 中文注释：实现 ClipHFAdapter.projected_features_torch 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.projected_features_torch` 的对象行为，维护该类在模型适配层中的调用契约。
     def projected_features_torch(self, images_bchw, texts: list[str]):
         import torch.nn.functional as F
 
@@ -115,13 +115,13 @@ class ClipHFAdapter(ModelAdapter):
         txt_feat = _extract_feature_tensor(txt_raw, attr_name="text_embeds").float()
         return F.normalize(img_feat, dim=-1), F.normalize(txt_feat, dim=-1)
 
-    # 中文注释：实现 ClipHFAdapter.score_pairs_torch 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 计算 `pairs PyTorch`，为指标、风险或调度决策提供数值依据。
     def score_pairs_torch(self, images_bchw, texts: list[str], *, output_attentions: bool = False):
         del output_attentions
         img_feat, txt_feat = self.projected_features_torch(images_bchw, texts)
         return (img_feat * txt_feat).sum(dim=-1)
 
-    # 中文注释：实现 ClipHFAdapter.patch_text_similarity_torch 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.patch_text_similarity_torch` 的对象行为，维护该类在模型适配层中的调用契约。
     def patch_text_similarity_torch(self, images_bchw, texts: list[str]):
         """Per-patch cosine similarity to text embedding (differentiable)."""
         import torch
@@ -155,7 +155,7 @@ class ClipHFAdapter(ModelAdapter):
             return sim.view(b, side, side)
         return sim
 
-    # 中文注释：实现 ClipHFAdapter.patch_text_similarity 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.patch_text_similarity` 的对象行为，维护该类在模型适配层中的调用契约。
     def patch_text_similarity(self, image: np.ndarray, text: str, eps: float = 1e-8) -> np.ndarray:
         import torch
         import torch.nn.functional as F
@@ -178,7 +178,7 @@ class ClipHFAdapter(ModelAdapter):
             m = m / (m.max() + float(eps))
         return m.cpu().numpy().astype(np.float32)
 
-    # 中文注释：实现 ClipHFAdapter.score_pairs 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 计算 `pairs`，为指标、风险或调度决策提供数值依据。
     def score_pairs(self, pairs: list[tuple[np.ndarray, str]], batch_size: int = 16) -> np.ndarray:
         import torch
 
@@ -197,15 +197,15 @@ class ClipHFAdapter(ModelAdapter):
             out.append(s.detach().cpu().numpy().astype(np.float32))
         return np.concatenate(out, axis=0).astype(np.float32)
 
-    # 中文注释：实现 ClipHFAdapter.encode_image 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.encode_image` 的对象行为，维护该类在模型适配层中的调用契约。
     def encode_image(self, image_np: np.ndarray) -> np.ndarray:
         return self.encode_images_batch([image_np], batch_size=1)[0]
 
-    # 中文注释：实现 ClipHFAdapter.encode_text 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.encode_text` 的对象行为，维护该类在模型适配层中的调用契约。
     def encode_text(self, text: str) -> np.ndarray:
         return self.encode_texts_batch([text], batch_size=1)[0]
 
-    # 中文注释：实现 ClipHFAdapter.encode_images_batch 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.encode_images_batch` 的对象行为，维护该类在模型适配层中的调用契约。
     def encode_images_batch(self, images: list[np.ndarray], batch_size: int = 16) -> np.ndarray:
         import torch
 
@@ -222,7 +222,7 @@ class ClipHFAdapter(ModelAdapter):
             out_embs.append(feats.detach().cpu().numpy().astype(np.float32))
         return np.concatenate(out_embs, axis=0).astype(np.float32)
 
-    # 中文注释：实现 ClipHFAdapter.encode_texts_batch 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.encode_texts_batch` 的对象行为，维护该类在模型适配层中的调用契约。
     def encode_texts_batch(self, texts: list[str], batch_size: int = 32) -> np.ndarray:
         import torch
 
@@ -239,7 +239,7 @@ class ClipHFAdapter(ModelAdapter):
             out_embs.append(feats.detach().cpu().numpy().astype(np.float32))
         return np.concatenate(out_embs, axis=0).astype(np.float32)
 
-    # 中文注释：实现 ClipHFAdapter.attention_map 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.attention_map` 的对象行为，维护该类在模型适配层中的调用契约。
     def attention_map(self, image: np.ndarray, text: str, eps: float = 1e-8) -> np.ndarray:
         import torch
 
@@ -252,7 +252,7 @@ class ClipHFAdapter(ModelAdapter):
         sal = sal / (sal.max() + eps)
         return sal.clamp(0.0, 1.0).cpu().numpy().astype(np.float32)
 
-    # 中文注释：实现 ClipHFAdapter.predict 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.predict` 的对象行为，维护该类在模型适配层中的调用契约。
     def predict(self, sample: Sample) -> ModelOutput:
         img_emb = self.encode_image(sample.image)
         txt_emb = self.encode_text(sample.text or "")
@@ -266,6 +266,6 @@ class ClipHFAdapter(ModelAdapter):
             raw={"adapter": "clip_hf", "device": self._device, "model_name": self._model_name, "similarity": sim},
         )
 
-    # 中文注释：实现 ClipHFAdapter.extra_debug 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `ClipHFAdapter.extra_debug` 的对象行为，维护该类在模型适配层中的调用契约。
     def extra_debug(self) -> dict[str, Any]:
         return {"device": str(self._device), "model_name": str(self._model_name)}

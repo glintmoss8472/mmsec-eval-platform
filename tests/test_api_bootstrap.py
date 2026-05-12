@@ -18,7 +18,7 @@ from mmsec_api.worker.queue import JobQueue
 from mmsec_eval.config.schema import BootstrapConfig
 
 
-# 中文注释：实现 make_client 的核心流程，支撑自动化测试中的业务语义和异常边界。
+# 构建 `client` 数据，集中整理自动化测试需要的输出结构。
 def make_client(tmp_path: Path, monkeypatch) -> TestClient:
     art = tmp_path / "artifacts"
     cfg = tmp_path / "bootstrap.yaml"
@@ -51,7 +51,7 @@ def make_client(tmp_path: Path, monkeypatch) -> TestClient:
     return TestClient(api_main.app)
 
 
-# 中文注释：验证 test_bootstrap_status_and_logs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `bootstrap 状态 and 日志` 场景，防止相关行为在后续修改中退化。
 def test_bootstrap_status_and_logs(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         final = {}
@@ -90,7 +90,7 @@ def test_bootstrap_status_and_logs(tmp_path: Path, monkeypatch):
         assert "bootstrap_state" in h.json()
 
 
-# 中文注释：验证 test_seed_runs_skip_fake_model_adapters 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `seed 运行记录 skip fake 模型 adapters` 场景，防止相关行为在后续修改中退化。
 def test_seed_runs_skip_fake_model_adapters(tmp_path: Path):
     seed_root = tmp_path / "seed"
     run_dir = seed_root / "runs" / "fake_seed"

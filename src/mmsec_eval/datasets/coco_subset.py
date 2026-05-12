@@ -14,13 +14,13 @@ from mmsec_eval.io.jsonl_io import read_jsonl
 from mmsec_eval.types import Sample
 
 
-# 中文注释：封装 _resolve_path 的内部步骤，让数据集加载层主流程保持清晰并隔离边界细节。
+# 解析 `路径` 的真实位置或配置值，减少调用方重复分支。
 def _resolve_path(base: Path, value: str) -> Path:
     p = Path(value)
     return p if p.is_absolute() else base / p
 
 
-# 中文注释：封装 _select_value 的内部步骤，让数据集加载层主流程保持清晰并隔离边界细节。
+# 筛选 `value`，按配置条件保留可用于评测或展示的数据。
 def _select_value(row: dict[str, Any], keys: tuple[str, ...]) -> str:
     for k in keys:
         if k in row and row[k] is not None:
@@ -30,7 +30,7 @@ def _select_value(row: dict[str, Any], keys: tuple[str, ...]) -> str:
     return ""
 
 
-# 中文注释：封装 _guess_split 的内部步骤，让数据集加载层主流程保持清晰并隔离边界细节。
+# 执行 `guess split` 辅助逻辑，保持数据集加载层中的输入处理和结果输出一致。
 def _guess_split(image_name: str) -> str:
     lower = image_name.lower()
     if "train" in lower:
@@ -42,7 +42,7 @@ def _guess_split(image_name: str) -> str:
     return "unknown"
 
 
-# 中文注释：封装 _looks_like_placeholder_rows 的内部步骤，让数据集加载层主流程保持清晰并隔离边界细节。
+# 整理 `looks like placeholder rows` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _looks_like_placeholder_rows(rows: list[dict[str, Any]]) -> bool:
     sample = rows[: min(8, len(rows))]
     captions = [_select_value(row, ("caption", "text")).lower() for row in sample]
@@ -52,7 +52,7 @@ def _looks_like_placeholder_rows(rows: list[dict[str, Any]]) -> bool:
     return all(("placeholder sample" in text) or text.startswith("demo caption ") for text in captions)
 
 
-# 中文注释：封装 _read_rows 的内部步骤，让数据集加载层主流程保持清晰并隔离边界细节。
+# 读取 `rows`，并对缺失或异常输入做边界处理。
 def _read_rows(captions_path: Path) -> list[dict[str, Any]]:
     suffix = captions_path.suffix.lower()
     if suffix == ".jsonl":
@@ -103,7 +103,7 @@ def _read_rows(captions_path: Path) -> list[dict[str, Any]]:
     return []
 
 
-# 中文注释：实现 load_coco_subset 的核心流程，支撑数据集加载层中的业务语义和异常边界。
+# 加载 `COCO subset`，把外部文件、配置或运行产物转换为内存结构。
 def load_coco_subset(dataset_cfg: Any) -> list[Sample]:
     root = Path(dataset_cfg.root)
     image_dir = _resolve_path(root, dataset_cfg.image_dir)

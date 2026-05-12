@@ -2,7 +2,7 @@
 from pathlib import Path
 
 
-# 中文注释：验证 test_technical_architecture_guide_covers_required_engineering_topics 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `technical architecture guide covers required engineering topics` 场景，防止相关行为在后续修改中退化。
 def test_technical_architecture_guide_covers_required_engineering_topics() -> None:
     doc = Path("docs/technical_architecture_and_extension_guide.md").read_text(encoding="utf-8")
 
@@ -26,7 +26,7 @@ def test_technical_architecture_guide_covers_required_engineering_topics() -> No
     assert "条件攻击成功率（conditional attack success rate）" in doc
 
 
-# 中文注释：验证 test_readme_links_primary_technical_documents 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `readme links primary technical documents` 场景，防止相关行为在后续修改中退化。
 def test_readme_links_primary_technical_documents() -> None:
     readme = Path("README.md").read_text(encoding="utf-8-sig")
 

@@ -22,7 +22,7 @@ _FAKE_SAMPLE_RUN_IDS = (
 _FAKE_SAMPLE_MODEL_ADAPTERS = ("dummy", "fixture_vlm")
 
 
-# 中文注释：封装 _sample_asset_visibility_filter 的内部步骤，让SQLite 持久化层主流程保持清晰并隔离边界细节。
+# 执行 `样本 asset visibility filter` 辅助逻辑，保持SQLite 持久化层中的输入处理和结果输出一致。
 def _sample_asset_visibility_filter() -> tuple[list[str], list[Any]]:
     return (
         [
@@ -33,7 +33,7 @@ def _sample_asset_visibility_filter() -> tuple[list[str], list[Any]]:
     )
 
 
-# 中文注释：封装 _is_fake_sample_asset 的内部步骤，让SQLite 持久化层主流程保持清晰并隔离边界细节。
+# 判断 `是否 fake 样本 asset` 条件是否成立，为调用方提供布尔决策。
 def _is_fake_sample_asset(source_run_id: str, model_adapter: str) -> bool:
     return source_run_id in _FAKE_SAMPLE_RUN_IDS or model_adapter.strip().lower() in _FAKE_SAMPLE_MODEL_ADAPTERS
 
@@ -156,21 +156,21 @@ _BASE_SCHEMA_DDL = (
 )
 
 
-# 中文注释：定义 SQLiteStore 的结构化职责，作为SQLite 持久化层中状态、配置或行为的边界。
+# 实现 `SQLiteStore.__init__` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
 class SQLiteStore:
-    # 中文注释：封装 SQLiteStore.__init__ 的内部步骤，让SQLite 持久化层主流程保持清晰并隔离边界细节。
+    # 封装 SQLiteStore.__init__ 的内部步骤，让SQLite 持久化层主流程保持清晰并隔离边界细节。
     def __init__(self, path: str) -> None:
         self.path = str(Path(path))
         Path(self.path).parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
 
-    # 中文注释：封装 SQLiteStore._connect 的内部步骤，让SQLite 持久化层主流程保持清晰并隔离边界细节。
+    # 实现 `SQLiteStore._connect` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def _connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.path)
         conn.row_factory = sqlite3.Row
         return conn
 
-    # 中文注释：实现 SQLiteStore.init_db 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.init_db` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def init_db(self) -> None:
         with self._connect() as conn:
             for stmt in _BASE_SCHEMA_DDL:
@@ -180,7 +180,7 @@ class SQLiteStore:
             self._backfill_runs_cache_defaults(conn)
             conn.commit()
 
-    # 中文注释：封装 SQLiteStore._ensure_runs_cache_columns 的内部步骤，让SQLite 持久化层主流程保持清晰并隔离边界细节。
+    # 确保 `运行记录 cache columns` 已准备好，不满足条件时主动创建、下载或报错。
     @staticmethod
     def _ensure_runs_cache_columns(conn: sqlite3.Connection) -> None:
         cols = {str(r[1]) for r in conn.execute("PRAGMA table_info(runs_cache)").fetchall()}
@@ -199,7 +199,7 @@ class SQLiteStore:
             if name not in cols:
                 conn.execute(f"ALTER TABLE runs_cache ADD COLUMN {name} {typ}")
 
-    # 中文注释：封装 SQLiteStore._backfill_runs_cache_defaults 的内部步骤，让SQLite 持久化层主流程保持清晰并隔离边界细节。
+    # 实现 `SQLiteStore._backfill_runs_cache_defaults` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     @staticmethod
     def _backfill_runs_cache_defaults(conn: sqlite3.Connection) -> None:
         # Older cache rows may contain NULLs for newly-added fields; normalize once at startup.
@@ -227,7 +227,7 @@ class SQLiteStore:
             """
         )
 
-    # 中文注释：封装 SQLiteStore._ensure_sample_asset_columns 的内部步骤，让SQLite 持久化层主流程保持清晰并隔离边界细节。
+    # 确保 `样本 asset columns` 已准备好，不满足条件时主动创建、下载或报错。
     @staticmethod
     def _ensure_sample_asset_columns(conn: sqlite3.Connection) -> None:
         cols = {str(r[1]) for r in conn.execute("PRAGMA table_info(sample_assets)").fetchall()}
@@ -264,14 +264,14 @@ class SQLiteStore:
             if name not in cols:
                 conn.execute(f"ALTER TABLE sample_assets ADD COLUMN {name} {typ}")
 
-    # 中文注释：封装 SQLiteStore._row_to_dict 的内部步骤，让SQLite 持久化层主流程保持清晰并隔离边界细节。
+    # 整理 `行记录 to dict` 行记录，把原始结果转换成列表接口和报告可消费的结构。
     @staticmethod
     def _row_to_dict(row: sqlite3.Row | None) -> dict[str, Any] | None:
         if row is None:
             return None
         return dict(row)
 
-    # 中文注释：实现 SQLiteStore.create_job 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 创建 `任务`，初始化后续流程所需的记录、对象或产物。
     def create_job(
         self,
         *,
@@ -310,7 +310,7 @@ class SQLiteStore:
                 conn.commit()
         return self.get_job(job_id) or {}
 
-    # 中文注释：实现 SQLiteStore.get_job 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 获取 `任务`，封装存储查询或状态读取细节。
     def get_job(self, job_id: str) -> dict[str, Any] | None:
         with self._connect() as conn:
             row = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
@@ -323,7 +323,7 @@ class SQLiteStore:
         item["error_message"] = str(item.get("error_message") or "")
         return item
 
-    # 中文注释：实现 SQLiteStore.list_jobs 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 列出 `任务`，按调用方需要组织分页或过滤结果。
     def list_jobs(self, page: int, page_size: int, status: str = "") -> tuple[int, list[dict[str, Any]]]:
         offset = (page - 1) * page_size
         where = ""
@@ -347,7 +347,7 @@ class SQLiteStore:
             row["error_message"] = str(row.get("error_message") or "")
         return int(total), out
 
-    # 中文注释：实现 SQLiteStore.list_recoverable_jobs 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 列出 `recoverable 任务`，按调用方需要组织分页或过滤结果。
     def list_recoverable_jobs(self, limit: int = 100) -> list[dict[str, Any]]:
         """Return queued jobs that can be safely reattached to an in-process worker.
 
@@ -376,7 +376,7 @@ class SQLiteStore:
             row["error_message"] = str(row.get("error_message") or "")
         return out
 
-    # 中文注释：实现 SQLiteStore.mark_running_jobs_interrupted 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.mark_running_jobs_interrupted` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def mark_running_jobs_interrupted(self, reason: str = "") -> int:
         message = (
             reason.strip()
@@ -419,7 +419,7 @@ class SQLiteStore:
                 conn.commit()
         return len(rows)
 
-    # 中文注释：实现 SQLiteStore.set_job_running 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.set_job_running` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def set_job_running(self, job_id: str) -> None:
         with self._lock:
             with self._connect() as conn:
@@ -429,7 +429,7 @@ class SQLiteStore:
                 )
                 conn.commit()
 
-    # 中文注释：实现 SQLiteStore.set_job_success 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.set_job_success` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def set_job_success(self, job_id: str, run_id: str = "") -> None:
         with self._lock:
             with self._connect() as conn:
@@ -439,7 +439,7 @@ class SQLiteStore:
                 )
                 conn.commit()
 
-    # 中文注释：实现 SQLiteStore.set_job_failed 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.set_job_failed` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def set_job_failed(self, job_id: str, error_code: str, error_message: str) -> None:
         with self._lock:
             with self._connect() as conn:
@@ -449,7 +449,7 @@ class SQLiteStore:
                 )
                 conn.commit()
 
-    # 中文注释：实现 SQLiteStore.set_job_cancelled 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.set_job_cancelled` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def set_job_cancelled(self, job_id: str, note: str = "") -> None:
         with self._lock:
             with self._connect() as conn:
@@ -459,7 +459,7 @@ class SQLiteStore:
                 )
                 conn.commit()
 
-    # 中文注释：实现 SQLiteStore.init_job_progress 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.init_job_progress` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def init_job_progress(self, job_id: str, job_type: str) -> None:
         now = utc_now_iso()
         rows = initial_stage_rows(job_type, now)
@@ -487,7 +487,7 @@ class SQLiteStore:
                     )
                 conn.commit()
 
-    # 中文注释：实现 SQLiteStore.list_job_progress 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 列出 `任务 进度`，按调用方需要组织分页或过滤结果。
     def list_job_progress(self, job_id: str) -> list[dict[str, Any]]:
         with self._connect() as conn:
             rows = conn.execute(
@@ -501,7 +501,7 @@ class SQLiteStore:
             ).fetchall()
         return [dict(row) for row in rows]
 
-    # 中文注释：实现 SQLiteStore.update_job_stage 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 更新 `任务 stage`，把最新状态同步到存储、页面或运行上下文。
     def update_job_stage(self, job_id: str, stage_key: str, state: str, progress_percent: float | None = None, message: str = "") -> None:
         now = utc_now_iso()
         with self._lock:
@@ -545,7 +545,7 @@ class SQLiteStore:
                     )
                 conn.commit()
 
-    # 中文注释：实现 SQLiteStore.get_latest_job_log 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 获取 `最新 任务 日志`，封装存储查询或状态读取细节。
     def get_latest_job_log(self, job_id: str) -> dict[str, Any] | None:
         with self._connect() as conn:
             row = conn.execute(
@@ -554,7 +554,7 @@ class SQLiteStore:
             ).fetchone()
         return dict(row) if row is not None else None
 
-    # 中文注释：实现 SQLiteStore.get_queue_position 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 获取 `队列 position`，封装存储查询或状态读取细节。
     def get_queue_position(self, job_id: str) -> int:
         row = self.get_job(job_id)
         if not row:
@@ -573,7 +573,7 @@ class SQLiteStore:
             ).fetchone()[0]
         return int(count)
 
-    # 中文注释：实现 SQLiteStore.list_success_durations 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 列出 `success durations`，按调用方需要组织分页或过滤结果。
     def list_success_durations(self, job_type: str, limit: int = 20) -> list[dict[str, Any]]:
         with self._connect() as conn:
             rows = conn.execute(
@@ -588,7 +588,7 @@ class SQLiteStore:
             ).fetchall()
         return [dict(row) for row in rows]
 
-    # 中文注释：实现 SQLiteStore.add_job_log 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.add_job_log` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def add_job_log(self, job_id: str, level: str, message: str) -> None:
         with self._lock:
             with self._connect() as conn:
@@ -598,7 +598,7 @@ class SQLiteStore:
                 )
                 conn.commit()
 
-    # 中文注释：实现 SQLiteStore.list_job_logs 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 列出 `任务 日志`，按调用方需要组织分页或过滤结果。
     def list_job_logs(self, job_id: str, page: int, page_size: int) -> tuple[int, list[dict[str, Any]]]:
         offset = (page - 1) * page_size
         with self._connect() as conn:
@@ -609,7 +609,7 @@ class SQLiteStore:
             ).fetchall()
         return int(total), [dict(r) for r in rows]
 
-    # 中文注释：实现 SQLiteStore.upsert_run_cache 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.upsert_run_cache` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def upsert_run_cache(self, summary: dict[str, Any], run_dir: str) -> None:
         run_id = str(summary.get("run_id", "")).strip()
         if not run_id:
@@ -666,7 +666,7 @@ class SQLiteStore:
                 )
                 conn.commit()
 
-    # 中文注释：实现 SQLiteStore.list_runs_cache 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 列出 `运行记录 cache`，按调用方需要组织分页或过滤结果。
     def list_runs_cache(self, page: int, page_size: int) -> tuple[int, list[dict[str, Any]]]:
         offset = (page - 1) * page_size
         with self._connect() as conn:
@@ -696,7 +696,7 @@ class SQLiteStore:
             row["path"] = str(row.get("path") or "")
         return int(total), out
 
-    # 中文注释：实现 SQLiteStore.upsert_dataset 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 推断 `upsert 数据集`，从样本、配置或运行记录中提取统一名称。
     def upsert_dataset(self, name: str, root_path: str, prepared: bool, item_count: int = 0, note: str = "") -> None:
         with self._lock:
             with self._connect() as conn:
@@ -722,7 +722,7 @@ class SQLiteStore:
                 )
                 conn.commit()
 
-    # 中文注释：实现 SQLiteStore.list_datasets 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 列出 `数据集`，按调用方需要组织分页或过滤结果。
     def list_datasets(self) -> list[dict[str, Any]]:
         with self._connect() as conn:
             rows = conn.execute("SELECT * FROM dataset_registry ORDER BY name ASC").fetchall()
@@ -731,7 +731,7 @@ class SQLiteStore:
             row["prepared"] = bool(row.get("prepared", 0))
         return out
 
-    # 中文注释：实现 SQLiteStore.count_sample_assets 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 统计 `count 样本 资产` 数量，在缺失文件或空输入时返回零值。
     def count_sample_assets(self) -> int:
         where, params = _sample_asset_visibility_filter()
         where_sql = "WHERE " + " AND ".join(where)
@@ -739,7 +739,7 @@ class SQLiteStore:
             row = conn.execute(f"SELECT COUNT(1) FROM sample_assets {where_sql}", params).fetchone()
         return int(row[0] if row else 0)
 
-    # 中文注释：实现 SQLiteStore.upsert_sample_assets 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.upsert_sample_assets` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def upsert_sample_assets(self, assets: list[dict[str, Any]]) -> int:
         if not assets:
             return 0
@@ -826,7 +826,7 @@ class SQLiteStore:
                 conn.commit()
         return written
 
-    # 中文注释：封装 SQLiteStore._asset_row_to_dict 的内部步骤，让SQLite 持久化层主流程保持清晰并隔离边界细节。
+    # 整理 `asset 行记录 to dict` 行记录，把原始结果转换成列表接口和报告可消费的结构。
     @staticmethod
     def _asset_row_to_dict(row: sqlite3.Row) -> dict[str, Any]:
         out = dict(row)
@@ -848,7 +848,7 @@ class SQLiteStore:
             out["metadata"] = {}
         return out
 
-    # 中文注释：实现 SQLiteStore.list_sample_assets 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 列出 `样本 资产`，按调用方需要组织分页或过滤结果。
     def list_sample_assets(
         self,
         *,
@@ -908,7 +908,7 @@ class SQLiteStore:
                 [*params, int(page_size), int(offset)],
             ).fetchall()
 
-            # 中文注释：实现 grouped 的核心流程，支撑SQLite 持久化层中的业务语义和异常边界。
+            # 执行 `grouped` 辅助逻辑，保持SQLite 持久化层中的输入处理和结果输出一致。
             def grouped(column: str) -> list[dict[str, Any]]:
                 group_rows = conn.execute(
                     f"""
@@ -952,7 +952,7 @@ class SQLiteStore:
         }
         return int(total), [self._asset_row_to_dict(row) for row in rows], {"summary": summary, "options": options}
 
-    # 中文注释：实现 SQLiteStore.list_sample_asset_batches 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 列出 `样本 asset batches`，按调用方需要组织分页或过滤结果。
     def list_sample_asset_batches(
         self,
         *,
@@ -1113,7 +1113,7 @@ class SQLiteStore:
                 [*params, int(page_size), int(offset)],
             ).fetchall()
 
-            # 中文注释：实现 grouped 的核心流程，支撑SQLite 持久化层中的业务语义和异常边界。
+            # 执行 `grouped` 辅助逻辑，保持SQLite 持久化层中的输入处理和结果输出一致。
             def grouped(column: str) -> list[dict[str, Any]]:
                 group_rows = conn.execute(
                     f"""
@@ -1174,7 +1174,7 @@ class SQLiteStore:
                 callable_count = row_callable_count
                 pending_count = row_pending_count
 
-                # 中文注释：实现 value_or_mixed 的核心流程，支撑SQLite 持久化层中的业务语义和异常边界。
+                # 执行 `value or mixed` 辅助逻辑，保持SQLite 持久化层中的输入处理和结果输出一致。
                 def value_or_mixed(name: str) -> str:
                     count = int(row[f"{name}_count"] or 0)
                     value = str(row[name] or "")
@@ -1231,7 +1231,7 @@ class SQLiteStore:
         }
         return int(total), items, {"summary": summary, "options": options}
 
-    # 中文注释：实现 SQLiteStore.get_sample_assets 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 获取 `样本 资产`，封装存储查询或状态读取细节。
     def get_sample_assets(self, asset_ids: list[str]) -> list[dict[str, Any]]:
         ids = [str(item).strip() for item in asset_ids if str(item).strip()]
         if not ids:
@@ -1244,7 +1244,7 @@ class SQLiteStore:
         by_id = {str(row["asset_id"]): self._asset_row_to_dict(row) for row in rows}
         return [by_id[item] for item in ids if item in by_id]
 
-    # 中文注释：实现 SQLiteStore.record_sample_asset_usage 的核心行为，维护SQLite 持久化层在该对象上的调用契约。
+    # 实现 `SQLiteStore.record_sample_asset_usage` 的对象行为，维护该类在SQLite 持久化层中的调用契约。
     def record_sample_asset_usage(self, *, asset_ids: list[str], evaluation_run_id: str, job_id: str = "", note: str = "") -> None:
         ids = [str(item).strip() for item in asset_ids if str(item).strip()]
         if not ids or not evaluation_run_id:

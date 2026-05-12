@@ -10,7 +10,7 @@ from PIL import Image
 from mmsec_eval.cli import cmd_run_benchmark
 
 
-# 中文注释：验证 test_run_benchmark_smoke 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `运行记录 基准评测 smoke` 场景，防止相关行为在后续修改中退化。
 def test_run_benchmark_smoke(tmp_path: Path):
     root = tmp_path / "bench_data"
     images = root / "images"

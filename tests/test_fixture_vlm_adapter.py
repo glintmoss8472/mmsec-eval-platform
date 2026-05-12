@@ -7,7 +7,7 @@ from mmsec_eval.model_adapters.fixture_vlm_adapter import FixtureVLMAdapter
 from mmsec_eval.types import Sample
 
 
-# 中文注释：封装 _sample 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 执行 `样本` 辅助逻辑，保持自动化测试中的输入处理和结果输出一致。
 def _sample(stage: str) -> Sample:
     return Sample(
         sample_id="s1",
@@ -29,7 +29,7 @@ def _sample(stage: str) -> Sample:
     )
 
 
-# 中文注释：验证 test_fixture_vqa_stage_outputs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `fixture 视觉问答 stage outputs` 场景，防止相关行为在后续修改中退化。
 def test_fixture_vqa_stage_outputs() -> None:
     adapter = FixtureVLMAdapter()
     assert adapter.generate_answer(_sample("clean"), "What is shown?").text == "circle"
@@ -37,7 +37,7 @@ def test_fixture_vqa_stage_outputs() -> None:
     assert adapter.generate_answer(_sample("defended"), "What is shown?").text == "circle"
 
 
-# 中文注释：验证 test_fixture_caption_and_probe_outputs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `fixture 图像描述 and 探测 outputs` 场景，防止相关行为在后续修改中退化。
 def test_fixture_caption_and_probe_outputs() -> None:
     adapter = FixtureVLMAdapter()
     assert "circle" in adapter.generate_caption(_sample("clean")).text

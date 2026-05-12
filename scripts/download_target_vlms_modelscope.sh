@@ -9,7 +9,7 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 mkdir -p "${OUT_ROOT}"
 
-# 中文注释：实现 download_model 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `download 模型` 步骤，封装脚本中的可复用命令片段。
 download_model() {
   local repo_id="$1"
   local local_name="$2"

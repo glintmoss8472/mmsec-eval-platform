@@ -21,7 +21,7 @@ vi.mock("../lib/api", () => ({
   listJobLogs: vi.fn(async () => apiState.logs),
 }));
 
-/** 中文注释：实现 setFailureScenario 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `set failure scenario` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function setFailureScenario() {
   apiState.jobs = {
     total: 1,
@@ -85,7 +85,7 @@ function setFailureScenario() {
   };
 }
 
-/** 中文注释：实现 setGenerationSuccessScenario 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `set 生成式评测 success scenario` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function setGenerationSuccessScenario() {
   apiState.jobs = {
     total: 1,
@@ -145,7 +145,7 @@ function setGenerationSuccessScenario() {
   };
 }
 
-/** 中文注释：实现 setSampleGenerationOnlyScenario 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `set 样本 生成式评测 only scenario` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function setSampleGenerationOnlyScenario() {
   apiState.jobs = {
     total: 1,
@@ -210,7 +210,7 @@ function setSampleGenerationOnlyScenario() {
   };
 }
 
-/** 中文注释：实现 createClient 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 构建 `create client` 结构，供页面渲染或测试断言复用。 */
 function createClient() {
   return new QueryClient({
     defaultOptions: {
@@ -222,7 +222,7 @@ function createClient() {
   });
 }
 
-/** 中文注释：实现 rowFor 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `行记录 所属` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function rowFor(label: string): HTMLElement {
   const rows = screen.getAllByRole("row");
   const row = rows.find((item) => within(item).queryByText(label));

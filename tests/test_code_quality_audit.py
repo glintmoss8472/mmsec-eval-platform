@@ -6,7 +6,7 @@ from pathlib import Path
 from scripts import audit_code_quality
 
 
-# 中文注释：验证 test_project_code_quality_gate_is_clean 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `project code quality gate 是否 clean` 场景，防止相关行为在后续修改中退化。
 def test_project_code_quality_gate_is_clean():
     report = audit_code_quality._build_report(Path.cwd(), max_function_lines=80, top_n=5)
 

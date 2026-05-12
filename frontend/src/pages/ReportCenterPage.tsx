@@ -37,19 +37,19 @@ const REPORT_REFRESH_MS = 30000;
 const DEFAULT_RUN_SORT: RunSortState = { key: "created", direction: "desc" };
 const SERVER_TIME_ZONE = "Asia/Shanghai";
 
-/** 中文注释：实现 asNumber 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `as number` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function asNumber(value: unknown, fallback = 0): number {
   const num = Number(value);
   return Number.isFinite(num) ? num : fallback;
 }
 
-/** 中文注释：实现 percent 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `percent` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function percent(value: unknown): string {
   const num = asNumber(value, 0);
   return `${Math.round(Math.max(0, Math.min(1, num)) * 100)}%`;
 }
 
-/** 中文注释：实现 createdAtText 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `created at 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 function createdAtText(value: string | undefined) {
   if (!value) return "未记录时间";
   const date = new Date(value);
@@ -57,7 +57,7 @@ function createdAtText(value: string | undefined) {
   return date.toLocaleString("zh-CN", { hour12: false, timeZone: SERVER_TIME_ZONE });
 }
 
-/** 中文注释：实现 taskKindLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `任务 类型 label` 展示值，统一页面标签、颜色和缺省文案。 */
 function taskKindLabel(kind: string | undefined) {
   if (kind === "vlr") return "图文检索";
   if (kind === "vqa") return "视觉问答";
@@ -66,7 +66,7 @@ function taskKindLabel(kind: string | undefined) {
   return "通用测评";
 }
 
-/** 中文注释：实现 confidenceLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `confidence label` 展示值，统一页面标签、颜色和缺省文案。 */
 function confidenceLabel(value: string | undefined) {
   if (value === "high") return "高置信";
   if (value === "medium") return "中置信";
@@ -74,41 +74,41 @@ function confidenceLabel(value: string | undefined) {
   return "未标注";
 }
 
-/** 中文注释：实现 confidenceTone 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `confidence tone` 展示值，统一页面标签、颜色和缺省文案。 */
 function confidenceTone(value: string | undefined): "green" | "orange" | "red" {
   if (value === "high") return "green";
   if (value === "medium") return "orange";
   return "red";
 }
 
-/** 中文注释：实现 resultTypeLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `result 类型 label` 展示值，统一页面标签、颜色和缺省文案。 */
 function resultTypeLabel(value: string | undefined) {
   if (value === "debug") return "调试结果";
   return "正式结果";
 }
 
-/** 中文注释：实现 resultTypeClass 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `result 类型 class` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function resultTypeClass(value: string | undefined) {
   return value === "debug" ? "att-chip att-chip-warn" : "att-chip att-chip-ok";
 }
 
-/** 中文注释：实现 datasetLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `数据集 label` 展示值，统一页面标签、颜色和缺省文案。 */
 function datasetLabel(run: RunItem) {
   return formatRunDatasetName(run.dataset_name || "", run.benchmark_tag || "", run.task_kind || "");
 }
 
-/** 中文注释：实现 modelLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `模型 label` 展示值，统一页面标签、颜色和缺省文案。 */
 function modelLabel(run: RunItem) {
   return formatAdapterName(run.victim_model_adapters?.[0] || run.model_adapter || run.surrogate_model_adapter || "-");
 }
 
-/** 中文注释：实现 sampleCount 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `样本 count` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function sampleCount(run: RunItem) {
   const count = asNumber(run.evidence_sample_count || run.case_count || run.sample_pair_count, 0);
   return count > 0 ? count : 0;
 }
 
-/** 中文注释：实现 sampleScaleText 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `样本 缩放 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 function sampleScaleText(run: RunItem | undefined) {
   if (!run) return "未记录";
   const count = sampleCount(run);
@@ -117,14 +117,14 @@ function sampleScaleText(run: RunItem | undefined) {
   return `${count} 条`;
 }
 
-/** 中文注释：实现 baselineText 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `baseline 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 function baselineText(run: RunItem) {
   if (run.task_kind === "vqa") return `原始输入准确率 ${percent(run.clean_accuracy)}`;
   if (run.task_kind === "caption") return `描述文本相似度 ${percent(run.caption_text_similarity ?? run.semantic_preservation_rate ?? run.object_jaccard)}`;
   return `前一位召回率 ${percent(run.clean_r1_mean)}`;
 }
 
-/** 中文注释：实现 taskMetricText 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `任务 指标 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 function taskMetricText(run: RunItem) {
   if (run.task_kind === "vqa") {
     return `原始准确率 ${percent(run.clean_accuracy)} / 攻击后准确率 ${percent(run.attacked_accuracy)} / 答案变化率 ${percent(run.answer_change_rate)}`;
@@ -135,7 +135,7 @@ function taskMetricText(run: RunItem) {
   return `前一位召回率 ${percent(run.clean_r1_mean)} 到 ${percent(run.attacked_r1_mean)} / 平均排名变化 ${Number.isFinite(Number(run.rank_delta_mean)) ? Math.round(Number(run.rank_delta_mean)) : "未记录"}`;
 }
 
-/** 中文注释：实现 pageRangeText 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `page range 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 function pageRangeText(page: number, pageSize: number, total: number) {
   if (total <= 0) return "0 / 0";
   const start = (page - 1) * pageSize + 1;
@@ -143,18 +143,18 @@ function pageRangeText(page: number, pageSize: number, total: number) {
   return `${start} - ${end} / ${total}`;
 }
 
-/** 中文注释：实现 nextRunSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 计算 `next 运行记录 sort` 排序结果，保证表格交互的顺序稳定。 */
 function nextRunSort(current: RunSortState, key: RunSortKey): RunSortState {
   return { key, direction: current.key === key && current.direction === "asc" ? "desc" : "asc" };
 }
 
-/** 中文注释：实现 ariaSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 计算 `aria sort` 排序结果，保证表格交互的顺序稳定。 */
 function ariaSort(sort: RunSortState, key: RunSortKey): "none" | "ascending" | "descending" {
   if (sort.key !== key) return "none";
   return sort.direction === "asc" ? "ascending" : "descending";
 }
 
-/** 中文注释：实现 SortHeader 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `SortHeader` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 function SortHeader({ sort, sortKey, label, onSort }: { sort: RunSortState; sortKey: RunSortKey; label: string; onSort: (key: RunSortKey) => void }) {
   const active = sort.key === sortKey;
   const icon = active ? (sort.direction === "asc" ? "↑" : "↓") : "↕";
@@ -166,7 +166,7 @@ function SortHeader({ sort, sortKey, label, onSort }: { sort: RunSortState; sort
   );
 }
 
-/** 中文注释：实现 queryParams 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `query params` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function queryParams(filters: FilterState): Omit<RunQueryParams, "page" | "page_size" | "sort_by" | "sort_dir"> {
   return {
     task_kind: filters.task,
@@ -180,16 +180,16 @@ function queryParams(filters: FilterState): Omit<RunQueryParams, "page" | "page_
   };
 }
 
-/** 中文注释：实现 optionValues 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `option values` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function optionValues(options: RunOptionsResponse | undefined, key: keyof RunOptionsResponse) {
   return (options?.[key] ?? []).map((item) => item.value).filter(Boolean);
 }
 
-/** 中文注释：实现 FilterBar 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `FilterBar` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 function FilterBar({ options, filters, setFilters }: { options?: RunOptionsResponse; filters: FilterState; setFilters: (next: FilterState) => void }) {
   const taskOptions = optionValues(options, "task_kinds");
   const attackOptions = optionValues(options, "attacks");
-  /** 中文注释：实现 update 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+  /** 整理 `update` 前端辅助逻辑，保持数据转换和展示口径一致。 */
   const update = (patch: Partial<FilterState>) => setFilters({ ...filters, ...patch });
   return (
     <GovPanel className="gov-filter-panel att-filter-panel">
@@ -245,7 +245,7 @@ function FilterBar({ options, filters, setFilters }: { options?: RunOptionsRespo
   );
 }
 
-/** 中文注释：实现 DistributionBars 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `DistributionBars` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 function DistributionBars({ rows, labelFor }: { rows: Array<{ key: string; count: number }>; labelFor: (key: string) => string }) {
   const max = Math.max(1, ...rows.map((row) => row.count));
   return (
@@ -262,7 +262,7 @@ function DistributionBars({ rows, labelFor }: { rows: Array<{ key: string; count
   );
 }
 
-/** 中文注释：实现 RunTable 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `RunTable` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 function RunTable({ rows, selectedRunId, onSelect, sort, onSort, loading }: { rows: RunItem[]; selectedRunId?: string; onSelect?: (run: RunItem) => void; sort: RunSortState; onSort: (key: RunSortKey) => void; loading?: boolean }) {
   const visibleRows = rows.filter((run) => !isDemoRun(run));
   return (
@@ -324,7 +324,7 @@ function RunTable({ rows, selectedRunId, onSelect, sort, onSort, loading }: { ro
   );
 }
 
-/** 中文注释：实现 getAnalyticsData 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 请求或读取 `get analytics 数据` 数据，隔离接口路径和调用参数。 */
 function getAnalyticsData(data: unknown) {
   return (data ?? {}) as {
     total_runs?: number;
@@ -340,12 +340,12 @@ function getAnalyticsData(data: unknown) {
   };
 }
 
-/** 中文注释：实现 taskRowsFromAnalytics 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `任务 rows 来源 analytics` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function taskRowsFromAnalytics(data: ReturnType<typeof getAnalyticsData> | undefined) {
   return (data?.task_groups ?? []).map((row) => ({ key: String(row.task_kind || "unknown"), count: asNumber(row.count, 0) }));
 }
 
-/** 中文注释：实现 useRunPageData 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 封装 `useRunPageData` Hook，把页面状态、副作用和持久化逻辑集中管理。 */
 function useRunPageData(filters: FilterState, page: number, pageSize: number, sort: RunSortState) {
   const baseParams = useMemo(() => queryParams(filters), [filters]);
   const runsQ = useQuery({
@@ -369,7 +369,7 @@ function useRunPageData(filters: FilterState, page: number, pageSize: number, so
   return { runsQ, analyticsQ, optionsQ };
 }
 
-/** 中文注释：实现 AnalysisView 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `AnalysisView` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 function AnalysisView() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [selectedRunId, setSelectedRunId] = useState<string>("");
@@ -384,7 +384,7 @@ function AnalysisView() {
   const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
   const safePage = totalRows ? Math.min(page, totalPages) : page;
   const selectedRun = runs.find((run) => run.run_id === selectedRunId) ?? runs[0];
-  /** 中文注释：实现 handleSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+  /** 处理 `handle sort` 交互事件，把用户操作同步到页面状态。 */
   const handleSort = (key: RunSortKey) => { setSort((current) => nextRunSort(current, key)); setPage(1); };
   const summaryQ = useQuery({ queryKey: ["analysis-summary", selectedRun?.run_id], queryFn: () => getRunSummary(String(selectedRun?.run_id || "")), enabled: Boolean(selectedRun?.run_id), staleTime: REPORT_REFRESH_MS, refetchInterval: REPORT_REFRESH_MS });
   const summary = summaryQ.data as Record<string, unknown> | undefined;
@@ -471,7 +471,7 @@ function AnalysisView() {
   );
 }
 
-/** 中文注释：实现 ReportsView 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `ReportsView` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 function ReportsView() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
@@ -484,7 +484,7 @@ function ReportsView() {
   const totalRows = runsQ.data?.total ?? analytics.total_runs ?? lastKnownTotalRows;
   const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
   const safePage = totalRows ? Math.min(page, totalPages) : page;
-  /** 中文注释：实现 handleSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+  /** 处理 `handle sort` 交互事件，把用户操作同步到页面状态。 */
   const handleSort = (key: RunSortKey) => { setSort((current) => nextRunSort(current, key)); setPage(1); };
 
   useEffect(() => {
@@ -525,11 +525,12 @@ function ReportsView() {
   );
 }
 
-/** 中文注释：实现 RunRecordsView 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `RunRecordsView` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function RunRecordsView({ mode }: { mode: RunRecordsMode }) {
   return mode === "reports" ? <ReportsView /> : <AnalysisView />;
 }
 
+/** 渲染 `ReportCenterPage` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export default function ReportCenterPage() {
   const location = useLocation();
   return <RunRecordsView mode={location.pathname === "/reports" ? "reports" : "analysis"} />;

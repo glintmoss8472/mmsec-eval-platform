@@ -9,7 +9,7 @@ from mmsec_eval.sample_store.manager import SampleStoreManager
 from mmsec_eval.types import AttackedSample, EvalRecord, JudgeResult, ModelOutput, Sample
 
 
-# 中文注释：验证 test_sample_store_manager 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `样本 store manager` 场景，防止相关行为在后续修改中退化。
 def test_sample_store_manager(tmp_path: Path):
     run_dir = tmp_path / "artifacts" / "runs" / "r1"
     mgr = SampleStoreManager(str(run_dir), save_images=True, save_traces=True)

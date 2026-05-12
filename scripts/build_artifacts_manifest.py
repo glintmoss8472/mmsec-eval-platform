@@ -21,7 +21,7 @@ KEY_FILES = (
 )
 
 
-# 中文注释：封装 _rel 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `rel` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _rel(path: Path, root: Path) -> str:
     try:
         return str(path.resolve().relative_to(root.resolve())).replace("\\", "/")
@@ -29,7 +29,7 @@ def _rel(path: Path, root: Path) -> str:
         return str(path.resolve()).replace("\\", "/")
 
 
-# 中文注释：封装 _sha256 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `sha256` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -38,7 +38,7 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-# 中文注释：封装 _read_json 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 读取 `JSON`，并对缺失或异常输入做边界处理。
 def _read_json(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
@@ -49,7 +49,7 @@ def _read_json(path: Path) -> dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
-# 中文注释：封装 _file_entry 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `file entry` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _file_entry(path: Path, root: Path) -> dict[str, Any]:
     return {
         "path": _rel(path, root),
@@ -58,7 +58,7 @@ def _file_entry(path: Path, root: Path) -> dict[str, Any]:
     }
 
 
-# 中文注释：实现 scan_run 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 执行 `scan 运行记录` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def scan_run(run_dir: Path, root: Path) -> dict[str, Any]:
     summary = _read_json(run_dir / "summary.json")
     files = {name: _file_entry(run_dir / name, root) for name in KEY_FILES if (run_dir / name).exists()}
@@ -78,7 +78,7 @@ def scan_run(run_dir: Path, root: Path) -> dict[str, Any]:
     }
 
 
-# 中文注释：实现 scan_paper_rows 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 整理 `scan paper rows` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def scan_paper_rows(paper_root: Path, root: Path) -> list[dict[str, Any]]:
     rows_dir = paper_root / "rows"
     if not rows_dir.exists():
@@ -94,7 +94,7 @@ def scan_paper_rows(paper_root: Path, root: Path) -> list[dict[str, Any]]:
     return rows
 
 
-# 中文注释：实现 scan_screenshots 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 执行 `scan screenshots` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def scan_screenshots(root: Path) -> list[dict[str, Any]]:
     screenshot_dir = root / "docs" / "assets" / "server_ui_content_audit_20260419"
     if not screenshot_dir.exists():
@@ -102,7 +102,7 @@ def scan_screenshots(root: Path) -> list[dict[str, Any]]:
     return [_file_entry(path, root) for path in sorted(screenshot_dir.glob("*.png"))]
 
 
-# 中文注释：实现 scan_auxiliary_artifacts 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 执行 `scan auxiliary 产物` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def scan_auxiliary_artifacts(artifacts_dir: Path, root: Path) -> list[dict[str, Any]]:
     patterns = {
         "embodied_decision": ("embodied_decision*", ("decision_summary.json", "decision_results.jsonl")),
@@ -120,7 +120,7 @@ def scan_auxiliary_artifacts(artifacts_dir: Path, root: Path) -> list[dict[str, 
     return groups
 
 
-# 中文注释：实现 build_manifest 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 构建 `manifest` 数据，集中整理运维与实验脚本需要的输出结构。
 def build_manifest(project_root: Path, artifacts_dir: Path) -> dict[str, Any]:
     runs_dir = artifacts_dir / "runs"
     paper_root = artifacts_dir / "paper_suite_20260418_final"
@@ -142,7 +142,7 @@ def build_manifest(project_root: Path, artifacts_dir: Path) -> dict[str, Any]:
     }
 
 
-# 中文注释：实现 parse_args 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 解析 `args`，把文本或载荷转换成可校验的字段。
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a reproducibility manifest for thesis and experiment artifacts.")
     parser.add_argument("--project-root", default=".")
@@ -151,7 +151,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `build_artifacts_manifest.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     args = parse_args()
     root = Path(args.project_root).resolve()

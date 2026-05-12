@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 
-# 中文注释：实现 read_jsonl 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 读取 `JSONL`，并对缺失或异常输入做边界处理。
 def read_jsonl(path: str) -> list[dict[str, Any]]:
     p = Path(path)
     if not p.exists():
@@ -21,7 +21,7 @@ def read_jsonl(path: str) -> list[dict[str, Any]]:
     return rows
 
 
-# 中文注释：实现 write_jsonl 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 写出 `JSONL`，保证后续报告、页面或复现实验能读取。
 def write_jsonl(path: str, rows: list[dict[str, Any]]) -> None:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)

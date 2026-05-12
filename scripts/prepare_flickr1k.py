@@ -20,7 +20,7 @@ from prepare_flickr30k import (
 )
 
 
-# 中文注释：封装 _subset_from_existing_source 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `subset 来源 已有 source` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _subset_from_existing_source(
     dataset_root: Path,
     image_dir: Path,
@@ -85,7 +85,7 @@ def _subset_from_existing_source(
     return _write_rows(dataset_root, image_dir, out_path, normalized, synthesize_missing=allow_synthetic_fallback)
 
 
-# 中文注释：封装 _resolve_tmm_asset_paths 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 解析 `tmm asset paths` 的真实位置或配置值，减少调用方重复分支。
 def _resolve_tmm_asset_paths(source_root: Path, tmm_json: str, tmm_image_dir: str) -> tuple[Path, Path] | None:
     json_candidates = [Path(tmm_json)] if tmm_json else []
     json_candidates.append(source_root / "flickr30k_test.json")
@@ -96,7 +96,7 @@ def _resolve_tmm_asset_paths(source_root: Path, tmm_json: str, tmm_image_dir: st
             source_root / "flickr30k-images",
         ]
     )
-    # 中文注释：实现 resolve_existing 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+    # 解析 `已有` 的真实位置或配置值，减少调用方重复分支。
     def resolve_existing(path: Path) -> Path | None:
         candidate = path if path.is_absolute() else source_root / path
         return candidate if candidate.exists() else None
@@ -108,7 +108,7 @@ def _resolve_tmm_asset_paths(source_root: Path, tmm_json: str, tmm_image_dir: st
     return json_path, image_path
 
 
-# 中文注释：封装 _subset_from_tmm_official_source 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `subset 来源 tmm official source` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _subset_from_tmm_official_source(
     dataset_root: Path,
     image_dir: Path,
@@ -165,7 +165,7 @@ def _subset_from_tmm_official_source(
     return _write_rows(dataset_root, image_dir, out_path, normalized, synthesize_missing=False)
 
 
-# 中文注释：封装 _try_hf_flickr1k_download 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `try Hugging Face Flickr1k download` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _try_hf_flickr1k_download(dataset_root: Path, image_dir: Path, out_path: Path, limit: int) -> int:
     try:
         from datasets import load_dataset  # type: ignore
@@ -225,7 +225,7 @@ def _try_hf_flickr1k_download(dataset_root: Path, image_dir: Path, out_path: Pat
     return _write_rows(dataset_root, image_dir, out_path, rows, synthesize_missing=False)
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `prepare_flickr1k.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("-Root", dest="root", default="data/flickr1k")

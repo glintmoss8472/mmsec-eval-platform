@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 
-# 中文注释：验证 test_mmsec_api_module_help_does_not_start_server 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `mmsec API module help does not start 服务` 场景，防止相关行为在后续修改中退化。
 def test_mmsec_api_module_help_does_not_start_server() -> None:
     result = subprocess.run(
         [sys.executable, "-m", "mmsec_api", "--help"],

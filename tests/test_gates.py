@@ -6,7 +6,7 @@ from pathlib import Path
 from mmsec_eval.runner.gates import gate1_ok, gate2_ok, gate3_ok
 
 
-# 中文注释：验证 test_gate_helpers 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `gate helpers` 场景，防止相关行为在后续修改中退化。
 def test_gate_helpers(tmp_path: Path):
     art = tmp_path / "artifacts"
     art.mkdir(parents=True, exist_ok=True)

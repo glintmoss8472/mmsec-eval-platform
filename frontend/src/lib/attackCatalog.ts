@@ -289,7 +289,7 @@ export const attackCatalog: AttackCatalogItem[] = [
 
 const ATTACK_CATALOG_MAP = new Map(attackCatalog.map((item) => [item.id, item]));
 
-/** 中文注释：实现 attackCatalogMap 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 整理 `攻击 catalog map` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function attackCatalogMap() {
   return ATTACK_CATALOG_MAP;
 }
@@ -298,7 +298,7 @@ export function attackCatalogMap() {
 export const localTorchSurrogateAdapters = new Set(["clip_hf", "blip_itm", "vilt_itm"]);
 export const clipOnlySurrogateAdapters = new Set(["clip_hf"]);
 
-/** 中文注释：实现 surrogatePolicyForAttack 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 整理 `surrogate policy 所属 攻击` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function surrogatePolicyForAttack(attack: string): AttackCatalogItem["surrogatePolicy"] {
   return ATTACK_CATALOG_MAP.get(String(attack || "").trim())?.surrogatePolicy ?? "any";
 }

@@ -7,7 +7,7 @@ from pathlib import Path
 from scripts.build_artifacts_manifest import build_manifest
 
 
-# 中文注释：验证 test_artifacts_manifest_links_run_files 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `产物 manifest links 运行记录 files` 场景，防止相关行为在后续修改中退化。
 def test_artifacts_manifest_links_run_files(tmp_path: Path):
     run_dir = tmp_path / "artifacts" / "runs" / "run_001"
     run_dir.mkdir(parents=True)

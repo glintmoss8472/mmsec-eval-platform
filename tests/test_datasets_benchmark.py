@@ -14,14 +14,14 @@ from mmsec_eval.datasets.flickr30k import load_flickr30k
 from mmsec_eval.datasets.mini_flickr import load_mini_flickr
 
 
-# 中文注释：封装 _write_image 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 写出 `图像`，保证后续报告、页面或复现实验能读取。
 def _write_image(path: Path, value: int) -> None:
     arr = np.zeros((32, 32, 3), dtype=np.uint8)
     arr[..., value % 3] = 200
     Image.fromarray(arr).save(path)
 
 
-# 中文注释：验证 test_flickr30k_loader 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `Flickr30k loader` 场景，防止相关行为在后续修改中退化。
 def test_flickr30k_loader(tmp_path: Path):
     root = tmp_path / "flickr"
     images = root / "images"
@@ -49,7 +49,7 @@ def test_flickr30k_loader(tmp_path: Path):
     assert out[0].metadata["dataset"] == "flickr30k"
 
 
-# 中文注释：验证 test_flickr1k_loader 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `Flickr1k loader` 场景，防止相关行为在后续修改中退化。
 def test_flickr1k_loader(tmp_path: Path):
     root = tmp_path / "flickr1k"
     images = root / "images"
@@ -77,7 +77,7 @@ def test_flickr1k_loader(tmp_path: Path):
     assert out[0].metadata["dataset"] == "flickr1k"
 
 
-# 中文注释：验证 test_flickr30k_loader_rejects_placeholder_rows 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `Flickr30k loader rejects placeholder rows` 场景，防止相关行为在后续修改中退化。
 def test_flickr30k_loader_rejects_placeholder_rows(tmp_path: Path):
     root = tmp_path / "flickr"
     images = root / "images"
@@ -112,7 +112,7 @@ def test_flickr30k_loader_rejects_placeholder_rows(tmp_path: Path):
         raise AssertionError("placeholder Flickr30k rows should be rejected")
 
 
-# 中文注释：验证 test_coco_subset_loader 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `COCO subset loader` 场景，防止相关行为在后续修改中退化。
 def test_coco_subset_loader(tmp_path: Path):
     root = tmp_path / "coco"
     images = root / "val2017"
@@ -148,7 +148,7 @@ def test_coco_subset_loader(tmp_path: Path):
     assert out[0].metadata["dataset"] == "coco_subset"
 
 
-# 中文注释：验证 test_coco_subset_loader_rejects_placeholder_rows 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `COCO subset loader rejects placeholder rows` 场景，防止相关行为在后续修改中退化。
 def test_coco_subset_loader_rejects_placeholder_rows(tmp_path: Path):
     root = tmp_path / "coco"
     images = root / "val2017"
@@ -177,7 +177,7 @@ def test_coco_subset_loader_rejects_placeholder_rows(tmp_path: Path):
         raise AssertionError("placeholder COCO rows should be rejected")
 
 
-# 中文注释：验证 test_mini_flickr_loader_uses_seed_dataset 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `mini Flickr loader uses seed 数据集` 场景，防止相关行为在后续修改中退化。
 def test_mini_flickr_loader_uses_seed_dataset():
     cfg = SimpleNamespace(
         root="",

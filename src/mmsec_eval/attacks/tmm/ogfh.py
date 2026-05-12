@@ -4,7 +4,7 @@ from __future__ import annotations
 import torch
 
 
-# 中文注释：实现 cosine_similarity 的核心流程，支撑TMM 迁移攻击模块中的业务语义和异常边界。
+# 执行 `cosine similarity` 辅助逻辑，保持TMM 迁移攻击模块中的输入处理和结果输出一致。
 def cosine_similarity(a: torch.Tensor, b: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
     a = a.reshape(a.shape[0], -1).float()
     b = b.reshape(b.shape[0], -1).float()
@@ -13,7 +13,7 @@ def cosine_similarity(a: torch.Tensor, b: torch.Tensor, eps: float = 1e-8) -> to
     return (a * b).sum(dim=-1)
 
 
-# 中文注释：实现 orthogonalize_grad 的核心流程，支撑TMM 迁移攻击模块中的业务语义和异常边界。
+# 执行 `orthogonalize grad` 辅助逻辑，保持TMM 迁移攻击模块中的输入处理和结果输出一致。
 def orthogonalize_grad(grad: torch.Tensor, ref: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
     """Remove the projection of grad onto ref (per sample)."""
     g = grad.reshape(grad.shape[0], -1).float()

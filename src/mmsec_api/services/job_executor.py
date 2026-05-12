@@ -28,14 +28,14 @@ from mmsec_eval.runtime import apply_config_env
 from mmsec_eval.runner.eval_runner import run
 
 
-# 中文注释：定义 JobExecutor 的结构化职责，作为后端业务服务中状态、配置或行为的边界。
+# 实现 `JobExecutor.__init__` 的对象行为，维护该类在后端业务服务中的调用契约。
 class JobExecutor:
-    # 中文注释：封装 JobExecutor.__init__ 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 封装 JobExecutor.__init__ 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def __init__(self, store: SQLiteStore, artifacts_dir: str = "artifacts") -> None:
         self.store = store
         self.artifacts_dir = artifacts_dir
 
-    # 中文注释：封装 JobExecutor._normalize_override 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 归一化 `override`，把不同来源的数值或文本压到统一尺度。
     @staticmethod
     def _normalize_override(override: dict[str, Any]) -> dict[str, Any]:
         runner = override.get("runner")
@@ -45,7 +45,7 @@ class JobExecutor:
                 runner["victim_model_adapters"] = [str(singular_victim)]
         return override
 
-    # 中文注释：封装 JobExecutor._parse_override 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 解析 `override`，把文本或载荷转换成可校验的字段。
     @staticmethod
     def _parse_override(raw: str) -> dict[str, Any]:
         if not raw:
@@ -56,7 +56,7 @@ class JobExecutor:
             return {}
         return JobExecutor._normalize_override(parsed) if isinstance(parsed, dict) else {}
 
-    # 中文注释：封装 JobExecutor._parse_payload 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 解析 `载荷`，把文本或载荷转换成可校验的字段。
     @staticmethod
     def _parse_payload(raw: str) -> dict[str, Any]:
         if not raw:
@@ -66,7 +66,7 @@ class JobExecutor:
         except json.JSONDecodeError:
             return {}
 
-    # 中文注释：封装 JobExecutor._deep_merge 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 实现 `JobExecutor._deep_merge` 的对象行为，维护该类在后端业务服务中的调用契约。
     @staticmethod
     def _deep_merge(base: dict[str, Any], patch: dict[str, Any]) -> dict[str, Any]:
         out = dict(base)
@@ -77,7 +77,7 @@ class JobExecutor:
                 out[k] = v
         return out
 
-    # 中文注释：封装 JobExecutor._validate_vlr_attack_capability 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 校验 `图文检索 攻击 capability` 的约束，发现不兼容时阻止继续执行。
     @staticmethod
     def _validate_vlr_attack_capability(cfg) -> None:
         attack = str(getattr(cfg.plugins, "attack", "") or "").strip()
@@ -86,7 +86,7 @@ class JobExecutor:
         if error:
             raise ValueError(error)
 
-    # 中文注释：封装 JobExecutor._validate_task_model_capability 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 校验 `任务 模型 capability` 的约束，发现不兼容时阻止继续执行。
     @staticmethod
     def _validate_task_model_capability(cfg, task_kind: str) -> None:
         task = str(task_kind or "").strip()
@@ -110,18 +110,18 @@ class JobExecutor:
                     + "。内置演示模型不允许作为正式受测模型。"
                 )
 
-    # 中文注释：封装 JobExecutor._apply_runtime_env 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 应用 `runtime 环境` 规则，把兼容字段写回报告或风险载荷。
     def _apply_runtime_env(self, cfg) -> None:
         # API jobs and CLI runs share the same runtime/model env semantics.
         apply_config_env(cfg)
         os.environ.setdefault("MMSEC_MODEL_PREFLIGHT_TIMEOUT_SECONDS", "1200")
 
-    # 中文注释：封装 JobExecutor._skip_model_preflight 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 推断 `skip 模型 preflight`，从样本、配置或运行记录中提取统一名称。
     @staticmethod
     def _skip_model_preflight() -> bool:
         return str(os.getenv("MMSEC_SKIP_MODEL_PREFLIGHT", "0")).strip().lower() in {"1", "true", "yes", "on"}
 
-    # 中文注释：封装 JobExecutor._run_eval_like 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 执行 `评测 like` 流程，按配置驱动后端业务服务完成一次任务。
     def _run_eval_like(
         self,
         *,
@@ -167,7 +167,7 @@ class JobExecutor:
             "report_path": artifacts.report_path,
         }
 
-    # 中文注释：封装 JobExecutor._run_vlr_like 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 执行 `图文检索 like` 流程，按配置驱动后端业务服务完成一次任务。
     def _run_vlr_like(
         self,
         *,
@@ -240,7 +240,7 @@ class JobExecutor:
             "report_path": artifacts.report_path,
         }
 
-    # 中文注释：封装 JobExecutor._run_generation_like 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 执行 `生成式评测 like` 流程，按配置驱动后端业务服务完成一次任务。
     def _run_generation_like(
         self,
         *,
@@ -303,7 +303,7 @@ class JobExecutor:
             "report_path": artifacts.report_path,
         }
 
-    # 中文注释：封装 JobExecutor._train_advclip_like 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 实现 `JobExecutor._train_advclip_like` 的对象行为，维护该类在后端业务服务中的调用契约。
     def _train_advclip_like(
         self,
         *,
@@ -357,7 +357,7 @@ class JobExecutor:
             "report_path": artifacts.report_path,
         }
 
-    # 中文注释：封装 JobExecutor._dataset_root_path 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 定位 `数据集 root 路径`，把配置值或请求上下文转换成实际文件系统路径。
     @staticmethod
     def _dataset_root_path(name: str, payload: dict[str, Any]) -> str:
         root_path = str(payload.get("root_path", "") or "").strip()
@@ -375,7 +375,7 @@ class JobExecutor:
                 root_path = "data/coco"
         return root_path
 
-    # 中文注释：封装 JobExecutor._script_cmd 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 实现 `JobExecutor._script_cmd` 的对象行为，维护该类在后端业务服务中的调用契约。
     @staticmethod
     def _script_cmd(project_root: Path, is_windows: bool, ps1_name: str, py_name: str) -> list[str]:
         if is_windows:
@@ -383,7 +383,7 @@ class JobExecutor:
             return ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script)]
         return [sys.executable, str(project_root / "scripts" / py_name)]
 
-    # 中文注释：封装 JobExecutor._flickr_prepare_cmd 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 实现 `JobExecutor._flickr_prepare_cmd` 的对象行为，维护该类在后端业务服务中的调用契约。
     @classmethod
     def _flickr_prepare_cmd(cls, project_root: Path, name: str, root_path: str, payload: dict[str, Any], is_windows: bool) -> list[str]:
         cmd = cls._script_cmd(
@@ -412,7 +412,7 @@ class JobExecutor:
         cmd += ["-MaxItems", str(int(payload.get("max_items", 256) or 256))]
         return cmd
 
-    # 中文注释：封装 JobExecutor._coco_prepare_cmd 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 实现 `JobExecutor._coco_prepare_cmd` 的对象行为，维护该类在后端业务服务中的调用契约。
     @classmethod
     def _coco_prepare_cmd(cls, project_root: Path, root_path: str, payload: dict[str, Any], is_windows: bool) -> list[str]:
         cmd = cls._script_cmd(project_root, is_windows, "prepare_coco_subset.ps1", "prepare_coco_subset.py")
@@ -429,7 +429,7 @@ class JobExecutor:
             cmd += ["-DownloadImages"]
         return cmd
 
-    # 中文注释：封装 JobExecutor._register_mini_flickr 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 实现 `JobExecutor._register_mini_flickr` 的对象行为，维护该类在后端业务服务中的调用契约。
     def _register_mini_flickr(self, project_root: Path, name: str, root_path: str, log: Callable[[str, str], None]) -> dict[str, Any]:
         dataset_root = project_root / root_path if root_path and not Path(root_path).is_absolute() else Path(root_path or ".")
         image_dir = dataset_root / "images"
@@ -443,7 +443,7 @@ class JobExecutor:
         log("info", f"registered demo fixture dataset: {dataset_root}")
         return {"dataset": name, "prepared": True, "root_path": root_path, "item_count": item_count}
 
-    # 中文注释：封装 JobExecutor._prepared_item_count 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 统计 `prepared item count` 数量，在缺失文件或空输入时返回零值。
     @staticmethod
     def _prepared_item_count(project_root: Path, name: str, root_path: str, payload: dict[str, Any]) -> int:
         dataset_root = project_root / root_path if root_path and not Path(root_path).is_absolute() else Path(root_path or ".")
@@ -461,7 +461,7 @@ class JobExecutor:
         except (json.JSONDecodeError, OSError):
             return 0
 
-    # 中文注释：封装 JobExecutor._run_dataset_prepare 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 执行 `数据集 prepare` 流程，按配置驱动后端业务服务完成一次任务。
     def _run_dataset_prepare(self, payload: dict[str, Any], log: Callable[[str, str], None]) -> dict[str, Any]:
         name = str(payload.get("name", "")).strip().lower()
         if name not in {"flickr30k", "flickr1k", "coco_subset", "mini_flickr"}:
@@ -489,7 +489,7 @@ class JobExecutor:
         self.store.upsert_dataset(name=name, root_path=root_path, prepared=True, item_count=item_count, note="prepared via api")
         return {"dataset": name, "prepared": True, "root_path": root_path, "item_count": item_count}
 
-    # 中文注释：封装 JobExecutor._execute_generation_job 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 实现 `JobExecutor._execute_generation_job` 的对象行为，维护该类在后端业务服务中的调用契约。
     def _execute_generation_job(
         self,
         *,
@@ -508,7 +508,7 @@ class JobExecutor:
             force_task_kind=task_kind,
         )
 
-    # 中文注释：封装 JobExecutor._execute_payload_job 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+    # 组装 `execute 载荷 任务`，把分散字段整理成后端任务或风险评分使用的载荷。
     def _execute_payload_job(
         self,
         *,
@@ -532,7 +532,7 @@ class JobExecutor:
             return self._run_dataset_prepare(payload, log)
         return None
 
-    # 中文注释：实现 JobExecutor.execute 的核心行为，维护后端业务服务在该对象上的调用契约。
+    # 实现 `JobExecutor.execute` 的对象行为，维护该类在后端业务服务中的调用契约。
     def execute(
         self,
         job: dict[str, Any],

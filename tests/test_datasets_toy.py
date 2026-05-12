@@ -2,7 +2,7 @@
 from mmsec_eval.datasets.toy_shapes import ToyShapesDataset
 
 
-# 中文注释：验证 test_toy_dataset_generate 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `toy 数据集 generate` 场景，防止相关行为在后续修改中退化。
 def test_toy_dataset_generate():
     ds = ToyShapesDataset(num_samples=8, image_size=64, seed=1)
     items = ds.generate()

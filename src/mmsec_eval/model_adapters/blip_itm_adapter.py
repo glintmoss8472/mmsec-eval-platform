@@ -15,11 +15,11 @@ from mmsec_eval.types import ModelOutput, Sample
 LOG = logging.getLogger(__name__)
 
 
-# 中文注释：定义 BlipITMAdapter 的结构化职责，作为模型适配层中状态、配置或行为的边界。
+# 定义 `BlipITMAdapter` 的插件适配边界，把模型、攻击或评测能力暴露为统一接口。
 class BlipITMAdapter(ModelAdapter):
     """BLIP image-text retrieval (ITM) adapter, CUDA-only and strict."""
 
-    # 中文注释：封装 BlipITMAdapter.__init__ 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `BlipITMAdapter.__init__` 的对象行为，维护该类在模型适配层中的调用契约。
     def __init__(self) -> None:
         import torch
         from transformers import BlipForImageTextRetrieval, BlipProcessor
@@ -48,12 +48,12 @@ class BlipITMAdapter(ModelAdapter):
                 )
             ) from e
 
-    # 中文注释：实现 BlipITMAdapter.device 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `BlipITMAdapter.device` 的对象行为，维护该类在模型适配层中的调用契约。
     @property
     def device(self) -> str:
         return str(self._device)
 
-    # 中文注释：封装 BlipITMAdapter._image_preprocess_torch 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `BlipITMAdapter._image_preprocess_torch` 的对象行为，维护该类在模型适配层中的调用契约。
     def _image_preprocess_torch(self, images_bchw):
         import torch
         import torch.nn.functional as F
@@ -76,15 +76,15 @@ class BlipITMAdapter(ModelAdapter):
         std_t = torch.tensor(std, device=self._device, dtype=x.dtype).view(1, 3, 1, 1)
         return (x - mean_t) / std_t
 
-    # 中文注释：封装 BlipITMAdapter._target_hw 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `BlipITMAdapter._target_hw` 的对象行为，维护该类在模型适配层中的调用契约。
     def _target_hw(self) -> tuple[int, int]:
         return processor_target_hw(self._processor, default_hw=(384, 384))
 
-    # 中文注释：封装 BlipITMAdapter._prepare_numpy_batch 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 准备 `numpy 批处理` 数据，补齐后续运行、报告或测试需要的字段。
     def _prepare_numpy_batch(self, images: list[np.ndarray]) -> np.ndarray:
         return stack_resized_rgb01(images, size_hw=self._target_hw())
 
-    # 中文注释：封装 BlipITMAdapter._encode_texts_torch 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+    # 实现 `BlipITMAdapter._encode_texts_torch` 的对象行为，维护该类在模型适配层中的调用契约。
     def _encode_texts_torch(self, texts: list[str]):
         enc = self._processor(text=texts, return_tensors="pt", padding=True, truncation=True)
         out: dict[str, Any] = {}
@@ -92,7 +92,7 @@ class BlipITMAdapter(ModelAdapter):
             out[k] = v.to(self._device)
         return out
 
-    # 中文注释：实现 BlipITMAdapter.score_pairs_torch 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 计算 `pairs PyTorch`，为指标、风险或调度决策提供数值依据。
     def score_pairs_torch(self, images_bchw, texts: list[str], *, output_attentions: bool = False):
         import torch
 
@@ -109,7 +109,7 @@ class BlipITMAdapter(ModelAdapter):
         logits = out.itm_score.float()
         return torch.softmax(logits, dim=-1)[:, 1]
 
-    # 中文注释：实现 BlipITMAdapter.projected_features_torch 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `BlipITMAdapter.projected_features_torch` 的对象行为，维护该类在模型适配层中的调用契约。
     def projected_features_torch(self, images_bchw, texts: list[str]):
         import torch.nn.functional as F
 
@@ -127,7 +127,7 @@ class BlipITMAdapter(ModelAdapter):
         txt_feat = F.normalize(self._model.text_proj(q[:, 0, :]).float(), dim=-1)
         return img_feat, txt_feat
 
-    # 中文注释：实现 BlipITMAdapter.score_pairs 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 计算 `pairs`，为指标、风险或调度决策提供数值依据。
     def score_pairs(self, pairs: list[tuple[np.ndarray, str]], batch_size: int = 8) -> np.ndarray:
         import torch
 
@@ -145,7 +145,7 @@ class BlipITMAdapter(ModelAdapter):
             out.append(scores.detach().cpu().numpy().astype(np.float32))
         return np.concatenate(out, axis=0).astype(np.float32)
 
-    # 中文注释：实现 BlipITMAdapter.fused_embedding 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `BlipITMAdapter.fused_embedding` 的对象行为，维护该类在模型适配层中的调用契约。
     def fused_embedding(self, image: np.ndarray, text: str) -> np.ndarray:
         import torch
 
@@ -155,7 +155,7 @@ class BlipITMAdapter(ModelAdapter):
             fused = torch.cat([img_feat, txt_feat], dim=-1)
         return fused[0].detach().cpu().numpy().astype(np.float32)
 
-    # 中文注释：实现 BlipITMAdapter.attention_map 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `BlipITMAdapter.attention_map` 的对象行为，维护该类在模型适配层中的调用契约。
     def attention_map(self, image: np.ndarray, text: str, eps: float = 1e-8) -> np.ndarray:
         import math
         import torch
@@ -197,7 +197,7 @@ class BlipITMAdapter(ModelAdapter):
             m = t[0, 0].numpy().astype(np.float32)
         return np.clip(m, 0.0, 1.0).astype(np.float32)
 
-    # 中文注释：实现 BlipITMAdapter.predict 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `BlipITMAdapter.predict` 的对象行为，维护该类在模型适配层中的调用契约。
     def predict(self, sample: Sample) -> ModelOutput:
         score = float(self.score_pairs([(sample.image, sample.text)], batch_size=1)[0])
         att = self.attention_map(sample.image, sample.text)
@@ -208,6 +208,6 @@ class BlipITMAdapter(ModelAdapter):
             raw={"adapter": "blip_itm", "device": self._device, "model_name": self._model_name, "score": score},
         )
 
-    # 中文注释：实现 BlipITMAdapter.extra_debug 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `BlipITMAdapter.extra_debug` 的对象行为，维护该类在模型适配层中的调用契约。
     def extra_debug(self) -> dict[str, Any]:
         return {"device": str(self._device), "model_name": str(self._model_name)}

@@ -13,19 +13,19 @@ import requests
 from PIL import Image, ImageDraw
 
 
-# 中文注释：封装 _truthy 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 判断 `真值` 输入是否表示真值，兼容字符串、数字和布尔类型。
 def _truthy(value: str) -> bool:
     return str(value).strip().lower() not in {"0", "false", "no", "off", ""}
 
 
-# 中文注释：封装 _allow_synthetic_fallback 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `allow synthetic fallback` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _allow_synthetic_fallback(raw: str | None = None) -> bool:
     if raw is None:
         raw = os.getenv("MMSEC_ALLOW_PLACEHOLDER_DATA", "0")
     return _truthy(str(raw))
 
 
-# 中文注释：封装 _download 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `download` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _download(url: str, target: Path) -> bool:
     try:
         with requests.get(url, timeout=90, stream=True) as response:
@@ -40,13 +40,13 @@ def _download(url: str, target: Path) -> bool:
         return False
 
 
-# 中文注释：封装 _download_image 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 下载 `图像` 资源，并把失败情况限制在可恢复范围内。
 def _download_image(split: str, file_name: str, target: Path) -> bool:
     url = f"http://images.cocodataset.org/{split}/{file_name}"
     return _download(url, target)
 
 
-# 中文注释：封装 _extract_member 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 提取 `member`，从归档、结果或响应中取出后续流程需要的字段。
 def _extract_member(zip_path: Path, member_name: str, target_root: Path) -> bool:
     try:
         with zipfile.ZipFile(zip_path, "r") as archive:
@@ -57,7 +57,7 @@ def _extract_member(zip_path: Path, member_name: str, target_root: Path) -> bool
         return False
 
 
-# 中文注释：封装 _placeholder 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `placeholder` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _placeholder(image_path: Path, text: str, idx: int) -> None:
     image_path.parent.mkdir(parents=True, exist_ok=True)
     width = 224
@@ -74,7 +74,7 @@ def _placeholder(image_path: Path, text: str, idx: int) -> None:
     image.save(image_path)
 
 
-# 中文注释：定义 CocoPaths 的结构化职责，作为运维与实验脚本中状态、配置或行为的边界。
+# 定义 `CocoPaths` 的状态和行为边界，供运维与实验脚本在固定职责内复用。
 @dataclass(frozen=True)
 class CocoPaths:
     dataset_root: Path
@@ -84,7 +84,7 @@ class CocoPaths:
     subset_file: Path
 
 
-# 中文注释：封装 _resolve_paths 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 解析 `paths` 的真实位置或配置值，减少调用方重复分支。
 def _resolve_paths(root: str, split: str) -> CocoPaths:
     dataset_root = Path(root)
     if not dataset_root.is_absolute():
@@ -100,7 +100,7 @@ def _resolve_paths(root: str, split: str) -> CocoPaths:
     )
 
 
-# 中文注释：封装 _maybe_download_annotations 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `maybe download annotations` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _maybe_download_annotations(paths: CocoPaths, *, split: str, need_annotations: bool) -> None:
     if not need_annotations or paths.ann_file.exists():
         return
@@ -110,7 +110,7 @@ def _maybe_download_annotations(paths: CocoPaths, *, split: str, need_annotation
         _extract_member(zip_path, f"annotations/captions_{split}.json", paths.dataset_root)
 
 
-# 中文注释：封装 _load_caption_payload 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 加载 `图像描述 载荷`，把外部文件、配置或运行产物转换为内存结构。
 def _load_caption_payload(ann_file: Path) -> tuple[dict[str, Any], dict[int, dict[str, Any]], list[Any]]:
     data = json.loads(ann_file.read_text(encoding="utf-8"))
     images = data.get("images", [])
@@ -119,7 +119,7 @@ def _load_caption_payload(ann_file: Path) -> tuple[dict[str, Any], dict[int, dic
     return data, image_map, annotations if isinstance(annotations, list) else []
 
 
-# 中文注释：封装 _select_subset 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 筛选 `subset`，按配置条件保留可用于评测或展示的数据。
 def _select_subset(
     *,
     annotations: list[Any],
@@ -166,7 +166,7 @@ def _select_subset(
     return kept, images_kept, skipped_images
 
 
-# 中文注释：封装 _write_subset_files 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 写出 `subset files`，保证后续报告、页面或复现实验能读取。
 def _write_subset_files(paths: CocoPaths, data: dict[str, Any], kept: list[dict[str, Any]], images_kept: list[dict[str, Any]]) -> Path:
     out = {
         "info": data.get("info", {}),
@@ -194,7 +194,7 @@ def _write_subset_files(paths: CocoPaths, data: dict[str, Any], kept: list[dict[
     return jsonl_path
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `prepare_coco_subset.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("-Root", dest="root", default="data/coco")

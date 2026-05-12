@@ -10,13 +10,13 @@ from mmsec_api.services.bootstrap_orchestrator import BootstrapOrchestrator
 router = APIRouter(prefix="/api/v1/bootstrap", tags=["bootstrap"])
 
 
-# 中文注释：处理 bootstrap_status 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /status` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/status", response_model=BootstrapStatusResponse)
 def bootstrap_status(bootstrap: BootstrapOrchestrator = Depends(get_bootstrap)) -> BootstrapStatusResponse:
     return BootstrapStatusResponse(**bootstrap.get_status())
 
 
-# 中文注释：处理 bootstrap_logs 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /logs` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/logs", response_model=BootstrapLogsResponse)
 def bootstrap_logs(
     limit: int = Query(default=200, ge=1, le=1000),
@@ -25,7 +25,7 @@ def bootstrap_logs(
     return BootstrapLogsResponse(items=bootstrap.get_logs(limit=limit))
 
 
-# 中文注释：处理 bootstrap_retry 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `POST /retry` 接口，完成请求校验、存储访问和响应模型组装。
 @router.post("/retry", response_model=BootstrapStatusResponse)
 def bootstrap_retry(bootstrap: BootstrapOrchestrator = Depends(get_bootstrap)) -> BootstrapStatusResponse:
     bootstrap.retry()

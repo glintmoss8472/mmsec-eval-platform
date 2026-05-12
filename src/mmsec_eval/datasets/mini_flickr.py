@@ -8,7 +8,7 @@ from typing import Any
 from mmsec_eval.datasets.flickr30k import load_flickr30k
 
 
-# 中文注释：实现 load_mini_flickr 的核心流程，支撑数据集加载层中的业务语义和异常边界。
+# 加载 `mini Flickr`，把外部文件、配置或运行产物转换为内存结构。
 def load_mini_flickr(dataset_cfg: Any):
     root = str(getattr(dataset_cfg, "root", "") or "").strip()
     if not root:

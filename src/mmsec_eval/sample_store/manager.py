@@ -12,7 +12,7 @@ from mmsec_eval.sample_store.serializer import save_image_png, write_json, write
 from mmsec_eval.types import EvalRecord, ModelOutput, Sample
 
 
-# 中文注释：封装 _json_ready 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
+# 判断或归一 `JSON ready` 状态，让调用方可以稳定渲染能力和可用性。
 def _json_ready(value: Any) -> Any:
     if isinstance(value, np.ndarray):
         return value.tolist()
@@ -25,9 +25,9 @@ def _json_ready(value: Any) -> Any:
     return value
 
 
-# 中文注释：定义 SampleStoreManager 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 实现 `SampleStoreManager.__init__` 的对象行为，维护该类在项目工程中的调用契约。
 class SampleStoreManager:
-    # 中文注释：封装 SampleStoreManager.__init__ 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
+    # 封装 SampleStoreManager.__init__ 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
     def __init__(
         self,
         run_dir: str,
@@ -45,7 +45,7 @@ class SampleStoreManager:
         self.model_tag = model_tag
         self._index_rows: list[dict[str, Any]] = []
 
-    # 中文注释：封装 SampleStoreManager._validate_case_bundle 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
+    # 校验 `案例 证据包` 的约束，发现不兼容时阻止继续执行。
     def _validate_case_bundle(self, bundle: CaseBundle) -> None:
         if not bundle.sample.sample_id:
             raise ValueError("case bundle missing sample.sample_id")
@@ -58,7 +58,7 @@ class SampleStoreManager:
         if not bundle.model_tag:
             raise ValueError("case bundle missing model_tag")
 
-    # 中文注释：实现 SampleStoreManager.persist_record 的核心行为，维护项目工程在该对象上的调用契约。
+    # 确认 `persist record` 是字典记录，避免后续字段读取直接接触异常类型。
     def persist_record(
         self,
         record: EvalRecord,
@@ -137,6 +137,6 @@ class SampleStoreManager:
         self._index_rows.append(index_row)
         return refs
 
-    # 中文注释：实现 SampleStoreManager.flush 的核心行为，维护项目工程在该对象上的调用契约。
+    # 实现 `SampleStoreManager.flush` 的对象行为，维护该类在项目工程中的调用契约。
     def flush(self) -> str:
         return write_jsonl(str(self.index_path), self._index_rows)

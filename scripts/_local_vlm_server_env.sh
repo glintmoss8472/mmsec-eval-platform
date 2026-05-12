@@ -7,7 +7,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 export STACK_ROOT="${STACK_ROOT:-${PROJECT_ROOT}}"
 export APP_ROOT="${APP_ROOT:-${PROJECT_ROOT}}"
 
-# 中文注释：实现 mmsec_truthy 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `mmsec 真值` 步骤，封装脚本中的可复用命令片段。
 mmsec_truthy() {
   local value="${1:-}"
   case "${value}" in
@@ -18,7 +18,7 @@ mmsec_truthy() {
   return 1
 }
 
-# 中文注释：实现 mmsec_local_model_ready 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `mmsec 本地 模型 ready` 步骤，封装脚本中的可复用命令片段。
 mmsec_local_model_ready() {
   local model_dir="${1:-}"
   [[ -n "${model_dir}" ]] || return 1
@@ -31,7 +31,7 @@ mmsec_local_model_ready() {
     -print -quit 2>/dev/null | grep -q .
 }
 
-# 中文注释：实现 mmsec_pick_best_gpu 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `mmsec pick best gpu` 步骤，封装脚本中的可复用命令片段。
 mmsec_pick_best_gpu() {
   if ! command -v nvidia-smi >/dev/null 2>&1; then
     echo "0"
@@ -44,7 +44,7 @@ mmsec_pick_best_gpu() {
     | tr -d ' '
 }
 
-# 中文注释：实现 mmsec_gpu_count 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `mmsec gpu count` 步骤，封装脚本中的可复用命令片段。
 mmsec_gpu_count() {
   if ! command -v nvidia-smi >/dev/null 2>&1; then
     echo "0"
@@ -53,7 +53,7 @@ mmsec_gpu_count() {
   nvidia-smi --query-gpu=index --format=csv,noheader 2>/dev/null | wc -l | tr -d ' '
 }
 
-# 中文注释：实现 mmsec_single_tenant_local_vlm 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `mmsec single tenant 本地 视觉语言模型` 步骤，封装脚本中的可复用命令片段。
 mmsec_single_tenant_local_vlm() {
   local mode="${MMSEC_LOCAL_VLM_SINGLE_TENANT:-auto}"
   case "${mode}" in
@@ -71,7 +71,7 @@ mmsec_single_tenant_local_vlm() {
   (( gpu_count <= 1 ))
 }
 
-# 中文注释：实现 mmsec_default_cleanup_ports 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `mmsec default cleanup ports` 步骤，封装脚本中的可复用命令片段。
 mmsec_default_cleanup_ports() {
   local target_port="$1"
   local all_ports="${MMSEC_LOCAL_VLM_ALL_PORTS:-8011 8012 8013 8014 8015 8016 8017}"
@@ -82,7 +82,7 @@ mmsec_default_cleanup_ports() {
   echo "${target_port}"
 }
 
-# 中文注释：实现 mmsec_prepare_local_vlm_env 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `mmsec prepare 本地 视觉语言模型 环境` 步骤，封装脚本中的可复用命令片段。
 mmsec_prepare_local_vlm_env() {
   export ENV_DIR="${ENV_DIR:-${PROJECT_ROOT}/.venv}"
   export LOG_DIR="${LOG_DIR:-${PROJECT_ROOT}/logs/model_servers}"
@@ -123,7 +123,7 @@ mmsec_prepare_local_vlm_env() {
   fi
 }
 
-# 中文注释：实现 mmsec_launch_local_openai_mm_server 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `mmsec launch 本地 OpenAI mm 服务` 步骤，封装脚本中的可复用命令片段。
 mmsec_launch_local_openai_mm_server() {
   local log_file_name="$1"
 

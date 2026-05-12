@@ -4,7 +4,7 @@ from __future__ import annotations
 from mmsec_eval.interaction.vqa_dialogue_benchmark import evaluate_interaction_cases, summarize_interaction_cases
 
 
-# 中文注释：验证 test_vqa_dialogue_counts_clean_correct_and_attacked_wrong 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `视觉问答 dialogue counts clean correct and 攻击后样本 wrong` 场景，防止相关行为在后续修改中退化。
 def test_vqa_dialogue_counts_clean_correct_and_attacked_wrong():
     rows = [
         {

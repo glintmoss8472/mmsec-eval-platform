@@ -22,7 +22,7 @@ UTC = timezone.utc
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-# 中文注释：定义 UrlAsset 的结构化职责，作为运维与实验脚本中状态、配置或行为的边界。
+# 定义 `UrlAsset` 的状态和行为边界，供运维与实验脚本在固定职责内复用。
 @dataclass(frozen=True)
 class UrlAsset:
     name: str
@@ -32,7 +32,7 @@ class UrlAsset:
     required_for_audit: bool = True
 
 
-# 中文注释：定义 DriveAsset 的结构化职责，作为运维与实验脚本中状态、配置或行为的边界。
+# 定义 `DriveAsset` 的状态和行为边界，供运维与实验脚本在固定职责内复用。
 @dataclass(frozen=True)
 class DriveAsset:
     name: str
@@ -194,18 +194,18 @@ EXTERNAL_REPOS = {
 }
 
 
-# 中文注释：封装 _now_tag 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `now tag` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _now_tag() -> str:
     return datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
 
 
-# 中文注释：封装 _write_json 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 写出 `JSON`，保证后续报告、页面或复现实验能读取。
 def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-# 中文注释：封装 _run 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `运行记录` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _run(cmd: list[str], *, cwd: Path | None = None, timeout: int | None = None) -> dict[str, Any]:
     proc = subprocess.run(
         cmd,
@@ -224,18 +224,18 @@ def _run(cmd: list[str], *, cwd: Path | None = None, timeout: int | None = None)
     }
 
 
-# 中文注释：封装 _host_matches 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `host matches` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _host_matches(host: str, suffix: str) -> bool:
     return host == suffix or host.endswith(f".{suffix}")
 
 
-# 中文注释：封装 _is_forbidden_foreign_url 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 判断 `是否 forbidden foreign URL` 条件是否成立，为调用方提供布尔决策。
 def _is_forbidden_foreign_url(url: str) -> bool:
     host = (urlparse(url).hostname or "").lower()
     return any(_host_matches(host, suffix) for suffix in FORBIDDEN_FOREIGN_HOST_SUFFIXES)
 
 
-# 中文注释：封装 _download_url 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 下载 `URL` 资源，并把失败情况限制在可恢复范围内。
 def _download_url(url: str, dest: Path, *, timeout: int, retries: int, domestic_only: bool = False) -> dict[str, Any]:
     if domestic_only and _is_forbidden_foreign_url(url):
         return {"status": "blocked_foreign_url", "path": str(dest), "url": url}
@@ -258,7 +258,7 @@ def _download_url(url: str, dest: Path, *, timeout: int, retries: int, domestic_
     return {"status": "failed", "path": str(dest), "url": url, "error": last_error}
 
 
-# 中文注释：封装 _probe_domestic_sources 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 探测 `domestic sources` 状态，优先调用模型探针并在失败时回退到文本匹配。
 def _probe_domestic_sources(*, timeout: int) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     for probe in DOMESTIC_RESOURCE_PROBES:
@@ -286,7 +286,7 @@ def _probe_domestic_sources(*, timeout: int) -> list[dict[str, Any]]:
     return results
 
 
-# 中文注释：封装 _prepare_coco_val2014_from_autodl 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 准备 `COCO val2014 来源 autodl` 数据，补齐后续运行、报告或测试需要的字段。
 def _prepare_coco_val2014_from_autodl(coco2017_root: Path, tmm_root: Path, *, limit: int = 0) -> dict[str, Any]:
     test_json = tmm_root / "datasets" / "coco_test.json"
     output_dir = tmm_root / "datasets" / "mscoco" / "val2014"
@@ -349,7 +349,7 @@ def _prepare_coco_val2014_from_autodl(coco2017_root: Path, tmm_root: Path, *, li
     return report
 
 
-# 中文注释：封装 _ensure_gdown 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 确保 `gdown` 已准备好，不满足条件时主动创建、下载或报错。
 def _ensure_gdown() -> dict[str, Any]:
     proc = subprocess.run([sys.executable, "-m", "gdown", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if proc.returncode == 0:
@@ -361,7 +361,7 @@ def _ensure_gdown() -> dict[str, Any]:
     return {"status": "present" if proc2.returncode == 0 else "failed", "stdout": proc2.stdout.strip(), "stderr": proc2.stderr.strip()}
 
 
-# 中文注释：封装 _download_drive 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 下载 `drive` 资源，并把失败情况限制在可恢复范围内。
 def _download_drive(asset: DriveAsset, asset_root: Path, *, timeout: int) -> dict[str, Any]:
     dest = asset_root / asset.dest
     if dest.exists() and (dest.is_dir() or dest.stat().st_size > 0):
@@ -383,7 +383,7 @@ def _download_drive(asset: DriveAsset, asset_root: Path, *, timeout: int) -> dic
     return {"name": asset.name, "status": status, "path": str(dest), "size_bytes": size, "result": result}
 
 
-# 中文注释：封装 _clone_repo 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `clone repo` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _clone_repo(name: str, url: str, repo_root: Path) -> dict[str, Any]:
     dest = repo_root / name
     if (dest / ".git").exists():
@@ -394,7 +394,7 @@ def _clone_repo(name: str, url: str, repo_root: Path) -> dict[str, Any]:
     return {"name": name, "status": "cloned" if result["returncode"] == 0 else "failed", "path": str(dest), "result": result}
 
 
-# 中文注释：封装 _safe_symlink_or_copy 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 安全计算 `symlink or copy`，在空值或异常输入下返回可控结果。
 def _safe_symlink_or_copy(src: Path, dst: Path) -> dict[str, Any]:
     if not src.exists():
         return {"status": "missing_source", "src": str(src), "dst": str(dst)}
@@ -409,7 +409,7 @@ def _safe_symlink_or_copy(src: Path, dst: Path) -> dict[str, Any]:
         return {"status": "copied", "src": str(src), "dst": str(dst)}
 
 
-# 中文注释：封装 _extract_archives 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 提取 `archives`，从归档、结果或响应中取出后续流程需要的字段。
 def _extract_archives(asset_root: Path) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     data_tar = asset_root / "downloads" / "albef" / "data.tar.gz"
@@ -456,7 +456,7 @@ def _extract_archives(asset_root: Path) -> list[dict[str, Any]]:
     return results
 
 
-# 中文注释：封装 _find_first 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 查找 `first`，按候选路径或记录字段返回最匹配的结果。
 def _find_first(root: Path, patterns: tuple[str, ...]) -> Path | None:
     if not root.exists():
         return None
@@ -471,7 +471,7 @@ def _find_first(root: Path, patterns: tuple[str, ...]) -> Path | None:
     return None
 
 
-# 中文注释：封装 _link_assets 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `link 资产` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _link_assets(asset_root: Path, tmm_root: Path) -> list[dict[str, Any]]:
     links: list[dict[str, Any]] = []
     for rel in (
@@ -521,7 +521,7 @@ def _link_assets(asset_root: Path, tmm_root: Path) -> list[dict[str, Any]]:
     return links
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `prepare_tmm_official_assets.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Prepare official assets referenced by whdii/TMM and linked upstream VLP repositories.")
     parser.add_argument("--asset-root", default="/root/autodl-tmp/paper_assets/tmm_official")

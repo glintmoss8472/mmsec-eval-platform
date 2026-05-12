@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 
-# 中文注释：验证 test_strict_paper_protocol_audit_blocks_when_assets_are_missing 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `strict paper protocol audit blocks when 资产 are missing` 场景，防止相关行为在后续修改中退化。
 def test_strict_paper_protocol_audit_blocks_when_assets_are_missing(tmp_path: Path) -> None:
     project_root = tmp_path / "project"
     advclip_root = tmp_path / "AdvCLIP"

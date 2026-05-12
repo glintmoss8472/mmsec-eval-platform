@@ -7,7 +7,7 @@ from pathlib import Path
 _CJK_FONT_READY: bool | None = None
 
 
-# 中文注释：封装 _configure_cjk_font 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
+# 执行 `configure cjk font` 辅助逻辑，保持报告可视化层中的输入处理和结果输出一致。
 def _configure_cjk_font(matplotlib) -> bool:
     """Use a CJK-capable font when one is available on the server."""
     global _CJK_FONT_READY
@@ -54,7 +54,7 @@ def _configure_cjk_font(matplotlib) -> bool:
     return False
 
 
-# 中文注释：封装 _safe_text 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
+# 安全计算 `文本`，在空值或异常输入下返回可控结果。
 def _safe_text(plt, value: object, fallback: str) -> str:
     """Avoid unreadable square glyphs when the runtime has no CJK font."""
     text = str(value or "").strip()
@@ -65,12 +65,12 @@ def _safe_text(plt, value: object, fallback: str) -> str:
     return ascii_text or fallback
 
 
-# 中文注释：封装 _safe_labels 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
+# 安全计算 `labels`，在空值或异常输入下返回可控结果。
 def _safe_labels(plt, labels: list[str]) -> list[str]:
     return [_safe_text(plt, label, f"item {idx + 1}") for idx, label in enumerate(labels)]
 
 
-# 中文注释：封装 _import_plt 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
+# 执行 `import plt` 辅助逻辑，保持报告可视化层中的输入处理和结果输出一致。
 def _import_plt():
     try:
         import matplotlib
@@ -84,7 +84,7 @@ def _import_plt():
     plt._mmsec_has_cjk_font = has_cjk_font  # type: ignore[attr-defined]
     return plt
 
-# 中文注释：实现 plot_metric_curve 的核心流程，支撑报告可视化层中的业务语义和异常边界。
+# 计算 `plot 指标 curve`，把原始模型输出汇总成页面和报告使用的指标字段。
 def plot_metric_curve(values: list[float], title: str, out_path: str) -> str:
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     plt = _import_plt()
@@ -101,7 +101,7 @@ def plot_metric_curve(values: list[float], title: str, out_path: str) -> str:
     return out_path
 
 
-# 中文注释：实现 plot_asr_bar 的核心流程，支撑报告可视化层中的业务语义和异常边界。
+# 执行 `plot ASR bar` 辅助逻辑，保持报告可视化层中的输入处理和结果输出一致。
 def plot_asr_bar(metrics: dict[str, float], out_path: str) -> str:
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     plt = _import_plt()
@@ -121,7 +121,7 @@ def plot_asr_bar(metrics: dict[str, float], out_path: str) -> str:
     return out_path
 
 
-# 中文注释：实现 plot_attack_comparison 的核心流程，支撑报告可视化层中的业务语义和异常边界。
+# 推断 `plot 攻击 comparison`，从样本、配置或运行记录中提取统一名称。
 def plot_attack_comparison(mode_stats: dict[str, dict[str, float]], out_path: str) -> str:
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     plt = _import_plt()
@@ -144,7 +144,7 @@ def plot_attack_comparison(mode_stats: dict[str, dict[str, float]], out_path: st
     return out_path
 
 
-# 中文注释：实现 plot_grouped_bar 的核心流程，支撑报告可视化层中的业务语义和异常边界。
+# 执行 `plot grouped bar` 辅助逻辑，保持报告可视化层中的输入处理和结果输出一致。
 def plot_grouped_bar(
     *,
     labels: list[str],
@@ -188,7 +188,7 @@ def plot_grouped_bar(
     return out_path
 
 
-# 中文注释：实现 plot_stage_compare_bar 的核心流程，支撑报告可视化层中的业务语义和异常边界。
+# 执行 `plot stage 对比 bar` 辅助逻辑，保持报告可视化层中的输入处理和结果输出一致。
 def plot_stage_compare_bar(
     *,
     out_path: str,
@@ -213,7 +213,7 @@ def plot_stage_compare_bar(
     return out_path
 
 
-# 中文注释：实现 plot_defense_recovery_curve 的核心流程，支撑报告可视化层中的业务语义和异常边界。
+# 执行 `plot 防御 recovery curve` 辅助逻辑，保持报告可视化层中的输入处理和结果输出一致。
 def plot_defense_recovery_curve(
     *,
     labels: list[str],

@@ -8,7 +8,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-# 中文注释：封装 _default_advclip_root 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 定位 `default advclip root`，把配置值或请求上下文转换成实际文件系统路径。
 def _default_advclip_root(project_root: Path) -> Path:
     for candidate in (
         project_root / "third_party" / "papers" / "AdvCLIP",
@@ -21,7 +21,7 @@ def _default_advclip_root(project_root: Path) -> Path:
     return project_root / "third_party" / "papers" / "AdvCLIP"
 
 
-# 中文注释：封装 _default_tmm_root 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 定位 `default tmm root`，把配置值或请求上下文转换成实际文件系统路径。
 def _default_tmm_root(project_root: Path) -> Path:
     for candidate in (
         project_root / "third_party" / "papers" / "TMM",
@@ -34,7 +34,7 @@ def _default_tmm_root(project_root: Path) -> Path:
     return project_root / "third_party" / "papers" / "TMM"
 
 
-# 中文注释：封装 _replace 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `replace` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _replace(path: Path, old: str, new: str, changes: list[str]) -> None:
     text = path.read_text(encoding="utf-8")
     if old not in text:
@@ -43,7 +43,7 @@ def _replace(path: Path, old: str, new: str, changes: list[str]) -> None:
     changes.append(str(path))
 
 
-# 中文注释：封装 _insert_after 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `insert after` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _insert_after(path: Path, marker: str, insertion: str, changes: list[str]) -> None:
     text = path.read_text(encoding="utf-8")
     if insertion in text or marker not in text:
@@ -52,7 +52,7 @@ def _insert_after(path: Path, marker: str, insertion: str, changes: list[str]) -
     changes.append(str(path))
 
 
-# 中文注释：实现 patch_advclip 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 执行 `补丁 advclip` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def patch_advclip(root: Path) -> list[str]:
     changes: list[str] = []
     for rel in ("advclip.py", "train_downstream_cross.py", "train_downstream_solo.py"):
@@ -87,7 +87,7 @@ def patch_advclip(root: Path) -> list[str]:
     return sorted(set(changes))
 
 
-# 中文注释：封装 _patch_tmm_eval_file 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `补丁 tmm 评测 file` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _patch_tmm_eval_file(root: Path, changes: list[str]) -> None:
     eval_file = root / "EvalTransferAttack.py"
     if eval_file.exists():
@@ -143,7 +143,7 @@ def _patch_tmm_eval_file(root: Path, changes: list[str]) -> None:
         )
 
 
-# 中文注释：封装 _patch_tmm_image_attack 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 推断 `补丁 tmm 图像 攻击`，从样本、配置或运行记录中提取统一名称。
 def _patch_tmm_image_attack(root: Path, changes: list[str]) -> None:
     image_attack = root / "attack" / "imageAttack.py"
     if image_attack.exists():
@@ -162,7 +162,7 @@ def _patch_tmm_image_attack(root: Path, changes: list[str]) -> None:
         )
 
 
-# 中文注释：封装 _patch_tmm_multimodal 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `补丁 tmm multimodal` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _patch_tmm_multimodal(root: Path, changes: list[str]) -> None:
     multimodal = root / "attack" / "multimodalAttack.py"
     if multimodal.exists():
@@ -199,7 +199,7 @@ def _patch_tmm_multimodal(root: Path, changes: list[str]) -> None:
         )
 
 
-# 中文注释：实现 patch_tmm 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 执行 `补丁 tmm` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def patch_tmm(root: Path) -> list[str]:
     changes: list[str] = []
     _patch_tmm_eval_file(root, changes)
@@ -208,7 +208,7 @@ def patch_tmm(root: Path) -> list[str]:
     return sorted(set(changes))
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `apply_official_paper_compat_patches.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Apply compatibility patches to downloaded official AdvCLIP/TMM repositories.")
     parser.add_argument("--project-root", default=str(PROJECT_ROOT))

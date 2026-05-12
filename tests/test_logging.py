@@ -6,7 +6,7 @@ from pathlib import Path
 from mmsec_eval.logging import setup_logging
 
 
-# 中文注释：验证 test_setup_logging 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `setup logging` 场景，防止相关行为在后续修改中退化。
 def test_setup_logging(tmp_path: Path):
     setup_logging(str(tmp_path))
     assert (tmp_path / "mmsec.log").exists()

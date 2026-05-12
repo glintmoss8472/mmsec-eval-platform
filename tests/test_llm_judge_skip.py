@@ -7,7 +7,7 @@ from mmsec_eval.judges.llm_judge import LLMJudge
 from mmsec_eval.types import AttackedSample, EvalRecord, ModelOutput, Sample
 
 
-# 中文注释：验证 test_llm_judge_disabled 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `llm judge disabled` 场景，防止相关行为在后续修改中退化。
 def test_llm_judge_disabled(monkeypatch):
     monkeypatch.setenv("MMSEC_LLM_JUDGE_ENABLED", "0")
     j = LLMJudge()

@@ -10,7 +10,7 @@ from mmsec_eval.sample_store.manager import SampleStoreManager
 from mmsec_eval.types import AttackedSample, EvalRecord, JudgeResult, ModelOutput, Sample
 
 
-# 中文注释：验证 test_sample_store_persists_defended_outputs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `样本 store persists defended outputs` 场景，防止相关行为在后续修改中退化。
 def test_sample_store_persists_defended_outputs(tmp_path: Path):
     run_dir = tmp_path / "run"
     mgr = SampleStoreManager(run_dir=str(run_dir), save_images=True, save_traces=True, dataset_tag="toy", model_tag="clip_hf")

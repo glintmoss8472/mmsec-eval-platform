@@ -6,34 +6,34 @@ from typing import Mapping
 from mmsec_eval.risk.components import component_audit_rows, component_keys, normalize_weights, scenario_weights
 
 
-# 中文注释：实现 clamp01 的核心流程，支撑风险评分层中的业务语义和异常边界。
+# 执行 `clamp01` 辅助逻辑，保持风险评分层中的输入处理和结果输出一致。
 def clamp01(x: float) -> float:
     return max(0.0, min(1.0, float(x)))
 
 
-# 中文注释：实现 normalize_inverse 的核心流程，支撑风险评分层中的业务语义和异常边界。
+# 归一化 `inverse`，把不同来源的数值或文本压到统一尺度。
 def normalize_inverse(value: float, reference: float) -> float:
     ref = max(1e-8, float(reference))
     return clamp01(1.0 - (float(value) / ref))
 
 
-# 中文注释：实现 normalize_direct 的核心流程，支撑风险评分层中的业务语义和异常边界。
+# 归一化 `direct`，把不同来源的数值或文本压到统一尺度。
 def normalize_direct(value: float, reference: float) -> float:
     ref = max(1e-8, float(reference))
     return clamp01(float(value) / ref)
 
 
-# 中文注释：封装 _scenario_weights 的内部步骤，让风险评分层主流程保持清晰并隔离边界细节。
+# 执行 `scenario weights` 辅助逻辑，保持风险评分层中的输入处理和结果输出一致。
 def _scenario_weights(scenario: str) -> dict[str, float]:
     return scenario_weights(scenario)
 
 
-# 中文注释：封装 _normalize_weights 的内部步骤，让风险评分层主流程保持清晰并隔离边界细节。
+# 归一化 `weights`，把不同来源的数值或文本压到统一尺度。
 def _normalize_weights(weights: Mapping[str, float], scenario: str) -> dict[str, float]:
     return normalize_weights(weights, scenario)
 
 
-# 中文注释：封装 _risk_level 的内部步骤，让风险评分层主流程保持清晰并隔离边界细节。
+# 归类 `风险 level`，把连续分数或多条记录整理成稳定分组。
 def _risk_level(score: float) -> str:
     x = clamp01(score)
     if x >= 0.80:
@@ -47,7 +47,7 @@ def _risk_level(score: float) -> str:
     return "minimal"
 
 
-# 中文注释：封装 _recommendations 的内部步骤，让风险评分层主流程保持清晰并隔离边界细节。
+# 执行 `recommendations` 辅助逻辑，保持风险评分层中的输入处理和结果输出一致。
 def _recommendations(level: str, breakdown: Mapping[str, float]) -> list[str]:
     rec: list[str] = []
     eff = float(breakdown.get("effectiveness", 0.0))
@@ -72,7 +72,7 @@ def _recommendations(level: str, breakdown: Mapping[str, float]) -> list[str]:
     return rec
 
 
-# 中文注释：实现 compute_risk_score 的核心流程，支撑风险评分层中的业务语义和异常边界。
+# 计算 `风险 分数`，为指标、风险或调度决策提供数值依据。
 def compute_risk_score(
     *,
     scenario: str,

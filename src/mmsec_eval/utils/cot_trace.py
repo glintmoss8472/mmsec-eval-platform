@@ -15,7 +15,7 @@ _ACTION_TOKEN_RE = re.compile(
 )
 
 
-# 中文注释：实现 parse_cot_trace 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 解析 `cot 调试轨迹`，把文本或载荷转换成可校验的字段。
 def parse_cot_trace(text: str) -> dict[str, Any]:
     s = str(text or "")
     lines = [x.strip() for x in s.splitlines() if x.strip()]

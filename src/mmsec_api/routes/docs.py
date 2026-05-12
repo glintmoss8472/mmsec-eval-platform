@@ -14,12 +14,12 @@ from mmsec_api.worker.queue import JobQueue
 router = APIRouter(prefix="/api/v1/docs", tags=["docs"])
 
 
-# 中文注释：封装 _artifacts_dir 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
+# 定位 `产物 目录`，把配置值或请求上下文转换成实际文件系统路径。
 def _artifacts_dir(request: Request) -> str:
     return str(getattr(request.app.state, "artifacts_dir", "artifacts"))
 
 
-# 中文注释：处理 ingest_docs 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `POST /ingest` 接口，完成请求校验、存储访问和响应模型组装。
 @router.post("/ingest", response_model=JobResponse)
 def ingest_docs(
     req: DocsIngestRequest,
@@ -37,7 +37,7 @@ def ingest_docs(
     return JobResponse(**job)
 
 
-# 中文注释：处理 docs_index 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /index` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/index", response_model=DocsPayloadResponse)
 def docs_index(request: Request) -> DocsPayloadResponse:
     p = Path(_artifacts_dir(request)) / "docs_index.json"
@@ -47,7 +47,7 @@ def docs_index(request: Request) -> DocsPayloadResponse:
     return DocsPayloadResponse(items=data)
 
 
-# 中文注释：处理 docs_snippets 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /snippets` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/snippets", response_model=DocsPayloadResponse)
 def docs_snippets(request: Request) -> DocsPayloadResponse:
     p = Path(_artifacts_dir(request)) / "docs_snippets.jsonl"

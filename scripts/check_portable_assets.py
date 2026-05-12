@@ -31,7 +31,7 @@ WEIGHT_PATTERNS: tuple[str, ...] = (
 )
 
 
-# 中文注释：封装 _weight_files 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `weight files` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _weight_files(root: Path) -> list[str]:
     found: list[str] = []
     for pattern in WEIGHT_PATTERNS:
@@ -41,7 +41,7 @@ def _weight_files(root: Path) -> list[str]:
     return sorted(set(found))
 
 
-# 中文注释：封装 _model_entry 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 推断 `模型 entry`，从样本、配置或运行记录中提取统一名称。
 def _model_entry(model_root: Path) -> dict[str, object]:
     config_exists = (model_root / "config.json").is_file()
     weights = _weight_files(model_root)
@@ -54,17 +54,17 @@ def _model_entry(model_root: Path) -> dict[str, object]:
     }
 
 
-# 中文注释：封装 _group_summary 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 汇总 `group 摘要`，从运行记录和指标中提炼页面展示所需的分析结果。
 def _group_summary(root: Path, names: Iterable[str]) -> dict[str, dict[str, object]]:
     return {str(name): _model_entry(root / str(name)) for name in names}
 
 
-# 中文注释：封装 _missing_models 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
+# 执行 `missing 模型` 辅助逻辑，保持运维与实验脚本中的输入处理和结果输出一致。
 def _missing_models(summary: dict[str, dict[str, object]]) -> list[str]:
     return [name for name, row in summary.items() if not bool(row.get("ready", False))]
 
 
-# 中文注释：实现 build_summary 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 构建 `摘要` 数据，集中整理运维与实验脚本需要的输出结构。
 def build_summary(artifacts_root: Path) -> dict[str, object]:
     hf_root = artifacts_root / "hf_models"
     local_vlm_root = artifacts_root / "local_vlm"
@@ -83,7 +83,7 @@ def build_summary(artifacts_root: Path) -> dict[str, object]:
     }
 
 
-# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
+# 作为 `check_portable_assets.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Verify that the portable ATT-project image can be built fully offline."

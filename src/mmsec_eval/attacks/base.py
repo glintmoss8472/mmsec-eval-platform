@@ -4,12 +4,12 @@ from __future__ import annotations
 import numpy as np
 
 
-# 中文注释：实现 clip01 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
+# 执行 `clip01` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def clip01(x: np.ndarray) -> np.ndarray:
     return np.clip(x, 0.0, 1.0)
 
 
-# 中文注释：实现 perturb_stats 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
+# 执行 `perturb stats` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def perturb_stats(clean: np.ndarray, adv: np.ndarray) -> tuple[int, float, float]:
     d = adv - clean
     l0 = int(np.count_nonzero(np.abs(d) > 1e-8))
@@ -18,7 +18,7 @@ def perturb_stats(clean: np.ndarray, adv: np.ndarray) -> tuple[int, float, float
     return l0, l2, linf
 
 
-# 中文注释：实现 total_variation 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
+# 执行 `total variation` 辅助逻辑，保持攻击算法公共层中的输入处理和结果输出一致。
 def total_variation(x: np.ndarray) -> float:
     dx = np.abs(np.diff(x, axis=1)).mean()
     dy = np.abs(np.diff(x, axis=0)).mean()

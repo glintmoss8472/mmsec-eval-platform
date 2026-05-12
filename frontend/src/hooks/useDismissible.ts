@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 const STORAGE_PREFIX = "mmsec:hidden:";
 export const DISMISSIBLE_RESET_EVENT = "mmsec:dismissible-reset";
 
-/** 中文注释：实现 storageKeyFor 的核心流程，支撑前端状态 Hook中的业务语义和异常边界。 */
+/** 整理 `storage key 所属` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function storageKeyFor(id?: string) {
   return id ? `${STORAGE_PREFIX}${id}` : "";
 }
 
-/** 中文注释：实现 readHidden 的核心流程，支撑前端状态 Hook中的业务语义和异常边界。 */
+/** 整理 `read hidden` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function readHidden(id?: string) {
   if (!id || typeof window === "undefined") {
     return false;
@@ -17,7 +17,7 @@ function readHidden(id?: string) {
   return window.sessionStorage.getItem(storageKeyFor(id)) === "1";
 }
 
-/** 中文注释：实现 clearDismissedPanels 的核心流程，支撑前端状态 Hook中的业务语义和异常边界。 */
+/** 整理 `clear dismissed panels` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function clearDismissedPanels() {
   if (typeof window === "undefined") {
     return;
@@ -33,7 +33,7 @@ export function clearDismissedPanels() {
   window.dispatchEvent(new Event(DISMISSIBLE_RESET_EVENT));
 }
 
-/** 中文注释：实现 useDismissible 的核心流程，支撑前端状态 Hook中的业务语义和异常边界。 */
+/** 封装 `useDismissible` Hook，把页面状态、副作用和持久化逻辑集中管理。 */
 export function useDismissible(id?: string) {
   const [visible, setVisible] = useState(() => !readHidden(id));
 
@@ -45,13 +45,13 @@ export function useDismissible(id?: string) {
     if (!id || typeof window === "undefined") {
       return undefined;
     }
-    /** 中文注释：实现 handleReset 的核心流程，支撑前端状态 Hook中的业务语义和异常边界。 */
+    /** 处理 `handle reset` 交互事件，把用户操作同步到页面状态。 */
     const handleReset = () => setVisible(true);
     window.addEventListener(DISMISSIBLE_RESET_EVENT, handleReset);
     return () => window.removeEventListener(DISMISSIBLE_RESET_EVENT, handleReset);
   }, [id]);
 
-  /** 中文注释：实现 dismiss 的核心流程，支撑前端状态 Hook中的业务语义和异常边界。 */
+  /** 整理 `dismiss` 前端辅助逻辑，保持数据转换和展示口径一致。 */
   function dismiss() {
     if (!id || typeof window === "undefined") {
       return;
@@ -60,7 +60,7 @@ export function useDismissible(id?: string) {
     setVisible(false);
   }
 
-  /** 中文注释：实现 restore 的核心流程，支撑前端状态 Hook中的业务语义和异常边界。 */
+  /** 整理 `restore` 前端辅助逻辑，保持数据转换和展示口径一致。 */
   function restore() {
     if (!id || typeof window === "undefined") {
       return;

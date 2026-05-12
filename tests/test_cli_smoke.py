@@ -4,7 +4,7 @@ from pathlib import Path
 from mmsec_eval.cli import main
 
 
-# 中文注释：验证 test_cli_help_path 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `命令行 help 路径` 场景，防止相关行为在后续修改中退化。
 def test_cli_help_path(tmp_path: Path):
     cfg = tmp_path / "cli_smoke.yaml"
     cfg.write_text(

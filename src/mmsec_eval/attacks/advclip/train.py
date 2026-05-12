@@ -32,7 +32,7 @@ from mmsec_eval.utils.seed import set_seed
 LOG = logging.getLogger(__name__)
 
 
-# 中文注释：封装 _extract_clip_feats 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 提取 `CLIP feats`，从归档、结果或响应中取出后续流程需要的字段。
 def _extract_clip_feats(out: Any, *, attr_name: str):
     if hasattr(out, "detach") and hasattr(out, "shape"):
         return out
@@ -49,7 +49,7 @@ def _extract_clip_feats(out: Any, *, attr_name: str):
     raise TypeError(f"unsupported CLIP feature output type: {type(out)!r}")
 
 
-# 中文注释：封装 _clip_adapter_ready 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 判断或归一 `CLIP adapter ready` 状态，让调用方可以稳定渲染能力和可用性。
 def _clip_adapter_ready(adapter: Any) -> bool:
     # Accept either:
     # 1) CLIP HF adapter (has _model/_processor), or
@@ -59,7 +59,7 @@ def _clip_adapter_ready(adapter: Any) -> bool:
     return bool(getattr(adapter, "_ready", False) and getattr(adapter, "_model", None) is not None and getattr(adapter, "_processor", None) is not None)
 
 
-# 中文注释：封装 _prepare_images_torch 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 准备 `图像 PyTorch` 数据，补齐后续运行、报告或测试需要的字段。
 def _prepare_images_torch(adapter: Any, images: list[np.ndarray]):
     """Convert a list of HWC float images in [0,1] to BCHW torch tensor on adapter.device."""
     import torch
@@ -92,7 +92,7 @@ def _prepare_images_torch(adapter: Any, images: list[np.ndarray]):
     return x
 
 
-# 中文注释：封装 _apply_patch_bchw 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 应用 `补丁 bchw` 规则，把兼容字段写回报告或风险载荷。
 def _apply_patch_bchw(images, patch_chw, locs: list[tuple[int, int]]):
     """Apply a universal patch (CHW) to BCHW images (torch)."""
     import torch
@@ -114,7 +114,7 @@ def _apply_patch_bchw(images, patch_chw, locs: list[tuple[int, int]]):
     return out.clamp(0.0, 1.0)
 
 
-# 中文注释：封装 _encode_clip_features 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `encode CLIP features` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _encode_clip_features(adapter: Any, images_bchw, texts: list[str]):
     """Return (image_features, text_features) as torch tensors (with gradients wrt images)."""
     import torch
@@ -152,7 +152,7 @@ def _encode_clip_features(adapter: Any, images_bchw, texts: list[str]):
     return img_feat, txt_feat
 
 
-# 中文注释：封装 _random_crop_patches 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `random crop patches` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _random_crop_patches(images_bchw, patch_size: int, rng: np.random.Generator, batch: int) -> Any:
     """Randomly crop real patches from BCHW images (torch tensor)."""
     import torch
@@ -172,7 +172,7 @@ def _random_crop_patches(images_bchw, patch_size: int, rng: np.random.Generator,
     return torch.cat(out, dim=0)
 
 
-# 中文注释：封装 _advclip_train_setup 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `advclip train setup` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _advclip_train_setup(cfg: AppConfig) -> dict[str, Any]:
     set_seed(cfg.seed)
     run_id = new_run_id()
@@ -226,7 +226,7 @@ def _advclip_train_setup(cfg: AppConfig) -> dict[str, Any]:
     }
 
 
-# 中文注释：封装 _advclip_batch 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `advclip 批处理` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _advclip_batch(ctx: dict[str, Any]) -> tuple[list[str], Any]:
     idx = ctx["rng"].integers(0, len(ctx["dataset"]), size=(ctx["batch_size"],))
     batch = [ctx["dataset"][int(i)] for i in idx.tolist()]
@@ -236,7 +236,7 @@ def _advclip_batch(ctx: dict[str, Any]) -> tuple[list[str], Any]:
     return texts, images_t
 
 
-# 中文注释：封装 _patch_regularizers 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `补丁 regularizers` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _patch_regularizers(patch_chw: Any) -> tuple[Any, Any]:
     import torch
 
@@ -246,7 +246,7 @@ def _patch_regularizers(patch_chw: Any) -> tuple[Any, Any]:
     return tv, l2
 
 
-# 中文注释：封装 _advclip_objective 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `advclip objective` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _advclip_objective(cfg: AppConfig, adapter: Any, images_t: Any, texts: list[str], adv_images_t: Any) -> tuple[Any, Any, Any]:
     import torch
 
@@ -263,7 +263,7 @@ def _advclip_objective(cfg: AppConfig, adapter: Any, images_t: Any, texts: list[
     return loss_align, loss_tpd, txt_feat
 
 
-# 中文注释：封装 _direct_patch_row 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 整理 `direct 补丁 行记录` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _direct_patch_row(step: int, loss: Any, loss_align: Any, loss_tpd: Any, tv: Any, l2: Any) -> dict[str, float | int]:
     return {
         "step": int(step),
@@ -279,7 +279,7 @@ def _direct_patch_row(step: int, loss: Any, loss_align: Any, loss_tpd: Any, tv: 
     }
 
 
-# 中文注释：封装 _train_direct_patch 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `train direct 补丁` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _train_direct_patch(cfg: AppConfig, ctx: dict[str, Any]) -> tuple[np.ndarray, list[dict[str, Any]], str]:
     import torch
 
@@ -312,7 +312,7 @@ def _train_direct_patch(cfg: AppConfig, ctx: dict[str, Any]) -> tuple[np.ndarray
     return patch_out, rows, ""
 
 
-# 中文注释：封装 _log_direct_patch_step 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `日志 direct 补丁 step` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _log_direct_patch_step(step: int, steps: int, row: dict[str, Any]) -> None:
     if step % 25 == 0 or step == steps:
         LOG.info(
@@ -325,7 +325,7 @@ def _log_direct_patch_step(step: int, steps: int, row: dict[str, Any]) -> None:
         )
 
 
-# 中文注释：封装 _gan_generators 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `gan generators` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _gan_generators(device: Any, seed: int) -> tuple[Any, Any, Any]:
     import torch
 
@@ -341,7 +341,7 @@ def _gan_generators(device: Any, seed: int) -> tuple[Any, Any, Any]:
     return torch_gen_train, torch_gen_fixed, z_fixed
 
 
-# 中文注释：封装 _train_discriminator 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `train discriminator` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _train_discriminator(ctx: dict[str, Any], gan: dict[str, Any], images_t: Any, step: int) -> dict[str, float]:
     import torch
 
@@ -375,7 +375,7 @@ def _train_discriminator(ctx: dict[str, Any], gan: dict[str, Any], images_t: Any
     }
 
 
-# 中文注释：封装 _gan_generator_step 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `gan generator step` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _gan_generator_step(cfg: AppConfig, ctx: dict[str, Any], gan: dict[str, Any], texts: list[str], images_t: Any) -> dict[str, Any]:
     import torch
 
@@ -406,7 +406,7 @@ def _gan_generator_step(cfg: AppConfig, ctx: dict[str, Any], gan: dict[str, Any]
     return {"loss": loss, "loss_align": loss_align, "loss_tpd": loss_tpd, "loss_gan_g": loss_gan_g, "loss_gan_g_raw": loss_gan_g_raw, "tv": tv, "l2": l2}
 
 
-# 中文注释：封装 _gan_row 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 整理 `gan 行记录` 行记录，把原始结果转换成列表接口和报告可消费的结构。
 def _gan_row(step: int, generator_stats: dict[str, Any], discriminator_stats: dict[str, float]) -> dict[str, Any]:
     row = {
         "step": int(step),
@@ -422,7 +422,7 @@ def _gan_row(step: int, generator_stats: dict[str, Any], discriminator_stats: di
     return row
 
 
-# 中文注释：封装 _init_gan_state 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 判断或归一 `init gan state` 状态，让调用方可以稳定渲染能力和可用性。
 def _init_gan_state(ctx: dict[str, Any], cfg: AppConfig) -> dict[str, Any]:
     import torch
 
@@ -444,7 +444,7 @@ def _init_gan_state(ctx: dict[str, Any], cfg: AppConfig) -> dict[str, Any]:
     }
 
 
-# 中文注释：封装 _train_gan_patch 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `train gan 补丁` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _train_gan_patch(cfg: AppConfig, ctx: dict[str, Any]) -> tuple[np.ndarray, list[dict[str, Any]], str]:
     import torch
 
@@ -464,7 +464,7 @@ def _train_gan_patch(cfg: AppConfig, ctx: dict[str, Any]) -> tuple[np.ndarray, l
     return patch_out, rows, gan_state_path
 
 
-# 中文注释：封装 _log_gan_step 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `日志 gan step` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _log_gan_step(step: int, steps: int, row: dict[str, Any]) -> None:
     if step % 25 == 0 or step == steps:
         LOG.info(
@@ -479,7 +479,7 @@ def _log_gan_step(step: int, steps: int, row: dict[str, Any]) -> None:
         )
 
 
-# 中文注释：封装 _gan_state_payload 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 组装 `gan state 载荷`，把分散字段整理成后端任务或风险评分使用的载荷。
 def _gan_state_payload(ctx: dict[str, Any], cfg: AppConfig, gan: dict[str, Any]) -> dict[str, Any]:
     return {
         "generator": gan["generator"].state_dict(),
@@ -492,7 +492,7 @@ def _gan_state_payload(ctx: dict[str, Any], cfg: AppConfig, gan: dict[str, Any])
     }
 
 
-# 中文注释：封装 _save_patch_preview 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 写出 `补丁 preview`，保证后续报告、页面或复现实验能读取。
 def _save_patch_preview(patch_out: np.ndarray, attack_debug_root: Path) -> str:
     try:
         preview = (np.clip(patch_out, 0, 1) * 255).astype(np.uint8)
@@ -502,7 +502,7 @@ def _save_patch_preview(patch_out: np.ndarray, attack_debug_root: Path) -> str:
         return str(exc)
 
 
-# 中文注释：封装 _finalize_advclip_training 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 执行 `finalize advclip training` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def _finalize_advclip_training(cfg: AppConfig, ctx: dict[str, Any], patch_out: np.ndarray, rows: list[dict[str, Any]], gan_state_path: str) -> RunArtifacts:
     preview_error = _save_patch_preview(patch_out, ctx["attack_debug_root"])
     summary = _advclip_summary(cfg, ctx, patch_out, rows, gan_state_path, preview_error)
@@ -538,7 +538,7 @@ def _finalize_advclip_training(cfg: AppConfig, ctx: dict[str, Any], patch_out: n
     )
 
 
-# 中文注释：封装 _advclip_summary 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
+# 汇总 `advclip 摘要`，从运行记录和指标中提炼页面展示所需的分析结果。
 def _advclip_summary(cfg: AppConfig, ctx: dict[str, Any], patch_out: np.ndarray, rows: list[dict[str, Any]], gan_state_path: str, preview_error: str) -> dict[str, Any]:
     return {
         "run_id": str(ctx["run_id"]),
@@ -561,7 +561,7 @@ def _advclip_summary(cfg: AppConfig, ctx: dict[str, Any], patch_out: np.ndarray,
     }
 
 
-# 中文注释：实现 train_advclip_patch 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
+# 执行 `train advclip 补丁` 辅助逻辑，保持AdvCLIP 攻击模块中的输入处理和结果输出一致。
 def train_advclip_patch(cfg: AppConfig) -> RunArtifacts:
     """Train and save an AdvCLIP universal patch into a new run directory."""
     ctx = _advclip_train_setup(cfg)

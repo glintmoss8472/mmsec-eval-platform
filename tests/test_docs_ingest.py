@@ -7,7 +7,7 @@ from pathlib import Path
 from mmsec_eval.cli import cmd_ingest_docs
 
 
-# 中文注释：验证 test_docs_ingest_smoke 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `文档 ingest smoke` 场景，防止相关行为在后续修改中退化。
 def test_docs_ingest_smoke(tmp_path: Path):
     txt = tmp_path / "a.txt"
     txt.write_text("hello docs ingest", encoding="utf-8")

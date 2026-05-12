@@ -12,12 +12,12 @@ type AssetBatchSortState = { key: AssetBatchSortKey; direction: SortDirection };
 
 const DEFAULT_ASSET_BATCH_SORT: AssetBatchSortState = { key: "created_at", direction: "desc" };
 
-/** 中文注释：实现 percentLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `percent label` 展示值，统一页面标签、颜色和缺省文案。 */
 function percentLabel(value: number) {
   return `${Math.round((Number(value) || 0) * 100)}%`;
 }
 
-/** 中文注释：实现 assetBatchSortValue 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 计算 `asset 批处理 sort value` 排序结果，保证表格交互的顺序稳定。 */
 function assetBatchSortValue(batch: any, key: AssetBatchSortKey): string | number {
   if (key === "created_at") return Date.parse(batch.created_at || "") || 0;
   if (key === "batch_id") return String(batch.batch_id || "");
@@ -28,13 +28,13 @@ function assetBatchSortValue(batch: any, key: AssetBatchSortKey): string | numbe
   return Number(batch.avg_risk_score || 0);
 }
 
-/** 中文注释：实现 compareAssetBatchValues 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `对比 asset 批处理 values` 请求参数，获取多个运行记录的对比结果。 */
 function compareAssetBatchValues(left: string | number, right: string | number) {
   if (typeof left === "number" && typeof right === "number") return left - right;
   return String(left).localeCompare(String(right), "zh-CN", { numeric: true, sensitivity: "base" });
 }
 
-/** 中文注释：实现 sortAssetBatches 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 计算 `sort asset batches` 排序结果，保证表格交互的顺序稳定。 */
 function sortAssetBatches(items: any[], sort: AssetBatchSortState) {
   return [...items].sort((left, right) => {
     const primary = compareAssetBatchValues(assetBatchSortValue(left, sort.key), assetBatchSortValue(right, sort.key));
@@ -45,13 +45,13 @@ function sortAssetBatches(items: any[], sort: AssetBatchSortState) {
   });
 }
 
-/** 中文注释：实现 ariaSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 计算 `aria sort` 排序结果，保证表格交互的顺序稳定。 */
 function ariaSort(sort: AssetBatchSortState, key: AssetBatchSortKey): "none" | "ascending" | "descending" {
   if (sort.key !== key) return "none";
   return sort.direction === "asc" ? "ascending" : "descending";
 }
 
-/** 中文注释：实现 AssetBatchSortHeader 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `AssetBatchSortHeader` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 function AssetBatchSortHeader({ sort, sortKey, label, onSort }: { sort: AssetBatchSortState; sortKey: AssetBatchSortKey; label: string; onSort: (key: AssetBatchSortKey) => void }) {
   const active = sort.key === sortKey;
   const icon = active ? (sort.direction === "asc" ? "↑" : "↓") : "↕";
@@ -63,7 +63,7 @@ function AssetBatchSortHeader({ sort, sortKey, label, onSort }: { sort: AssetBat
   );
 }
 
-/** 中文注释：实现 ExperimentStudioView 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `ExperimentStudioView` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function ExperimentStudioView(props: ExperimentStudioViewProps) {
   const {
     WIZARD_STEPS,
@@ -250,13 +250,13 @@ export function ExperimentStudioView(props: ExperimentStudioViewProps) {
   const visibleBatchItems = sortedBatchItems.slice((safeAssetBatchPage - 1) * assetBatchPageSize, safeAssetBatchPage * assetBatchPageSize);
   const effectiveBatchMax = Math.max(assetNeedCount, Number(batchCallableMax || selectedBatch?.callable_assets || 0));
 
-  /** 中文注释：实现 toggleAssetBatchSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+  /** 转换 `toggle asset 批处理 sort` 输入，保证接口数据能被页面安全使用。 */
   const toggleAssetBatchSort = (key: AssetBatchSortKey) => {
     setAssetBatchSort((current) => ({ key, direction: current.key === key && current.direction === "desc" ? "asc" : "desc" }));
     setAssetBatchPage(1);
   };
 
-  /** 中文注释：实现 chooseBatch 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+  /** 整理 `choose 批处理` 前端辅助逻辑，保持数据转换和展示口径一致。 */
   const chooseBatch = (batch: any) => {
     setSelectedBatchId(batch.batch_id);
     const selectableCount = Number(batch.selectable_assets || batch.callable_assets || 0);

@@ -1,17 +1,17 @@
 // 文件说明：该文件属于前端业务工具，集中实现 caseBundleText 相关逻辑。
 export type CaseStage = "clean" | "adv";
 
-/** 中文注释：实现 asRecord 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 整理 `as record` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
 }
 
-/** 中文注释：实现 stageRecord 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 整理 `stage record` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function stageRecord(root: unknown, stage: CaseStage): Record<string, unknown> {
   return asRecord(asRecord(root)[stage]);
 }
 
-/** 中文注释：实现 textValue 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 生成 `文本 value` 展示值，统一页面标签、颜色和缺省文案。 */
 function textValue(value: unknown): string {
   if (value === null || value === undefined) {
     return "";
@@ -19,19 +19,19 @@ function textValue(value: unknown): string {
   return String(value).trim();
 }
 
-/** 中文注释：实现 extractAttackText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 生成 `extract 攻击 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 function extractAttackText(outputText: string): string {
   const marker = "攻击文本：";
   return outputText.includes(marker) ? outputText.split(marker, 2)[1].trim() : "";
 }
 
-/** 中文注释：实现 stripEmbeddedInputText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 生成 `strip embedded input 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 function stripEmbeddedInputText(outputText: string): string {
   const marker = "，攻击文本：";
   return outputText.includes(marker) ? outputText.split(marker, 2)[0].trim() : outputText;
 }
 
-/** 中文注释：实现 formatCaseOutputText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 格式化 `format 案例 output 文本`，统一页面展示文本和缺省值。 */
 export function formatCaseOutputText(value: unknown): string {
   const raw = value === null || value === undefined || value === "" ? "未记录输出说明" : value;
   return stripEmbeddedInputText(textValue(raw)
@@ -39,7 +39,7 @@ export function formatCaseOutputText(value: unknown): string {
     .replace(/score=/gi, "分数="));
 }
 
-/** 中文注释：实现 caseOutputText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 生成 `案例 output 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 export function caseOutputText(bundle: Record<string, unknown>, stage: CaseStage): string {
   const node = stageRecord(bundle.outputs, stage);
   const text = textValue(node.text);
@@ -48,7 +48,7 @@ export function caseOutputText(bundle: Record<string, unknown>, stage: CaseStage
   return formatCaseOutputText(text || reason || score || "未记录输出说明");
 }
 
-/** 中文注释：实现 caseInputText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 生成 `案例 input 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 export function caseInputText(bundle: Record<string, unknown>, stage: CaseStage): string {
   const inputs = asRecord(bundle.inputs);
   const direct = textValue(stageRecord(inputs, stage).text);
@@ -64,7 +64,7 @@ export function caseInputText(bundle: Record<string, unknown>, stage: CaseStage)
 }
 
 
-/** 中文注释：实现 isLikelyEnglishText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 判断 `是否 likely english 文本` 状态，支撑页面分支渲染或按钮可用性。 */
 export function isLikelyEnglishText(value: unknown): boolean {
   const text = textValue(value);
   if (!text || /[\u4e00-\u9fff]/.test(text)) return false;
@@ -72,7 +72,7 @@ export function isLikelyEnglishText(value: unknown): boolean {
   return letters >= 3;
 }
 
-/** 中文注释：实现 caseInputLabel 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 生成 `案例 input label` 展示值，统一页面标签、颜色和缺省文案。 */
 export function caseInputLabel(stage: CaseStage, taskKind: string, value: unknown): string {
   const kind = String(taskKind || "").toLowerCase();
   const english = isLikelyEnglishText(value);
@@ -84,7 +84,7 @@ export function caseInputLabel(stage: CaseStage, taskKind: string, value: unknow
   return stage === "clean" ? "原始输入文本" : "攻击后输入文本";
 }
 
-/** 中文注释：实现 caseOutputLabel 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 生成 `案例 output label` 展示值，统一页面标签、颜色和缺省文案。 */
 export function caseOutputLabel(stage: CaseStage, taskKind: string, value: unknown): string {
   const kind = String(taskKind || "").toLowerCase();
   if (kind !== "vqa" && kind !== "caption") return "检索分数";

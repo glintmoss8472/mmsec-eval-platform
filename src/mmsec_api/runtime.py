@@ -16,7 +16,7 @@ from mmsec_eval.config.schema import BootstrapConfig
 from mmsec_eval.plugins.builtin import register_builtin_plugins
 
 
-# 中文注释：封装 _load_bootstrap_config 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
+# 加载 `bootstrap 配置`，把外部文件、配置或运行产物转换为内存结构。
 def _load_bootstrap_config() -> BootstrapConfig:
     if os.getenv("MMSEC_BOOTSTRAP_ENABLED", "").strip() in {"0", "false", "False"}:
         cfg = BootstrapConfig()
@@ -29,7 +29,7 @@ def _load_bootstrap_config() -> BootstrapConfig:
         return BootstrapConfig()
 
 
-# 中文注释：实现 ensure_app_runtime 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 确保 `应用 runtime` 已准备好，不满足条件时主动创建、下载或报错。
 def ensure_app_runtime(
     app: FastAPI,
     *,

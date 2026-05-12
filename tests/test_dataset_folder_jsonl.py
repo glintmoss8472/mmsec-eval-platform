@@ -10,7 +10,7 @@ from PIL import Image
 from mmsec_eval.datasets.folder_jsonl import load_folder_jsonl
 
 
-# 中文注释：验证 test_folder_jsonl_loader 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `folder JSONL loader` 场景，防止相关行为在后续修改中退化。
 def test_folder_jsonl_loader(tmp_path: Path):
     image_path = tmp_path / "a.png"
     arr = (np.ones((32, 32, 3)) * 200).astype("uint8")

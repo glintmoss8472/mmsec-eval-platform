@@ -3,12 +3,12 @@ import type { ReactNode } from "react";
 
 type Tone = "blue" | "green" | "red" | "purple" | "orange";
 
-/** 中文注释：实现 GovIcon 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `GovIcon` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function GovIcon({ tone = "blue", children }: { tone?: Tone; children: ReactNode }) {
   return <span className={`gov-icon gov-icon-${tone}`}>{children}</span>;
 }
 
-/** 中文注释：实现 GovPanel 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `GovPanel` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function GovPanel({
   title,
   children,
@@ -26,7 +26,7 @@ export function GovPanel({
   );
 }
 
-/** 中文注释：实现 GovMetric 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `GovMetric` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function GovMetric({
   title,
   value,
@@ -61,12 +61,12 @@ export function GovMetric({
   );
 }
 
-/** 中文注释：实现 MiniStatus 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `MiniStatus` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function MiniStatus({ tone = "blue", children }: { tone?: Tone; children: ReactNode }) {
   return <span className={`gov-mini-status gov-mini-${tone}`}>{children}</span>;
 }
 
-/** 中文注释：实现 ShieldIcon 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `ShieldIcon` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function ShieldIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -76,7 +76,7 @@ export function ShieldIcon() {
   );
 }
 
-/** 中文注释：实现 CubeIcon 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `CubeIcon` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function CubeIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -86,7 +86,7 @@ export function CubeIcon() {
   );
 }
 
-/** 中文注释：实现 DatabaseIcon 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `DatabaseIcon` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function DatabaseIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -97,7 +97,7 @@ export function DatabaseIcon() {
   );
 }
 
-/** 中文注释：实现 ClipboardIcon 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `ClipboardIcon` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function ClipboardIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -108,7 +108,7 @@ export function ClipboardIcon() {
   );
 }
 
-/** 中文注释：实现 AlertIcon 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `AlertIcon` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function AlertIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -118,7 +118,7 @@ export function AlertIcon() {
   );
 }
 
-/** 中文注释：实现 ChartIcon 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `ChartIcon` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function ChartIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -128,7 +128,7 @@ export function ChartIcon() {
   );
 }
 
-/** 中文注释：实现 ClockIcon 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `ClockIcon` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function ClockIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -138,7 +138,7 @@ export function ClockIcon() {
   );
 }
 
-/** 中文注释：实现 CheckIcon 的核心流程，支撑前端组件中的业务语义和异常边界。 */
+/** 渲染 `CheckIcon` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function CheckIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">

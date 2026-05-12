@@ -12,7 +12,7 @@ from mmsec_eval.io.jsonl_io import read_jsonl
 from mmsec_eval.plugins.builtin import register_builtin_plugins
 
 
-# 中文注释：验证 test_train_advclip_use_gan 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `train advclip use gan` 场景，防止相关行为在后续修改中退化。
 def test_train_advclip_use_gan(tmp_path: Path) -> None:
     register_builtin_plugins()
 

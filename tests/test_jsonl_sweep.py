@@ -7,7 +7,7 @@ from mmsec_eval.cli import cmd_run_sweep
 from mmsec_eval.io.jsonl_io import write_jsonl
 
 
-# 中文注释：验证 test_run_sweep_smoke 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `运行记录 参数扫描 smoke` 场景，防止相关行为在后续修改中退化。
 def test_run_sweep_smoke(tmp_path: Path):
     cfg = tmp_path / "cfg.yaml"
     cfg.write_text(

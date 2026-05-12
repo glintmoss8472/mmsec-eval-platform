@@ -20,18 +20,18 @@ const METRIC_OPTIONS: Array<{ value: MetricKey; label: string }> = [
   { value: "clean_recall", label: "原始召回率" },
 ];
 
-/** 中文注释：实现 asRecord 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `as record` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
 }
 
-/** 中文注释：实现 asNum 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `as 数值` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function asNum(value: unknown): number {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
 }
 
-/** 中文注释：实现 parseMetricPoint 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 转换 `parse 指标 point` 输入，保证接口数据能被页面安全使用。 */
 function parseMetricPoint(value: unknown): MetricPoint {
   const row = asRecord(value);
   const cleanRecall = asNum(row.clean_recall);
@@ -43,16 +43,17 @@ function parseMetricPoint(value: unknown): MetricPoint {
   };
 }
 
-/** 中文注释：实现 shortRunId 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `short 运行记录 id` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function shortRunId(runId: string): string {
   return runId.length > 16 ? `${runId.slice(0, 8)}...${runId.slice(-6)}` : runId;
 }
 
-/** 中文注释：实现 metricLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `指标 label` 展示值，统一页面标签、颜色和缺省文案。 */
 function metricLabel(metric: MetricKey): string {
   return METRIC_OPTIONS.find((item) => item.value === metric)?.label ?? metric;
 }
 
+/** 渲染 `ExperimentComparePage` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export default function ExperimentComparePage() {
   const runsQ = useQuery({ queryKey: ["runs-compare"], queryFn: () => listRuns({ page: 1, page_size: 200 }) });
   const [selected, setSelected] = useState<string[]>([]);

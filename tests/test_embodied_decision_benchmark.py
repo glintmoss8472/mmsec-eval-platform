@@ -4,7 +4,7 @@ from __future__ import annotations
 from mmsec_eval.embodied.decision_benchmark import evaluate_decision_cases, summarize_decision_cases
 
 
-# 中文注释：验证 test_embodied_decision_loop_counts_valid_wrong_decisions 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `embodied decision loop counts valid wrong decisions` 场景，防止相关行为在后续修改中退化。
 def test_embodied_decision_loop_counts_valid_wrong_decisions():
     rows = [
         {

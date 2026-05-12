@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 
 
-# 中文注释：实现 attention_to_critical_mask 的核心流程，支撑TMM 迁移攻击模块中的业务语义和异常边界。
+# 执行 `attention to critical mask` 辅助逻辑，保持TMM 迁移攻击模块中的输入处理和结果输出一致。
 def attention_to_critical_mask(att_map: np.ndarray, threshold: float) -> np.ndarray:
     """Convert an attention map to a boolean critical-region mask."""
     m = np.asarray(att_map, dtype=np.float32)
@@ -14,7 +14,7 @@ def attention_to_critical_mask(att_map: np.ndarray, threshold: float) -> np.ndar
     return (m >= thr).astype(np.float32)
 
 
-# 中文注释：实现 allocate_budget 的核心流程，支撑TMM 迁移攻击模块中的业务语义和异常边界。
+# 执行 `allocate budget` 辅助逻辑，保持TMM 迁移攻击模块中的输入处理和结果输出一致。
 def allocate_budget(mask_hw: np.ndarray, eps_v: float, ratio_r: float) -> tuple[float, float]:
     """ADFP budget split (approx).
 
@@ -36,7 +36,7 @@ def allocate_budget(mask_hw: np.ndarray, eps_v: float, ratio_r: float) -> tuple[
     return eps_crit, eps_noncrit
 
 
-# 中文注释：实现 input_diversity 的核心流程，支撑TMM 迁移攻击模块中的业务语义和异常边界。
+# 执行 `input diversity` 辅助逻辑，保持TMM 迁移攻击模块中的输入处理和结果输出一致。
 def input_diversity(images, *, rng: np.random.Generator, p: float = 0.7, low: float = 0.9):
     """DI-FGSM style input diversity (differentiable).
 

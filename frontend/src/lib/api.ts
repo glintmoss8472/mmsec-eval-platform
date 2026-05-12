@@ -622,7 +622,7 @@ export interface SystemCompliance {
   };
 }
 
-/** 中文注释：实现 health 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /health` 接口，并把响应数据转换成前端约定的类型。 */
 export async function health() {
   return (await api.get("/health")).data as {
     status: string;
@@ -632,12 +632,12 @@ export async function health() {
   };
 }
 
-/** 中文注释：实现 listJobs 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /jobs` 接口，并把响应数据转换成前端约定的类型。 */
 export async function listJobs(params: { page?: number; page_size?: number; status?: string } = {}) {
   return (await api.get("/jobs", { params })).data as { total: number; items: JobItem[] };
 }
 
-/** 中文注释：实现 createJob 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `POST /jobs` 接口提交数据，并返回后端创建或更新后的结果。 */
 export async function createJob(payload: {
   job_type: JobType;
   config_path: string;
@@ -658,37 +658,37 @@ export async function createJob(payload: {
   }
 }
 
-/** 中文注释：实现 listJobLogs 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /jobs/{jobId}/logs` 接口，并把响应数据转换成前端约定的类型。 */
 export async function listJobLogs(jobId: string, params: { page?: number; page_size?: number } = {}) {
   return (await api.get(`/jobs/${jobId}/logs`, { params })).data as { total: number; items: JobLogResponse[] };
 }
 
-/** 中文注释：实现 getJobProgress 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /jobs/{jobId}/progress` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getJobProgress(jobId: string) {
   return (await api.get(`/jobs/${jobId}/progress`)).data as JobProgressResponse;
 }
 
-/** 中文注释：实现 cancelJob 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `POST /jobs/{jobId}/cancel` 接口取消任务，并返回更新后的任务状态。 */
 export async function cancelJob(jobId: string) {
   return (await api.post(`/jobs/${jobId}/cancel`)).data as JobItem;
 }
 
-/** 中文注释：实现 listRuns 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /runs` 接口，并把响应数据转换成前端约定的类型。 */
 export async function listRuns(params: RunQueryParams = {}) {
   return (await api.get("/runs", { params })).data as { total: number; page: number; page_size: number; items: RunItem[] };
 }
 
-/** 中文注释：实现 getRunAnalytics 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /runs/analytics` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getRunAnalytics(params: Omit<RunQueryParams, "page" | "page_size" | "sort_by" | "sort_dir"> = {}) {
   return (await api.get("/runs/analytics", { params })).data as RunAnalyticsResponse;
 }
 
-/** 中文注释：实现 getRunOptions 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /runs/options` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getRunOptions(params: { exclude_demo?: boolean } = {}) {
   return (await api.get("/runs/options", { params })).data as RunOptionsResponse;
 }
 
-/** 中文注释：实现 listCaseIndex 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /runs/cases` 接口，并把响应数据转换成前端约定的类型。 */
 export async function listCaseIndex(params: {
   page?: number;
   page_size?: number;
@@ -709,7 +709,7 @@ export async function listCaseIndex(params: {
   return (await api.get("/runs/cases", { params })).data as { total: number; items: CaseIndexItem[] };
 }
 
-/** 中文注释：实现 listSampleAssets 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /samples` 接口，并把响应数据转换成前端约定的类型。 */
 export async function listSampleAssets(params: {
   page?: number;
   page_size?: number;
@@ -725,7 +725,7 @@ export async function listSampleAssets(params: {
 }
 
 
-/** 中文注释：实现 listSampleAssetBatches 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /samples/batches` 接口，并把响应数据转换成前端约定的类型。 */
 export async function listSampleAssetBatches(params: {
   page?: number;
   page_size?: number;
@@ -743,7 +743,7 @@ export async function listSampleAssetBatches(params: {
   return (await api.get("/samples/batches", { params })).data as SampleAssetBatchListResponse;
 }
 
-/** 中文注释：实现 compareRuns 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /runs/compare` 接口对比多个运行记录，并返回聚合后的比较结果。 */
 export async function compareRuns(runIds: string[]) {
   const joined = runIds.join(",");
   return (await api.get("/runs/compare", { params: { run_ids: joined } })).data as {
@@ -752,22 +752,22 @@ export async function compareRuns(runIds: string[]) {
   };
 }
 
-/** 中文注释：实现 getRunSummary 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /runs/{runId}/summary` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getRunSummary(runId: string) {
   return (await api.get(`/runs/${runId}/summary`)).data as Record<string, unknown>;
 }
 
-/** 中文注释：实现 getRunReportData 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /runs/{runId}/report-data` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getRunReportData(runId: string) {
   return (await api.get(`/runs/${runId}/report-data`)).data as Record<string, unknown>;
 }
 
-/** 中文注释：实现 getRunCases 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /runs/{runId}/cases` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getRunCases(runId: string, params: { page?: number; page_size?: number } = {}) {
   return (await api.get(`/runs/${runId}/cases`, { params })).data as { total: number; items: Record<string, unknown>[] };
 }
 
-/** 中文注释：实现 getCaseDetail 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /runs/{runId}/cases/{sampleId}` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getCaseDetail(runId: string, sampleId: string) {
   return (await api.get(`/runs/${runId}/cases/${sampleId}`)).data as {
     case_bundle: Record<string, unknown>;
@@ -775,12 +775,12 @@ export async function getCaseDetail(runId: string, sampleId: string) {
   };
 }
 
-/** 中文注释：实现 listDatasets 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /datasets` 接口，并把响应数据转换成前端约定的类型。 */
 export async function listDatasets() {
   return (await api.get("/datasets")).data as { items: DatasetItem[] };
 }
 
-/** 中文注释：实现 prepareDataset 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `POST /datasets/prepare` 接口提交数据，并返回后端创建或更新后的结果。 */
 export async function prepareDataset(payload: {
   name: "flickr30k" | "flickr1k" | "coco_subset";
   root_path?: string;
@@ -795,47 +795,47 @@ export async function prepareDataset(payload: {
   return (await api.post("/datasets/prepare", payload)).data as JobItem;
 }
 
-/** 中文注释：实现 ingestDocs 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `POST /docs/ingest` 接口提交数据，并返回后端创建或更新后的结果。 */
 export async function ingestDocs(configPath: string) {
   return (await api.post("/docs/ingest", { config_path: configPath })).data as JobItem;
 }
 
-/** 中文注释：实现 docsIndex 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /docs/index` 接口，并把响应数据转换成前端约定的类型。 */
 export async function docsIndex() {
   return (await api.get("/docs/index")).data as { items: Record<string, unknown>[] };
 }
 
-/** 中文注释：实现 docsSnippets 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /docs/snippets` 接口，并把响应数据转换成前端约定的类型。 */
 export async function docsSnippets() {
   return (await api.get("/docs/snippets")).data as { items: Record<string, unknown>[] };
 }
 
-/** 中文注释：实现 getBootstrapStatus 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /bootstrap/status` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getBootstrapStatus() {
   return (await api.get("/bootstrap/status")).data as BootstrapStatus;
 }
 
-/** 中文注释：实现 getBootstrapLogs 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /bootstrap/logs` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getBootstrapLogs(limit = 200) {
   return (await api.get("/bootstrap/logs", { params: { limit } })).data as { items: { ts: string; level: string; message: string }[] };
 }
 
-/** 中文注释：实现 retryBootstrap 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `POST /bootstrap/retry` 接口提交数据，并返回后端创建或更新后的结果。 */
 export async function retryBootstrap() {
   return (await api.post("/bootstrap/retry")).data as BootstrapStatus;
 }
 
-/** 中文注释：实现 getSystemOverview 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /system/overview` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getSystemOverview() {
   return (await api.get("/system/overview")).data as SystemOverview;
 }
 
-/** 中文注释：实现 getSystemCompliance 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 请求 `GET /system/compliance` 接口，并把响应数据转换成前端约定的类型。 */
 export async function getSystemCompliance() {
   return (await api.get("/system/compliance")).data as SystemCompliance;
 }
 
-/** 中文注释：实现 runAssetUrl 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
+/** 拼接 `运行记录 asset URL`，把运行记录、资源路径和后端基址转换成可访问地址。 */
 export function runAssetUrl(runId: string, path: string) {
   const norm = path.replace(/\\/g, "/").replace(/^\/+/, "");
   return `${API_BASE}/runs/${runId}/assets/${norm}`;

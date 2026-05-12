@@ -15,12 +15,12 @@ type StageView = {
   flow_message?: string;
 };
 
-/** 中文注释：实现 isRunning 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 判断 `是否 running` 状态，支撑页面分支渲染或按钮可用性。 */
 function isRunning(status?: string) {
   return status === "running" || status === "queued";
 }
 
-/** 中文注释：实现 etaLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `eta label` 展示值，统一页面标签、颜色和缺省文案。 */
 function etaLabel(status?: string, seconds?: number) {
   if (status === "success") return "已完成";
   if (status === "failed" || status === "cancelled") return "已结束";
@@ -28,7 +28,7 @@ function etaLabel(status?: string, seconds?: number) {
   return `${Math.max(1, Math.round(seconds / 60))} 分钟`;
 }
 
-/** 中文注释：实现 parseOverride 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 转换 `parse override` 输入，保证接口数据能被页面安全使用。 */
 function parseOverride(raw?: string): Record<string, unknown> {
   if (!raw) return {};
   try {
@@ -39,12 +39,12 @@ function parseOverride(raw?: string): Record<string, unknown> {
   }
 }
 
-/** 中文注释：实现 nestedRecord 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `nested record` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function nestedRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null ? value as Record<string, unknown> : {};
 }
 
-/** 中文注释：实现 inferAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `infer 攻击` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function inferAttack(job?: { config_path?: string; override_json?: string }) {
   const override = parseOverride(job?.override_json);
   const attack = nestedRecord(override.plugins).attack || nestedRecord(override.attack).name;
@@ -56,12 +56,12 @@ function inferAttack(job?: { config_path?: string; override_json?: string }) {
   return "";
 }
 
-/** 中文注释：实现 isSampleGenerationOnlyJob 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 判断 `是否 样本 生成式评测 only 任务` 状态，支撑页面分支渲染或按钮可用性。 */
 function isSampleGenerationOnlyJob(job?: { job_type?: string; override_json?: string }): boolean {
   return workflowType(job) === "sample_generation_only" || job?.job_type === "generate_sample_assets";
 }
 
-/** 中文注释：实现 inferModel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `infer 模型` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function inferModel(job?: { config_path?: string; job_type?: string; override_json?: string }) {
   if (isSampleGenerationOnlyJob(job)) return "";
   const override = parseOverride(job?.override_json);
@@ -77,14 +77,14 @@ function inferModel(job?: { config_path?: string; job_type?: string; override_js
   return "";
 }
 
-/** 中文注释：实现 inferCurrentVictim 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `infer current victim` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function inferCurrentVictim(message?: string): string {
   const text = String(message || "");
   const match = text.match(/(openai_[a-z0-9_]+|clip_hf|blip_itm|vilt_itm)/i);
   return match ? match[1] : "";
 }
 
-/** 中文注释：实现 inferSampleTotal 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `infer 样本 total` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function inferSampleTotal(
   job?: { override_json?: string },
   stages?: Array<{ message?: string }>,
@@ -99,7 +99,7 @@ function inferSampleTotal(
   return Number(dataset.max_items || runner.max_samples || 0) || 0;
 }
 
-/** 中文注释：实现 uiTaskName 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `界面 任务 名称` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function uiTaskName(job?: { job_type?: string; override_json?: string }, model?: string, attack?: string): string {
   if (!job) return "暂无任务";
   const override = parseOverride(job.override_json);
@@ -112,14 +112,14 @@ function uiTaskName(job?: { job_type?: string; override_json?: string }, model?:
   return formatJobType(job.job_type || "run_eval");
 }
 
-/** 中文注释：实现 workflowType 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `workflow 类型` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function workflowType(job?: { override_json?: string }): string {
   const override = parseOverride(job?.override_json);
   const extra = nestedRecord(override.extra);
   return String(extra.workflow_type || "");
 }
 
-/** 中文注释：实现 inferWorkflow 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `infer workflow` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function inferWorkflow(job?: { job_type?: string; override_json?: string }): string {
   if (isSampleGenerationOnlyJob(job)) return "待测评样本生成任务";
   const workflow = workflowType(job);
@@ -129,7 +129,7 @@ function inferWorkflow(job?: { job_type?: string; override_json?: string }): str
   return "自动化测评任务";
 }
 
-/** 中文注释：实现 metricTaskName 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `指标 任务 名称` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function metricTaskName(value: string): string {
   const text = String(value || "").trim();
   const lower = text.toLowerCase();
@@ -141,7 +141,7 @@ function metricTaskName(value: string): string {
   return text || "暂无任务";
 }
 
-/** 中文注释：实现 statusDetailLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `状态 详情 label` 展示值，统一页面标签、颜色和缺省文案。 */
 function statusDetailLabel(status?: string): string {
   if (status === "failed") return "失败原因：";
   if (status === "cancelled") return "取消原因：";
@@ -149,7 +149,7 @@ function statusDetailLabel(status?: string): string {
   return "当前正在执行：";
 }
 
-/** 中文注释：实现 statusDetailMessage 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `状态 详情 message` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function statusDetailMessage(
   status: string | undefined,
   currentStageMessage: string | undefined,
@@ -168,12 +168,12 @@ function statusDetailMessage(
   return formatBackendMessage(currentStageMessage || selectedJob?.error_message || "等待后端状态");
 }
 
-/** 中文注释：实现 findStageState 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `find stage state` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function findStageState(stages: Array<{ stage_key?: string; state?: string; progress_percent?: number }>, key: string): string {
   return stages.find((stage) => stage.stage_key === key)?.state || "pending";
 }
 
-/** 中文注释：实现 phaseState 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `phase state` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function phaseState(
   stages: Array<{ stage_key?: string; state?: string; progress_percent?: number }>,
   keys: string[],
@@ -187,7 +187,7 @@ function phaseState(
   return fallback;
 }
 
-/** 中文注释：实现 phaseProgress 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `phase 进度` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function phaseProgress(stages: Array<{ stage_key?: string; progress_percent?: number }>, keys: string[], fallback = 0): number {
   const values = keys
     .map((key) => Number(stages.find((stage) => stage.stage_key === key)?.progress_percent))
@@ -196,7 +196,7 @@ function phaseProgress(stages: Array<{ stage_key?: string; progress_percent?: nu
   return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
 }
 
-/** 中文注释：实现 statusByJob 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `状态 by 任务` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function statusByJob(status?: string): string {
   if (status === "success") return "success";
   if (status === "failed") return "failed";
@@ -204,12 +204,12 @@ function statusByJob(status?: string): string {
   return "pending";
 }
 
-/** 中文注释：实现 isGenerationJob 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 判断 `是否 生成式评测 任务` 状态，支撑页面分支渲染或按钮可用性。 */
 function isGenerationJob(jobType?: string): boolean {
   return ["run_vqa", "run_caption"].includes(String(jobType || ""));
 }
 
-/** 中文注释：实现 phaseProgressForState 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `phase 进度 所属 state` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function phaseProgressForState(
   stages: Array<{ stage_key?: string; progress_percent?: number }>,
   keys: string[],
@@ -220,7 +220,7 @@ function phaseProgressForState(
   return phaseProgress(stages, keys, fallback);
 }
 
-/** 中文注释：实现 phaseStateWithFailure 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `phase state with failure` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 function phaseStateWithFailure(
   stages: Array<{ stage_key?: string; state?: string; progress_percent?: number }>,
   keys: string[],
@@ -237,7 +237,7 @@ function phaseStateWithFailure(
   return state;
 }
 
-/** 中文注释：实现 buildDisplayStages 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 构建 `build display stages` 结构，供页面渲染或测试断言复用。 */
 function buildDisplayStages(
   stages: Array<{ stage_key?: string; state?: string; progress_percent?: number }>,
   jobStatus: string | undefined,
@@ -351,6 +351,7 @@ function buildDisplayStages(
   ];
 }
 
+/** 渲染 `JobCenterPage` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export default function JobCenterPage() {
   const qc = useQueryClient();
   const [activeJob, setActiveJob] = useState("");

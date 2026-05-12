@@ -10,7 +10,7 @@ from mmsec_eval.plugins.builtin import register_builtin_plugins
 from mmsec_eval.runner.eval_runner import run
 
 
-# 中文注释：验证 test_eval_runner_defense_metrics 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `评测 runner 防御 指标` 场景，防止相关行为在后续修改中退化。
 def test_eval_runner_defense_metrics(tmp_path: Path):
     register_builtin_plugins()
     cfg = load_config("configs/mvp.yaml")

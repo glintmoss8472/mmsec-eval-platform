@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 
 
-# 中文注释：实现 save_image_png 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 写出 `图像 png`，保证后续报告、页面或复现实验能读取。
 def save_image_png(path: str, image: np.ndarray) -> str:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -19,7 +19,7 @@ def save_image_png(path: str, image: np.ndarray) -> str:
     return str(p)
 
 
-# 中文注释：实现 write_json 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 写出 `JSON`，保证后续报告、页面或复现实验能读取。
 def write_json(path: str, data: dict[str, Any]) -> str:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -27,7 +27,7 @@ def write_json(path: str, data: dict[str, Any]) -> str:
     return str(p)
 
 
-# 中文注释：实现 write_jsonl 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 写出 `JSONL`，保证后续报告、页面或复现实验能读取。
 def write_jsonl(path: str, rows: list[dict[str, Any]]) -> str:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)

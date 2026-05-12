@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 
-# 中文注释：串联 main 的主流程，集中处理外部攻击脚本的初始化、执行和退出条件。
+# 作为 `anyattack_demo_one.py` 的执行入口，串联参数读取、核心处理和退出状态。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run official AnyAttack demo.py for one image pair.")
     parser.add_argument("--repo_dir", required=True)

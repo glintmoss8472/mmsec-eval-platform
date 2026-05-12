@@ -9,13 +9,13 @@ from mmsec_api.services.system_overview import build_system_compliance, build_sy
 router = APIRouter(prefix="/api/v1/system", tags=["system"])
 
 
-# 中文注释：处理 system_overview 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /overview` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/overview", response_model=SystemOverviewResponse)
 def system_overview(request: Request) -> SystemOverviewResponse:
     return SystemOverviewResponse(**build_system_overview(request))
 
 
-# 中文注释：处理 system_compliance 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /compliance` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("/compliance", response_model=SystemComplianceResponse)
 def system_compliance(request: Request) -> SystemComplianceResponse:
     return SystemComplianceResponse(**build_system_compliance(request))

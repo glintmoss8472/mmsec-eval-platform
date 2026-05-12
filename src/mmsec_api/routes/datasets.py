@@ -14,7 +14,7 @@ from mmsec_api.worker.queue import JobQueue
 router = APIRouter(prefix="/api/v1/datasets", tags=["datasets"])
 
 
-# 中文注释：处理 list_datasets 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `GET /` 接口，完成请求校验、存储访问和响应模型组装。
 @router.get("", response_model=DatasetListResponse)
 def list_datasets(store: SQLiteStore = Depends(get_store)) -> DatasetListResponse:
     project_root = Path(__file__).resolve().parents[3]
@@ -22,7 +22,7 @@ def list_datasets(store: SQLiteStore = Depends(get_store)) -> DatasetListRespons
     return DatasetListResponse(items=items)
 
 
-# 中文注释：处理 prepare_dataset 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
+# 处理 `POST /prepare` 接口，完成请求校验、存储访问和响应模型组装。
 @router.post("/prepare", response_model=JobResponse)
 def prepare_dataset(
     payload: DatasetPrepareRequest,

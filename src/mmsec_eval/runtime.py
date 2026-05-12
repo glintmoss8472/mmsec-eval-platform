@@ -13,12 +13,12 @@ from mmsec_eval.model_adapters.local_vlm_catalog import LOCAL_OPENAI_COMPAT_MODE
 LOG = logging.getLogger(__name__)
 
 
-# 中文注释：封装 _truthy 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
+# 判断 `真值` 输入是否表示真值，兼容字符串、数字和布尔类型。
 def _truthy(value: str) -> bool:
     return str(value).strip() in {"1", "true", "True", "yes", "on"}
 
 
-# 中文注释：封装 _detect_torch 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
+# 执行 `detect PyTorch` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 def _detect_torch() -> tuple[Any | None, str]:
     try:
         import torch  # type: ignore
@@ -28,7 +28,7 @@ def _detect_torch() -> tuple[Any | None, str]:
         return None, str(e)
 
 
-# 中文注释：封装 _torch_has_cuda 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
+# 执行 `PyTorch 是否包含 CUDA` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 def _torch_has_cuda(torch_mod: Any) -> bool:
     try:
         if getattr(torch_mod, "version", None) is None:
@@ -41,19 +41,19 @@ def _torch_has_cuda(torch_mod: Any) -> bool:
         return False
 
 
-# 中文注释：实现 torch_install_command 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 执行 `PyTorch install command` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 def torch_install_command() -> str:
     if platform.system().lower().startswith("win"):
         return "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install_torch_cuda.ps1"
     return "bash scripts/install_torch_cuda.sh"
 
 
-# 中文注释：实现 torch_install_hint 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 执行 `PyTorch install hint` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 def torch_install_hint() -> str:
     return f"Run `{torch_install_command()}` and re-run."
 
 
-# 中文注释：实现 resolve_runtime_device 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 解析 `runtime device` 的真实位置或配置值，减少调用方重复分支。
 def resolve_runtime_device(cfg: AppConfig) -> str:
     """Resolve the actual runtime device for the current run.
 
@@ -84,7 +84,7 @@ def resolve_runtime_device(cfg: AppConfig) -> str:
     )
 
 
-# 中文注释：实现 apply_runtime_env 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 应用 `runtime 环境` 规则，把兼容字段写回报告或风险载荷。
 def apply_runtime_env(cfg: AppConfig) -> str:
     """Apply runtime-related environment variables for downstream plugins.
 
@@ -105,7 +105,7 @@ def apply_runtime_env(cfg: AppConfig) -> str:
     return device
 
 
-# 中文注释：实现 apply_local_vlm_env_defaults 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 应用 `本地 视觉语言模型 环境 defaults` 规则，把兼容字段写回报告或风险载荷。
 def apply_local_vlm_env_defaults(*, include_api_key_env: bool = False, include_timeout: bool = False) -> None:
     """Apply default environment variables for self-hosted OpenAI-compatible VLMs."""
     for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS:
@@ -117,7 +117,7 @@ def apply_local_vlm_env_defaults(*, include_api_key_env: bool = False, include_t
             os.environ.setdefault(spec.timeout_env, spec.timeout_default)
 
 
-# 中文注释：实现 apply_config_env 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 应用 `配置 环境` 规则，把兼容字段写回报告或风险载荷。
 def apply_config_env(cfg: AppConfig) -> str:
     """Apply runtime, model, judge, and adapter environment variables from config.
 
@@ -154,14 +154,14 @@ def apply_config_env(cfg: AppConfig) -> str:
     return device
 
 
-# 中文注释：实现 env_runtime_device 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 整理 `环境 runtime device`，描述当前服务器运行环境、模型入口或部署状态。
 def env_runtime_device(default: str = "cuda") -> str:
     """Read the resolved runtime device from env (set by apply_runtime_env)."""
     v = str(os.getenv("MMSEC_RUNTIME_DEVICE", "")).strip()
     return v if v else default
 
 
-# 中文注释：实现 env_strict_real 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 执行 `环境 strict real` 辅助逻辑，保持项目工程中的输入处理和结果输出一致。
 def env_strict_real(default: bool = False) -> bool:
     v = os.getenv("MMSEC_STRICT_REAL", "")
     if v == "":
@@ -169,7 +169,7 @@ def env_strict_real(default: bool = False) -> bool:
     return _truthy(v)
 
 
-# 中文注释：实现 env_model_enable_gradients 的核心流程，支撑项目工程中的业务语义和异常边界。
+# 推断 `环境 模型 enable gradients`，从样本、配置或运行记录中提取统一名称。
 def env_model_enable_gradients(default: bool = False) -> bool:
     v = os.getenv("MMSEC_MODEL_ENABLE_GRADIENTS", "")
     if v == "":

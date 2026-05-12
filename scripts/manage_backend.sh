@@ -13,20 +13,20 @@ HEALTH_URL="http://${HOST}:${PORT}/api/v1/health"
 
 mkdir -p "${LOG_DIR}"
 
-# 中文注释：实现 read_pid 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `read pid` 步骤，封装脚本中的可复用命令片段。
 read_pid() {
   if [[ -s "${PID_FILE}" ]]; then
     tr -d '[:space:]' < "${PID_FILE}"
   fi
 }
 
-# 中文注释：实现 pid_alive 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `pid alive` 步骤，封装脚本中的可复用命令片段。
 pid_alive() {
   local pid="${1:-}"
   [[ -n "${pid}" ]] && kill -0 "${pid}" >/dev/null 2>&1
 }
 
-# 中文注释：实现 pid_cmdline 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `pid cmdline` 步骤，封装脚本中的可复用命令片段。
 pid_cmdline() {
   local pid="${1:-}"
   if [[ -n "${pid}" && -r "/proc/${pid}/cmdline" ]]; then
@@ -34,7 +34,7 @@ pid_cmdline() {
   fi
 }
 
-# 中文注释：实现 pid_looks_like_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `pid looks like backend` 步骤，封装脚本中的可复用命令片段。
 pid_looks_like_backend() {
   local pid="${1:-}"
   local cmd
@@ -42,7 +42,7 @@ pid_looks_like_backend() {
   [[ "${cmd}" == *"mmsec_api.main:app"* || "${cmd}" == *"scripts/run_backend.sh"* ]]
 }
 
-# 中文注释：实现 port_pid 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `port pid` 步骤，封装脚本中的可复用命令片段。
 port_pid() {
   if command -v ss >/dev/null 2>&1; then
     ss -ltnp 2>/dev/null \
@@ -55,12 +55,12 @@ port_pid() {
     | awk -v port="${PORT}" '$2 ~ /python/ && $0 ~ /uvicorn mmsec_api.main:app/ && $0 ~ ("--port " port) {print $1; exit}'
 }
 
-# 中文注释：实现 health_ok 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `health ok` 步骤，封装脚本中的可复用命令片段。
 health_ok() {
   curl -fsS "${HEALTH_URL}" >/dev/null 2>&1
 }
 
-# 中文注释：实现 start_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 启动 `start backend` 进程，并准备日志、端口或运行目录。
 start_backend() {
   local pid
   pid="$(read_pid || true)"
@@ -102,7 +102,7 @@ start_backend() {
   return 1
 }
 
-# 中文注释：实现 stop_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 停止 `stop backend` 进程，避免残留服务占用资源。
 stop_backend() {
   local pid
   pid="$(read_pid || true)"
@@ -132,7 +132,7 @@ stop_backend() {
   return 1
 }
 
-# 中文注释：实现 status_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 处理 `状态 backend` 步骤，封装脚本中的可复用命令片段。
 status_backend() {
   local pid
   pid="$(read_pid || true)"

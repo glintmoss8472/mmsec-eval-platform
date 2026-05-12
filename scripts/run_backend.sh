@@ -21,7 +21,7 @@ RUNTIME_PYTHON_BIN=""
 
 cd "${PROJECT_ROOT}"
 
-# 中文注释：实现 python_mm 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 检查 `python mm` 条件，选择满足项目要求的 Python 运行时。
 python_mm() {
   local bin_path="$1"
   "${bin_path}" - <<'PY'
@@ -30,7 +30,7 @@ print(f"{sys.version_info[0]}.{sys.version_info[1]}")
 PY
 }
 
-# 中文注释：实现 python_ok 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 检查 `python ok` 条件，选择满足项目要求的 Python 运行时。
 python_ok() {
   local version
   version="$(python_mm "$1" 2>/dev/null || echo '0.0')"
@@ -41,7 +41,7 @@ python_ok() {
   (( major > 3 || (major == 3 && minor >= 10) ))
 }
 
-# 中文注释：实现 python_has_runtime_deps 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
+# 检查 `python 是否包含 runtime deps` 条件，选择满足项目要求的 Python 运行时。
 python_has_runtime_deps() {
   local bin_path="$1"
   "${bin_path}" - <<'PY' >/dev/null 2>&1

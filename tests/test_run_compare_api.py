@@ -7,7 +7,7 @@ from pathlib import Path
 from api_test_utils import make_client
 
 
-# 中文注释：封装 _write_run 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 写出 `运行记录`，保证后续报告、页面或复现实验能读取。
 def _write_run(art: Path, run_id: str, asr: float, asr_def: float):
     run_dir = art / "runs" / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -39,7 +39,7 @@ def _write_run(art: Path, run_id: str, asr: float, asr_def: float):
     (run_dir / "report_data.json").write_text(json.dumps({"stage_metrics": {}}, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-# 中文注释：验证 test_runs_compare_api 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `运行记录 对比 API` 场景，防止相关行为在后续修改中退化。
 def test_runs_compare_api(tmp_path: Path, monkeypatch):
     art = tmp_path / "artifacts"
     _write_run(art, "r1", 0.6, 0.4)

@@ -7,7 +7,7 @@ from typing import Any
 from mmsec_eval.viz.render_report import render_report_html
 
 
-# 中文注释：实现 write_report 的核心流程，支撑评测运行器中的业务语义和异常边界。
+# 写出 `报告`，保证后续报告、页面或复现实验能读取。
 def write_report(run_dir: str, summary: dict[str, Any], rows: list[dict[str, Any]]) -> str:
     out = Path(run_dir) / "report.html"
     html = render_report_html(summary=summary, rows=rows, run_dir=run_dir)

@@ -8,7 +8,7 @@ from mmsec_eval.config.loader import _deep_merge
 from mmsec_eval.config.schema import AppConfig
 
 
-# 中文注释：实现 apply_override 的核心流程，支撑配置系统中的业务语义和异常边界。
+# 应用 `override` 规则，把兼容字段写回报告或风险载荷。
 def apply_override(base: AppConfig, override: dict[str, Any]) -> AppConfig:
     from mmsec_eval.config.loader import _to_config
 

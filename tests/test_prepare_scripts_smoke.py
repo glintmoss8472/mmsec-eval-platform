@@ -12,19 +12,19 @@ from PIL import Image
 import importlib.util
 
 
-# 中文注释：封装 _run_py 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 执行 `py` 流程，按配置驱动自动化测试完成一次任务。
 def _run_py(script: str, args: list[str]) -> subprocess.CompletedProcess[str]:
     cmd = [sys.executable, script] + args
     return subprocess.run(cmd, capture_output=True, text=True)
 
 
-# 中文注释：封装 _run_ps 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 执行 `ps` 流程，按配置驱动自动化测试完成一次任务。
 def _run_ps(script: str, args: list[str]) -> subprocess.CompletedProcess[str]:
     cmd = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script] + args
     return subprocess.run(cmd, capture_output=True, text=True)
 
 
-# 中文注释：验证 test_prepare_flickr30k_script_smoke 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `prepare Flickr30k script smoke` 场景，防止相关行为在后续修改中退化。
 def test_prepare_flickr30k_script_smoke(tmp_path: Path):
     root = tmp_path / "flickr_data"
     img = root / "images"
@@ -40,7 +40,7 @@ def test_prepare_flickr30k_script_smoke(tmp_path: Path):
     assert (root / "captions_index.jsonl").exists()
 
 
-# 中文注释：验证 test_prepare_coco_subset_script_smoke 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `prepare COCO subset script smoke` 场景，防止相关行为在后续修改中退化。
 def test_prepare_coco_subset_script_smoke(tmp_path: Path):
     root = tmp_path / "coco_data"
     ann = root / "annotations"
@@ -67,7 +67,7 @@ def test_prepare_coco_subset_script_smoke(tmp_path: Path):
     assert (ann / "captions_val2017_subset.json").exists()
 
 
-# 中文注释：验证 test_prepare_flickr30k_python_script_rejects_placeholder_fallback 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `prepare Flickr30k python script rejects placeholder fallback` 场景，防止相关行为在后续修改中退化。
 def test_prepare_flickr30k_python_script_rejects_placeholder_fallback(tmp_path: Path):
     root = tmp_path / "flickr_placeholder"
     img = root / "images"
@@ -93,7 +93,7 @@ def test_prepare_flickr30k_python_script_rejects_placeholder_fallback(tmp_path: 
     assert "Synthetic fallback is disabled by default" in res.stdout
 
 
-# 中文注释：验证 test_prepare_flickr1k_python_script_uses_tmm_official_assets 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `prepare Flickr1k python script uses tmm official 资产` 场景，防止相关行为在后续修改中退化。
 def test_prepare_flickr1k_python_script_uses_tmm_official_assets(tmp_path: Path):
     source = tmp_path / "tmm_datasets"
     image_dir = source / "flickr" / "flickr30k-images"
@@ -133,7 +133,7 @@ def test_prepare_flickr1k_python_script_uses_tmm_official_assets(tmp_path: Path)
     assert (out / "images" / "a.jpg").exists()
 
 
-# 中文注释：验证 test_prepare_coco_subset_python_script_uses_real_local_images 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `prepare COCO subset python script uses real 本地 图像` 场景，防止相关行为在后续修改中退化。
 def test_prepare_coco_subset_python_script_uses_real_local_images(tmp_path: Path):
     root = tmp_path / "coco_real"
     ann = root / "annotations"
@@ -162,7 +162,7 @@ def test_prepare_coco_subset_python_script_uses_real_local_images(tmp_path: Path
     assert (ann / "captions_val2017_subset.jsonl").exists()
 
 
-# 中文注释：验证 test_run_thesis_matrix_help_imports_current_local_vlm_catalog 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `运行记录 thesis 矩阵 help imports current 本地 视觉语言模型 catalog` 场景，防止相关行为在后续修改中退化。
 def test_run_thesis_matrix_help_imports_current_local_vlm_catalog():
     res = _run_py("scripts/run_thesis_matrix.py", ["--help"])
 
@@ -170,7 +170,7 @@ def test_run_thesis_matrix_help_imports_current_local_vlm_catalog():
     assert "--entry-ids" in res.stdout
 
 
-# 中文注释：验证 test_prepare_flickr30k_can_extract_real_rows_from_release_archive 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `prepare Flickr30k 是否可以 extract real rows 来源 release archive` 场景，防止相关行为在后续修改中退化。
 def test_prepare_flickr30k_can_extract_real_rows_from_release_archive(tmp_path: Path):
     spec = importlib.util.spec_from_file_location("prepare_flickr30k", "scripts/prepare_flickr30k.py")
     assert spec and spec.loader

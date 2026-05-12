@@ -156,12 +156,12 @@ export const STANDARD_ATTACK_STEPS: Record<string, number> = {
   anyattack: 1,
 };
 
-/** 中文注释：实现 usesOfficialExternalAlignmentRecipe 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 封装 `usesOfficialExternalAlignmentRecipe` Hook，把页面状态、副作用和持久化逻辑集中管理。 */
 export function usesOfficialExternalAlignmentRecipe(attack: string): boolean {
   return attack === "foa_attack" || attack === "m_attack" || attack === "mpc_attack";
 }
 
-/** 中文注释：实现 surrogateRequirementNote 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `surrogate requirement note` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function surrogateRequirementNote(attack: string): string {
   const policy = surrogatePolicyForAttack(attack);
   if (attack === "tmm") {
@@ -179,7 +179,7 @@ export function surrogateRequirementNote(attack: string): string {
   return "";
 }
 
-/** 中文注释：实现 surrogateSupportedForAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `surrogate supported 所属 攻击` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function surrogateSupportedForAttack(attack: string, adapter: string): boolean {
   const policy = surrogatePolicyForAttack(attack);
   if (policy === "clip_only") return clipOnlySurrogateAdapters.has(adapter);
@@ -187,18 +187,18 @@ export function surrogateSupportedForAttack(attack: string, adapter: string): bo
   return true;
 }
 
-/** 中文注释：实现 surrogateSelectableForRun 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `surrogate selectable 所属 运行记录` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function surrogateSelectableForRun(attack: string, adapter: string): boolean {
   if (CLIP_AUXILIARY_SURROGATE_ATTACKS.has(attack)) return adapter === "clip_hf";
   return surrogateSupportedForAttack(attack, adapter);
 }
 
-/** 中文注释：实现 victimSelectableForLaunch 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `victim selectable 所属 launch` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function victimSelectableForLaunch(healthStatus: string): boolean {
   return RUNNABLE_VICTIM_STATUSES.has(String(healthStatus || "").trim());
 }
 
-/** 中文注释：实现 configPathFor 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `配置 路径 所属` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function configPathFor(attack: string, launchMode: LaunchMode, taskKind: TaskKind): string {
   const externalStandardConfigs: Record<string, { generation: string; vlr: string }> = {
     xtransfer_uap: {
@@ -233,7 +233,7 @@ export function configPathFor(attack: string, launchMode: LaunchMode, taskKind: 
   return "configs/bench/bootstrap_full_vlr_cuda.yaml";
 }
 
-/** 中文注释：实现 inferredTaskCapabilities 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `inferred 任务 capabilities` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function inferredTaskCapabilities(adapter: string): string[] {
   const id = String(adapter || "").trim();
   if (!id || id === "fixture_vlm") return [];
@@ -244,13 +244,13 @@ export function inferredTaskCapabilities(adapter: string): string[] {
   return [];
 }
 
-/** 中文注释：实现 generationCapableAdapter 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `生成式评测 capable adapter` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function generationCapableAdapter(adapter: string): boolean {
   const capabilities = inferredTaskCapabilities(adapter);
   return capabilities.includes("vqa") && capabilities.includes("caption");
 }
 
-/** 中文注释：实现 modelTaskCapabilities 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `模型 任务 capabilities` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function modelTaskCapabilities(model: Pick<ModelOverview, "adapter" | "task_capabilities" | "formal_eval"> | undefined): string[] {
   if (!model) return [];
   if (model.formal_eval === false) return [];
@@ -258,12 +258,12 @@ export function modelTaskCapabilities(model: Pick<ModelOverview, "adapter" | "ta
   return explicit.length ? explicit : inferredTaskCapabilities(model.adapter);
 }
 
-/** 中文注释：实现 modelSupportsTask 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `模型 supports 任务` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function modelSupportsTask(model: Pick<ModelOverview, "adapter" | "task_capabilities" | "formal_eval"> | undefined, taskKind: TaskKind): boolean {
   return modelTaskCapabilities(model).includes(taskKind);
 }
 
-/** 中文注释：实现 groupIdForAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `group id 所属 攻击` 数据，把接口响应转换成页面可直接渲染的结构。 */
 export function groupIdForAttack(attackId: string) {
   if (EXTERNAL_RUNTIME_ATTACKS.has(attackId)) return "external-paper";
   if (CLASSIC_GRADIENT_ATTACKS.has(attackId)) return "classic-gradient";
@@ -271,7 +271,7 @@ export function groupIdForAttack(attackId: string) {
   return "classic-gradient";
 }
 
-/** 中文注释：实现 requirementText 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `requirement 文本` 展示值，统一页面标签、颜色和缺省文案。 */
 export function requirementText(item: AttackRequirementStatus | undefined): string {
   if (!item) return "未知";
   if (item.status === "ready") return "已配置";
@@ -280,7 +280,7 @@ export function requirementText(item: AttackRequirementStatus | undefined): stri
   return "未知";
 }
 
-/** 中文注释：实现 requirementTone 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `requirement tone` 展示值，统一页面标签、颜色和缺省文案。 */
 export function requirementTone(item: AttackRequirementStatus | undefined): string {
   if (!item) return "unknown";
   if (item.status === "ready") return "ready";
@@ -289,21 +289,21 @@ export function requirementTone(item: AttackRequirementStatus | undefined): stri
   return "unknown";
 }
 
-/** 中文注释：实现 statusTitle 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 生成 `状态 title` 展示值，统一页面标签、颜色和缺省文案。 */
 export function statusTitle(item: AttackRequirementStatus | undefined): string {
   if (!item) return "当前后端未返回该配置项状态";
   const path = item.path ? `；路径：${item.path}` : "";
   return `${item.note || ""}${path}`;
 }
 
-/** 中文注释：实现 formatModelDisplayText 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 格式化 `format 模型 display 文本`，统一页面展示文本和缺省值。 */
 export function formatModelDisplayText(model?: ModelOverview): string {
   const raw = String(model?.display_name || model?.model_name || model?.endpoint_or_source || model?.adapter || "").trim();
   if (!raw) return "未选择模型";
   return raw.replace(/视觉语言\s*Transformer\s*匹配模型/g, "视觉语言变换器匹配模型");
 }
 
-/** 中文注释：实现 ExternalStatusPills 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 渲染 `ExternalStatusPills` 组件，组织该区域的数据读取、交互状态和可访问性标记。 */
 export function ExternalStatusPills({ status }: { status: ExternalAttackRuntimeStatus | undefined }) {
   if (!status) {
     return <span className="gov-attack-status-missing">等待后端状态</span>;
@@ -324,19 +324,19 @@ export function ExternalStatusPills({ status }: { status: ExternalAttackRuntimeS
   );
 }
 
-/** 中文注释：实现 asDatasetOverride 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `as 数据集 override` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function asDatasetOverride(datasetId: string) {
   const catalogItem = datasetCatalogMap.get(datasetId);
   return catalogItem?.override ?? { kind: datasetId, benchmark_tag: datasetId };
 }
 
-/** 中文注释：实现 generationDatasetSupportsTask 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `生成式评测 数据集 supports 任务` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function generationDatasetSupportsTask(datasetKey: string, taskKind: TaskKind): boolean {
   const meta = GENERATION_DATASET_META[String(datasetKey || "").trim()];
   return Boolean(meta && meta.task === taskKind);
 }
 
-/** 中文注释：实现 splitList 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `split list` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function splitList(value: string): string[] {
   return String(value || "")
     .split(/[,\s]+/)
@@ -344,30 +344,30 @@ export function splitList(value: string): string[] {
     .filter(Boolean);
 }
 
-/** 中文注释：实现 boundedNumber 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `bounded number` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function boundedNumber(value: string, fallback: number, min: number, max: number): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
   return Math.max(min, Math.min(max, parsed));
 }
 
-/** 中文注释：实现 defaultStepCount 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `default step count` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function defaultStepCount(attack: string): number {
   if (usesOfficialExternalAlignmentRecipe(attack)) return OFFICIAL_ALIGNMENT_STEPS;
   return STANDARD_ATTACK_STEPS[attack] ?? 16;
 }
 
-/** 中文注释：实现 defaultStrengthForAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `default strength 所属 攻击` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function defaultStrengthForAttack(attack: string): string {
   return STANDARD_ATTACK_STRENGTH[attack] ?? STANDARD_EPSILON;
 }
 
-/** 中文注释：实现 defaultStepSize 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `default step size` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function defaultStepSize(attack: string, strength: number): number {
   return STANDARD_STEP_SIZE[attack] ?? Math.min(strength, 0.01);
 }
 
-/** 中文注释：实现 budgetControlForAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `budget control 所属 攻击` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function budgetControlForAttack(attack: string): { label: string; help: string } | null {
   if (UAP_BUDGET_ATTACKS.has(attack)) {
     return {
@@ -402,21 +402,21 @@ export function budgetControlForAttack(attack: string): { label: string; help: s
   return null;
 }
 
-/** 中文注释：实现 stepHelpForAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `step help 所属 攻击` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function stepHelpForAttack(attack: string): string {
   if (attack === "advclip") return "仅在需要自动训练通用补丁时使用；已有补丁时评测阶段不会重新优化。";
   if (["foa_attack", "mpc_attack", "m_attack"].includes(attack)) return "会作为迭代步数传入外部攻击脚本。";
   return "会写入攻击优化过程，控制梯度或局部优化迭代次数。";
 }
 
-/** 中文注释：实现 stepSizeHelpForAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `step size help 所属 攻击` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function stepSizeHelpForAttack(attack: string): string {
   if (attack === "advclip") return "仅作为补丁训练学习率使用；贴加补丁评测阶段不使用。";
   if (["foa_attack", "mpc_attack", "m_attack"].includes(attack)) return "会转换为外部脚本的步长参数 α（alpha）。";
   return "控制每次优化更新的步长。";
 }
 
-/** 中文注释：实现 surrogateHelpForAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `surrogate help 所属 攻击` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function surrogateHelpForAttack(attack: string, isGenerationTask: boolean): string {
   if (CLIP_AUXILIARY_SURROGATE_ATTACKS.has(attack)) {
     if (attack === "advclip") return "通用对抗补丁（AdvCLIP）在评测阶段加载并贴加通用补丁；若缺少补丁会自动训练，当前固定使用 CLIP 代理。";
@@ -429,17 +429,17 @@ export function surrogateHelpForAttack(attack: string, isGenerationTask: boolean
   return "该代理模型用于攻击生成阶段。";
 }
 
-/** 中文注释：实现 attackUsesBudget 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `攻击 uses budget` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function attackUsesBudget(attack: string): boolean {
   return IMAGE_BUDGET_ATTACKS.has(attack) || UAP_BUDGET_ATTACKS.has(attack);
 }
 
-/** 中文注释：实现 attackUsesSteps 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `攻击 uses steps` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function attackUsesSteps(attack: string): boolean {
   return STEP_PARAM_ATTACKS.has(attack);
 }
 
-/** 中文注释：实现 attackUsesStepSize 的核心流程，支撑前端页面中的业务语义和异常边界。 */
+/** 整理 `攻击 uses step size` 前端辅助逻辑，保持数据转换和展示口径一致。 */
 export function attackUsesStepSize(attack: string): boolean {
   return STEP_SIZE_PARAM_ATTACKS.has(attack);
 }

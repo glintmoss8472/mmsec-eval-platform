@@ -8,7 +8,7 @@ import numpy as np
 from mmsec_eval.types import Sample
 
 
-# 中文注释：定义 VLRIndex 的结构化职责，作为图文检索评估层中状态、配置或行为的边界。
+# 定义 `VLRIndex` 的状态和行为边界，供图文检索评估层在固定职责内复用。
 @dataclass(frozen=True)
 class VLRIndex:
     # Unique images (grouped by source_image) and caption texts.
@@ -26,7 +26,7 @@ class VLRIndex:
     gt_txt_idxs: list[list[int]]
 
 
-# 中文注释：实现 build_vlr_index 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 构建 `图文检索 索引` 数据，集中整理图文检索评估层需要的输出结构。
 def build_vlr_index(samples: list[Sample]) -> VLRIndex:
     """Build retrieval index from a caption-per-sample dataset.
 
@@ -67,7 +67,7 @@ def build_vlr_index(samples: list[Sample]) -> VLRIndex:
     )
 
 
-# 中文注释：实现 l2_normalize 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 执行 `l2 normalize` 辅助逻辑，保持图文检索评估层中的输入处理和结果输出一致。
 def l2_normalize(x: np.ndarray, axis: int = -1, eps: float = 1e-12) -> np.ndarray:
     x = np.asarray(x, dtype=np.float32)
     denom = np.linalg.norm(x, ord=2, axis=axis, keepdims=True)
@@ -75,7 +75,7 @@ def l2_normalize(x: np.ndarray, axis: int = -1, eps: float = 1e-12) -> np.ndarra
     return x / denom
 
 
-# 中文注释：实现 score_matrix_dual_stream 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 计算 `矩阵 dual stream`，为指标、风险或调度决策提供数值依据。
 def score_matrix_dual_stream(img_embs: np.ndarray, txt_embs: np.ndarray) -> np.ndarray:
     """Return similarity matrix sim[text, image]."""
     img = l2_normalize(img_embs, axis=-1)
@@ -85,13 +85,13 @@ def score_matrix_dual_stream(img_embs: np.ndarray, txt_embs: np.ndarray) -> np.n
     return (txt @ img.T).astype(np.float32)
 
 
-# 中文注释：封装 _safe_ks 的内部步骤，让图文检索评估层主流程保持清晰并隔离边界细节。
+# 安全计算 `ks`，在空值或异常输入下返回可控结果。
 def _safe_ks(ks: list[int]) -> list[int]:
     out = sorted({int(k) for k in ks if int(k) > 0})
     return out
 
 
-# 中文注释：封装 _topk_sorted_indices 的内部步骤，让图文检索评估层主流程保持清晰并隔离边界细节。
+# 执行 `topk sorted indices` 辅助逻辑，保持图文检索评估层中的输入处理和结果输出一致。
 def _topk_sorted_indices(sim: np.ndarray, max_k: int) -> np.ndarray:
     """Return per-row top-k indices sorted by score desc."""
     if max_k <= 0:
@@ -102,7 +102,7 @@ def _topk_sorted_indices(sim: np.ndarray, max_k: int) -> np.ndarray:
     return np.take_along_axis(idx, order, axis=1).astype(np.int64)
 
 
-# 中文注释：实现 recall_at_k_t2i 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 计算 `recall at k t2i` 指标，统计目标样本落入 Top-K 的比例。
 def recall_at_k_t2i(sim_t2i: np.ndarray, gt_img_idx: np.ndarray, ks: list[int]) -> dict[int, float]:
     """Text->Image recall@k.
 
@@ -132,7 +132,7 @@ def recall_at_k_t2i(sim_t2i: np.ndarray, gt_img_idx: np.ndarray, ks: list[int]) 
     return out
 
 
-# 中文注释：实现 recall_at_k_i2t 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 计算 `recall at k i2t` 指标，统计目标样本落入 Top-K 的比例。
 def recall_at_k_i2t(sim_i2t: np.ndarray, gt_txt_idxs: list[list[int]], ks: list[int]) -> dict[int, float]:
     """Image->Text recall@k.
 
@@ -166,7 +166,7 @@ def recall_at_k_i2t(sim_i2t: np.ndarray, gt_txt_idxs: list[list[int]], ks: list[
     return out
 
 
-# 中文注释：实现 mean_rank_t2i 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 计算 `均值 排名 t2i` 均值，空输入时返回可控的默认结果。
 def mean_rank_t2i(sim_t2i: np.ndarray, gt_img_idx: np.ndarray) -> float:
     """Mean rank for Text->Image (1 is best)."""
     sim = np.asarray(sim_t2i, dtype=np.float32)
@@ -191,7 +191,7 @@ def mean_rank_t2i(sim_t2i: np.ndarray, gt_img_idx: np.ndarray) -> float:
     return float(rank.mean())
 
 
-# 中文注释：实现 mean_rank_i2t 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 计算 `均值 排名 i2t` 均值，空输入时返回可控的默认结果。
 def mean_rank_i2t(sim_i2t: np.ndarray, gt_txt_idxs: list[list[int]]) -> float:
     """Mean best rank for Image->Text (1 is best).
 
@@ -225,7 +225,7 @@ def mean_rank_i2t(sim_i2t: np.ndarray, gt_txt_idxs: list[list[int]]) -> float:
     return float(np.mean(ranks)) if ranks else 0.0
 
 
-# 中文注释：实现 compute_vlr_metrics 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 计算 `图文检索 指标`，为指标、风险或调度决策提供数值依据。
 def compute_vlr_metrics(sim_t2i: np.ndarray, index: VLRIndex, ks: list[int]) -> dict[str, float]:
     """Compute both directions' metrics from sim[text,image]."""
     ks2 = _safe_ks(ks)
@@ -249,7 +249,7 @@ def compute_vlr_metrics(sim_t2i: np.ndarray, index: VLRIndex, ks: list[int]) -> 
     return out
 
 
-# 中文注释：实现 topk_indices_t2i 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 执行 `topk indices t2i` 辅助逻辑，保持图文检索评估层中的输入处理和结果输出一致。
 def topk_indices_t2i(sim_t2i: np.ndarray, k: int) -> np.ndarray:
     """Return top-k image indices per text query."""
     sim = np.asarray(sim_t2i, dtype=np.float32)
@@ -266,7 +266,7 @@ def topk_indices_t2i(sim_t2i: np.ndarray, k: int) -> np.ndarray:
     return np.take_along_axis(idx, order, axis=1).astype(np.int64)
 
 
-# 中文注释：实现 topk_indices_i2t 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 执行 `topk indices i2t` 辅助逻辑，保持图文检索评估层中的输入处理和结果输出一致。
 def topk_indices_i2t(sim_i2t: np.ndarray, k: int) -> np.ndarray:
     """Return top-k text indices per image query."""
     sim = np.asarray(sim_i2t, dtype=np.float32)
@@ -282,7 +282,7 @@ def topk_indices_i2t(sim_i2t: np.ndarray, k: int) -> np.ndarray:
     return np.take_along_axis(idx, order, axis=1).astype(np.int64)
 
 
-# 中文注释：封装 _i2t_hit_maps 的内部步骤，让图文检索评估层主流程保持清晰并隔离边界细节。
+# 执行 `i2t hit maps` 辅助逻辑，保持图文检索评估层中的输入处理和结果输出一致。
 def _i2t_hit_maps(
     *,
     clean_top: np.ndarray,
@@ -306,7 +306,7 @@ def _i2t_hit_maps(
     return clean_by_k, attacked_by_k
 
 
-# 中文注释：封装 _add_conditional_success_metrics 的内部步骤，让图文检索评估层主流程保持清晰并隔离边界细节。
+# 计算 `add conditional success 指标`，把原始模型输出汇总成页面和报告使用的指标字段。
 def _add_conditional_success_metrics(
     out: dict[str, float],
     *,
@@ -336,7 +336,7 @@ def _add_conditional_success_metrics(
         out[f"tr_cond_success@{k}"] = float(success_i.sum())
 
 
-# 中文注释：封装 _add_conditional_rank_metrics 的内部步骤，让图文检索评估层主流程保持清晰并隔离边界细节。
+# 计算 `add conditional 排名 指标`，把原始模型输出汇总成页面和报告使用的指标字段。
 def _add_conditional_rank_metrics(out: dict[str, float], *, clean: np.ndarray, attacked: np.ndarray, index: VLRIndex, gt_img: np.ndarray) -> None:
     clean_gt = clean[np.arange(clean.shape[0]), gt_img]
     attacked_gt = attacked[np.arange(attacked.shape[0]), gt_img]
@@ -357,7 +357,7 @@ def _add_conditional_rank_metrics(out: dict[str, float], *, clean: np.ndarray, a
     out["tr_rank_delta_mean"] = float(np.mean(i2t_deltas)) if i2t_deltas else 0.0
 
 
-# 中文注释：实现 conditional_attack_metrics 的核心流程，支撑图文检索评估层中的业务语义和异常边界。
+# 计算 `攻击 指标` 条件指标，只在满足前置条件的样本上统计。
 def conditional_attack_metrics(
     clean_sim_t2i: np.ndarray,
     attacked_sim_t2i: np.ndarray,

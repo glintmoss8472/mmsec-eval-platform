@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 
 
-# 中文注释：定义 Sample 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `Sample` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class Sample:
     sample_id: str
@@ -17,7 +17,7 @@ class Sample:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
-# 中文注释：定义 ModelOutput 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `ModelOutput` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class ModelOutput:
     text: str
@@ -30,7 +30,7 @@ class ModelOutput:
     raw: dict[str, Any] = field(default_factory=dict)
 
 
-# 中文注释：定义 AttackTraceStep 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `AttackTraceStep` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class AttackTraceStep:
     step: int
@@ -39,7 +39,7 @@ class AttackTraceStep:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
-# 中文注释：定义 AttackedSample 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `AttackedSample` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class AttackedSample:
     sample: Sample
@@ -51,7 +51,7 @@ class AttackedSample:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
-# 中文注释：定义 JudgeResult 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `JudgeResult` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class JudgeResult:
     success: bool
@@ -59,7 +59,7 @@ class JudgeResult:
     raw: dict[str, Any] = field(default_factory=dict)
 
 
-# 中文注释：定义 EvalRecord 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `EvalRecord` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class EvalRecord:
     sample: Sample
@@ -72,7 +72,7 @@ class EvalRecord:
     error_code: str = ""
 
 
-# 中文注释：定义 RunArtifacts 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `RunArtifacts` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class RunArtifacts:
     run_id: str
@@ -84,7 +84,7 @@ class RunArtifacts:
     benchmark_summary_path: str = ""
 
 
-# 中文注释：定义 AttackContext 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `AttackContext` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class AttackContext:
     config: Any
@@ -94,7 +94,7 @@ class AttackContext:
     sample_debug_dir: str = ""
 
 
-# 中文注释：定义 DefendedSample 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `DefendedSample` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class DefendedSample:
     sample: Sample
@@ -102,7 +102,7 @@ class DefendedSample:
     artifact_refs: dict[str, str] = field(default_factory=dict)
 
 
-# 中文注释：定义 DefenseContext 的结构化职责，作为项目工程中状态、配置或行为的边界。
+# 定义 `DefenseContext` 的不可变配置载体，集中保存后续计算需要的结构化字段。
 @dataclass
 class DefenseContext:
     config: Any

@@ -10,12 +10,12 @@ from mmsec_eval.plugins.base import ModelAdapter
 from mmsec_eval.types import ModelOutput, Sample
 
 
-# 中文注释：封装 _norm 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 执行 `norm` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def _norm(value: object) -> str:
     return re.sub(r"\s+", " ", str(value or "").strip().lower())
 
 
-# 中文注释：封装 _first_text 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 查找第一个可用的 `文本`，用于页面预览或结果补全。
 def _first_text(*values: object, default: str = "") -> str:
     for value in values:
         if isinstance(value, list):
@@ -30,7 +30,7 @@ def _first_text(*values: object, default: str = "") -> str:
     return default
 
 
-# 中文注释：封装 _stage 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 执行 `stage` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def _stage(sample: Sample) -> str:
     text = _norm(sample.metadata.get("generation_stage"))
     if text in {"clean", "attacked", "defended"}:
@@ -38,7 +38,7 @@ def _stage(sample: Sample) -> str:
     return "clean"
 
 
-# 中文注释：封装 _contains_object 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
+# 执行 `contains object` 辅助逻辑，保持模型适配层中的输入处理和结果输出一致。
 def _contains_object(text: str, object_name: str, aliases: list[str]) -> bool:
     candidates = [object_name, *aliases]
     haystack = f" {_norm(text)} "
@@ -49,7 +49,7 @@ def _contains_object(text: str, object_name: str, aliases: list[str]) -> bool:
     return False
 
 
-# 中文注释：定义 FixtureVLMAdapter 的结构化职责，作为模型适配层中状态、配置或行为的边界。
+# 定义 `FixtureVLMAdapter` 的插件适配边界，把模型、攻击或评测能力暴露为统一接口。
 class FixtureVLMAdapter(ModelAdapter):
     """Deterministic generation adapter for CI and offline UI smoke tests.
 
@@ -59,13 +59,13 @@ class FixtureVLMAdapter(ModelAdapter):
 
     adapter_name = "fixture_vlm"
 
-    # 中文注释：实现 FixtureVLMAdapter.predict 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `FixtureVLMAdapter.predict` 的对象行为，维护该类在模型适配层中的调用契约。
     def predict(self, sample: Sample) -> ModelOutput:
         text = str(sample.text or "")
         answer = self.generate_answer(sample, text).text
         return ModelOutput(text=answer, score=1.0, raw={"adapter": self.adapter_name, "task": "predict_fixture"})
 
-    # 中文注释：实现 FixtureVLMAdapter.generate_answer 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 生成 `answer`，补齐前端展示或后续评测需要的样本资产。
     def generate_answer(self, sample: Sample, question: str, *, prompt: str = "", max_tokens: int = 64) -> ModelOutput:
         del prompt, max_tokens
         meta = dict(sample.metadata)
@@ -90,7 +90,7 @@ class FixtureVLMAdapter(ModelAdapter):
             },
         )
 
-    # 中文注释：实现 FixtureVLMAdapter.generate_caption 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 生成 `图像描述`，补齐前端展示或后续评测需要的样本资产。
     def generate_caption(self, sample: Sample, *, prompt: str = "", max_tokens: int = 96) -> ModelOutput:
         del prompt, max_tokens
         meta = dict(sample.metadata)
@@ -110,7 +110,7 @@ class FixtureVLMAdapter(ModelAdapter):
             raw={"adapter": self.adapter_name, "task": "caption", "stage": stage, "fixture": True},
         )
 
-    # 中文注释：实现 FixtureVLMAdapter.object_probe 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 实现 `FixtureVLMAdapter.object_probe` 的对象行为，维护该类在模型适配层中的调用契约。
     def object_probe(self, sample: Sample, object_name: str, *, prompt: str = "", max_tokens: int = 8) -> ModelOutput:
         del prompt, max_tokens
         meta = dict(sample.metadata)
@@ -145,7 +145,7 @@ class FixtureVLMAdapter(ModelAdapter):
             },
         )
 
-    # 中文注释：实现 FixtureVLMAdapter.score_pairs 的核心行为，维护模型适配层在该对象上的调用契约。
+    # 计算 `pairs`，为指标、风险或调度决策提供数值依据。
     def score_pairs(self, pairs: list[tuple[np.ndarray, str]], batch_size: int = 1) -> np.ndarray:
         del batch_size
         return np.ones((len(pairs),), dtype=np.float32)

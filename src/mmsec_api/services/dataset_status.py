@@ -12,7 +12,7 @@ _GENERATION_JSONL_FILES = {
 }
 
 
-# 中文注释：封装 _default_root_for 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 整理 `default root 所属` 路径信息，把本地文件或产物引用转换成统一表示。
 def _default_root_for(name: str, project_root: Path) -> Path:
     key = name.strip().lower()
     if key == "coco_subset":
@@ -26,7 +26,7 @@ def _default_root_for(name: str, project_root: Path) -> Path:
     return project_root
 
 
-# 中文注释：封装 _resolve_root_path 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 解析 `root 路径` 的真实位置或配置值，减少调用方重复分支。
 def _resolve_root_path(name: str, root_path: str, project_root: Path) -> Path:
     raw = root_path.strip()
     if raw:
@@ -35,7 +35,7 @@ def _resolve_root_path(name: str, root_path: str, project_root: Path) -> Path:
     return _default_root_for(name, project_root)
 
 
-# 中文注释：封装 _required_paths 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
+# 整理 `required paths` 路径信息，把本地文件或产物引用转换成统一表示。
 def _required_paths(name: str, root: Path) -> list[tuple[Path, str]]:
     key = name.strip().lower()
     if key == "coco_subset":
@@ -59,7 +59,7 @@ def _required_paths(name: str, root: Path) -> list[tuple[Path, str]]:
     return [(root, "当前 root_path 不存在")]
 
 
-# 中文注释：实现 enrich_dataset_registry_rows 的核心流程，支撑后端业务服务中的业务语义和异常边界。
+# 补全 `数据集 registry rows` 字段，让前端和报告能直接消费证据包。
 def enrich_dataset_registry_rows(rows: list[dict[str, Any]], project_root: Path) -> list[dict[str, Any]]:
     enriched: list[dict[str, Any]] = []
     for row in rows:

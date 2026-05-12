@@ -5,7 +5,7 @@ import importlib.util
 from pathlib import Path
 
 
-# 中文注释：封装 _load_module 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
+# 加载 `module`，把外部文件、配置或运行产物转换为内存结构。
 def _load_module():
     path = Path("scripts/run_server_exhaustive_matrix.py").resolve()
     spec = importlib.util.spec_from_file_location("run_server_exhaustive_matrix", path)
@@ -15,7 +15,7 @@ def _load_module():
     return module
 
 
-# 中文注释：验证 test_classic_acceptance_uses_matrix_e1_e2_and_external_e4 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `classic acceptance uses 矩阵 e1 e2 and external e4` 场景，防止相关行为在后续修改中退化。
 def test_classic_acceptance_uses_matrix_e1_e2_and_external_e4():
     module = _load_module()
     thresholds = module._load_thresholds()
@@ -54,7 +54,7 @@ def test_classic_acceptance_uses_matrix_e1_e2_and_external_e4():
     assert result["external_analysis_path"]
 
 
-# 中文注释：验证 test_dataset_override_supports_flickr1k 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
+# 验证 `数据集 override supports Flickr1k` 场景，防止相关行为在后续修改中退化。
 def test_dataset_override_supports_flickr1k():
     module = _load_module()
     payload = module._dataset_override("flickr1k")
