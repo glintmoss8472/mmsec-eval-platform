@@ -52,6 +52,7 @@ def main() -> int:
             ignore_patterns=ignore_patterns,
             resume_download=True,
         )
+        (target / ".source_model").write_text(f"{model_id}\n", encoding="utf-8")
         print(f"{key} -> {target}")
     return 0
 
