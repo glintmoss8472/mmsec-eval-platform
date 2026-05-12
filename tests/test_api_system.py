@@ -39,31 +39,6 @@ def _write_system_dataset_fixtures(client, tmp_path: Path) -> None:
     store.upsert_dataset("mini_flickr", str(mini_root), True, 4, "prepared via api (demo fixture)")
 
 
-def _write_docker_validation_fixture(tmp_path: Path) -> None:
-    docker_dir = tmp_path / "artifacts" / "verification" / "docker_offline_validation"
-    docker_dir.mkdir(parents=True, exist_ok=True)
-    (docker_dir / "summary.json").write_text(
-        json.dumps(
-            {
-                "generated_at": "2026-04-22T22:24:57+00:00",
-                "overall_passed": True,
-                "attack_matrix": {"count": 15, "success_count": 15, "rows": [{"attack": "fgsm", "job_status": "success"}]},
-                "model_matrix": {
-                    "count": 10,
-                    "success_count": 10,
-                    "rows": [
-                        {"model_adapter": "openai_qwen25_vl", "job_status": "success", "summary": {"dataset_name": "mini_flickr"}},
-                        {"model_adapter": "openai_gemma3_12b", "job_status": "success", "summary": {"dataset_name": "mini_flickr"}},
-                    ],
-                },
-            },
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-
 def _assert_dataset_endpoint_ready(client) -> None:
     datasets_resp = client.get("/api/v1/datasets")
     assert datasets_resp.status_code == 200
@@ -80,7 +55,7 @@ def _assert_overview_top_level(payload: dict) -> None:
         "validation_summary", "latest_formal_runs", "latest_primary_formal_runs",
         "latest_ablation_runs", "primary_formal_runs_source_path", "primary_formal_runs_source_kind",
         "live_runtime_note", "paper_result_environment_source_path", "paper_result_environment_note",
-        "paper_result_environment", "build_identity", "model_coverage", "portable_container_validation",
+        "paper_result_environment", "build_identity", "model_coverage",
         "dataset_catalog", "dataset_catalog_formal_count", "dataset_catalog_total_count",
         "external_attack_status",
     }
@@ -133,16 +108,8 @@ def _assert_overview_environment(payload: dict) -> None:
     assert payload["paper_result_environment"]["torch"]["version"] == "2.1.0+cu121"
     assert payload["paper_result_environment"]["torch"]["cuda_version"] == "12.1"
     assert payload["paper_result_environment_note"]
-    assert payload["portable_container_validation"]["overall_passed"] is True
-    assert payload["portable_container_validation"]["model_success_count"] == 10
-    assert payload["portable_container_validation"]["attack_success_count"] == 15
-    expected_containerized = Path("/.dockerenv").exists()
-    assert payload["build_identity"]["containerized"] is expected_containerized
-    assert payload["build_identity"]["runtime_transport"] == ("docker_container" if expected_containerized else "host_python")
-    assert payload["build_identity"]["runtime_context"] == ("container" if expected_containerized else "host")
-    assert payload["build_identity"]["image_ref"] == ""
-    assert payload["portable_container_validation"]["validated_models"] == ["openai_gemma3_12b", "openai_qwen25_vl"]
-    assert payload["portable_container_validation"]["dataset_names"] == ["mini_flickr"]
+    assert payload["build_identity"]["runtime_transport"] == "host_python"
+    assert payload["build_identity"]["runtime_context"] == "host"
     assert payload["validated_model_count"] == 0
 
 
@@ -197,10 +164,8 @@ def _assert_ablation_runs(payload: dict) -> None:
 
 def _assert_compliance_payload(cp: dict) -> None:
     assert {"checklist_semantics", "taskbook_items", "paper_coverage", "engineering_views"}.issubset(cp)
-    assert {"portable_container_validation", "result_conformance"}.issubset(cp)
+    assert "result_conformance" in cp
     assert "model_validation_ok" in cp["result_conformance"]
-    assert cp["portable_container_validation"]["overall_passed"] is True
-    assert cp["portable_container_validation"]["model_success_count"] == 10
     routes = {item["route"] for item in cp["engineering_views"]["ui_pages"]}
     assert {
         "/",
@@ -228,7 +193,6 @@ def _assert_compliance_payload(cp: dict) -> None:
 def test_system_overview(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         _write_system_dataset_fixtures(client, tmp_path)
-        _write_docker_validation_fixture(tmp_path)
         _assert_dataset_endpoint_ready(client)
         r = client.get("/api/v1/system/overview")
         assert r.status_code == 200

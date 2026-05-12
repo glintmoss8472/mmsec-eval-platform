@@ -481,19 +481,6 @@ export interface SystemOverview {
   validated_model_count?: number;
   scientific_quality_models?: string[];
   scientific_quality_model_count?: number;
-  portable_container_validation?: {
-    summary_path?: string;
-    generated_at?: string;
-    overall_passed?: boolean;
-    model_count?: number;
-    model_success_count?: number;
-    attack_count?: number;
-    attack_success_count?: number;
-    validated_models?: string[];
-    dataset_names?: string[];
-    attacks?: string[];
-    note?: string;
-  };
   model_coverage?: {
     integrated?: { count: number; models: string[]; semantics: string };
     online?: { count: number; models: string[]; semantics: string };
@@ -532,12 +519,8 @@ export interface SystemOverview {
     version_source: string;
     backend_commit: string;
     runtime_transport?: string;
-    containerized?: boolean;
     runtime_context?: string;
-    image_ref?: string;
     runtime_profile?: string;
-    runtime_volume_name?: string;
-    bundle_root?: string;
     runtime_root?: string;
     frontend_index_exists: boolean;
     frontend_dist_fresh: boolean;

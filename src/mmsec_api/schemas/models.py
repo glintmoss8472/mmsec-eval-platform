@@ -347,7 +347,6 @@ class SystemOverviewResponse(BaseModel):
     paper_repositories: list[dict[str, Any]]
     patch_registry: dict[str, Any]
     build_identity: dict[str, Any] = Field(default_factory=dict)
-    portable_container_validation: dict[str, Any] = Field(default_factory=dict)
     latest_runs: list[RunSummary]
     latest_runs_note: str = ""
     latest_formal_runs: list[RunSummary] = Field(default_factory=list)
@@ -426,5 +425,4 @@ class SystemComplianceResponse(BaseModel):
     taskbook_items: list[ComplianceItem]
     paper_coverage: list[PaperCoverageItem]
     engineering_views: EngineeringViewsResponse | None = None
-    portable_container_validation: dict[str, Any] = Field(default_factory=dict)
     result_conformance: ResultConformanceResponse = Field(default_factory=ResultConformanceResponse)

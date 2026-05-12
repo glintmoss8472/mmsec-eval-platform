@@ -18,7 +18,7 @@
 - 后端：Python、FastAPI、SQLite、Uvicorn
 - 评测引擎：PyTorch、Transformers、Pillow、NumPy
 - 前端：React、TypeScript、Vite、TanStack Query、ECharts
-- 部署：Linux shell、systemd、可选 Docker
+- 部署：Linux shell、systemd、Nginx
 
 ## 目录结构
 
@@ -31,7 +31,7 @@ scripts/            启动、数据准备、模型服务、验证和实验脚本
 seed/               小型演示数据，用于基础页面和流程验证
 tests/              必要测试
 assets/templates/   HTML 报告模板
-deploy/             systemd、Nginx、Docker 部署模板
+deploy/             systemd、Nginx 部署模板
 docs/               部署补充说明
 ```
 
@@ -256,21 +256,6 @@ sudo cp deploy/nginx-mmsec-eval-platform.conf.example /etc/nginx/sites-available
 sudo ln -s /etc/nginx/sites-available/mmsec-eval-platform /etc/nginx/sites-enabled/mmsec-eval-platform
 sudo nginx -t
 sudo systemctl reload nginx
-```
-
-## Docker 可选启动
-
-```bash
-docker compose -f deploy/docker-compose.yml up --build -d
-docker compose -f deploy/docker-compose.yml logs -f
-```
-
-如果需要在镜像构建阶段安装 CUDA 版 PyTorch：
-
-```bash
-INSTALL_CUDA_TORCH=1 \
-TORCH_INDEX_URL=https://download.pytorch.org/whl/cu126 \
-docker compose -f deploy/docker-compose.yml build
 ```
 
 ## 验证

@@ -119,29 +119,12 @@ def _runtime_info() -> dict[str, Any]:
 
 def _build_runtime_identity() -> dict[str, Any]:
     runtime_context = str(os.getenv("MMSEC_RUNTIME_CONTEXT", "") or "").strip()
-    image_ref = str(os.getenv("MMSEC_IMAGE_REF", "") or "").strip()
     runtime_profile = str(os.getenv("MMSEC_RUNTIME_PROFILE", "") or "").strip()
-    runtime_volume_name = str(os.getenv("MMSEC_RUNTIME_VOLUME_NAME", "") or "").strip()
-    bundle_root = str(os.getenv("MMSEC_BUNDLE_ROOT", "") or "").strip()
     runtime_root = str(os.getenv("MMSEC_RUNTIME_ROOT", "") or "").strip()
-    docker_env_exists = Path("/.dockerenv").exists()
-    cgroup_hint = ""
-    try:
-        cgroup_text = Path("/proc/1/cgroup").read_text(encoding="utf-8", errors="ignore")
-        if any(token in cgroup_text for token in ("docker", "containerd", "kubepods")):
-            cgroup_hint = "container"
-    except OSError:
-        cgroup_hint = ""
-    containerized = docker_env_exists or runtime_context.lower() == "container" or bool(cgroup_hint)
-    runtime_transport = "docker_container" if containerized else "host_python"
     return {
-        "runtime_transport": runtime_transport,
-        "containerized": containerized,
-        "runtime_context": runtime_context or ("container" if containerized else "host"),
-        "image_ref": image_ref,
+        "runtime_transport": "host_python",
+        "runtime_context": runtime_context or "host",
         "runtime_profile": runtime_profile,
-        "runtime_volume_name": runtime_volume_name,
-        "bundle_root": bundle_root,
         "runtime_root": runtime_root,
     }
 
@@ -452,77 +435,6 @@ def _latest_model_validation_summary(artifacts_dir: Path) -> tuple[Path | None, 
     path = latest_dir / "summary.json"
     data = read_json(path, {})
     return path, data if isinstance(data, dict) else {}
-
-
-def _portable_container_validation_summary(artifacts_dir: Path) -> dict[str, Any]:
-    candidate_paths = [
-        artifacts_dir / "verification" / "docker_offline_validation" / "summary.json",
-        artifacts_dir / "verification" / "docker_model_matrix" / "summary.json",
-    ]
-    path: Path | None = None
-    data: dict[str, Any] = {}
-    for candidate in candidate_paths:
-        payload = read_json(candidate, {})
-        if candidate.exists() and isinstance(payload, dict):
-            path = candidate
-            data = payload
-            break
-    if path is None:
-        return {}
-
-    model_matrix = data.get("model_matrix", {})
-    if not isinstance(model_matrix, dict):
-        model_matrix = {}
-    attack_matrix = data.get("attack_matrix", {})
-    if not isinstance(attack_matrix, dict):
-        attack_matrix = {}
-
-    model_rows = [row for row in list(model_matrix.get("rows", [])) if isinstance(row, dict)]
-    attack_rows = [row for row in list(attack_matrix.get("rows", [])) if isinstance(row, dict)]
-
-    validated_models = sorted(
-        {
-            str(row.get("model_adapter", "")).strip()
-            for row in model_rows
-            if str(row.get("job_status", "")).strip() == "success" and str(row.get("model_adapter", "")).strip()
-        }
-    )
-    dataset_names = sorted(
-        {
-            str(dict(row.get("summary", {})).get("dataset_name", "")).strip()
-            for row in model_rows
-            if isinstance(row.get("summary", {}), dict) and str(dict(row.get("summary", {})).get("dataset_name", "")).strip()
-        }
-    )
-    attacks = sorted(
-        {
-            str(row.get("attack", "")).strip()
-            for row in attack_rows
-            if str(row.get("attack", "")).strip()
-        }
-    )
-
-    model_count = int(model_matrix.get("count", 0) or len(model_rows))
-    model_success_count = int(model_matrix.get("success_count", 0) or len(validated_models))
-    attack_count = int(attack_matrix.get("count", 0) or len(attack_rows))
-    attack_success_count = int(attack_matrix.get("success_count", 0) or 0)
-
-    return {
-        "summary_path": str(path),
-        "generated_at": str(data.get("generated_at", "") or ""),
-        "overall_passed": bool(data.get("overall_passed", False)),
-        "model_count": model_count,
-        "model_success_count": model_success_count,
-        "attack_count": attack_count,
-        "attack_success_count": attack_success_count,
-        "validated_models": validated_models,
-        "dataset_names": dataset_names,
-        "attacks": attacks,
-        "note": (
-            "该字段只说明 portable Docker 镜像在断网冷启动验收中已经跑通的模型矩阵和攻击矩阵，"
-            "用于证明镜像可迁移和可离线复验；它不替代首页上方的轻量迁移验证计数，也不替代论文正式结果。"
-        ),
-    }
 
 
 def _parse_json_object(raw: Any) -> dict[str, Any]:
@@ -1449,12 +1361,8 @@ def _overview_build_identity(ctx: dict[str, Any]) -> dict[str, Any]:
         "runtime_instance_id": str(getattr(request.app.state, "runtime_instance_id", "") or ""),
         "backend_commit": _git_value(ctx["project_root"], ["rev-parse", "--short", "HEAD"]),
         "runtime_transport": runtime_identity["runtime_transport"],
-        "containerized": bool(runtime_identity["containerized"]),
         "runtime_context": runtime_identity["runtime_context"],
-        "image_ref": runtime_identity["image_ref"],
         "runtime_profile": runtime_identity["runtime_profile"],
-        "runtime_volume_name": runtime_identity["runtime_volume_name"],
-        "bundle_root": runtime_identity["bundle_root"],
         "runtime_root": runtime_identity["runtime_root"],
         "frontend_index_exists": bool(frontend_build.get("index_exists", False)),
         "frontend_dist_fresh": bool(frontend_build.get("dist_fresh", False)),
@@ -1649,7 +1557,6 @@ def _system_overview_payload(ctx: dict[str, Any]) -> dict[str, Any]:
         "validated_model_count": len(validated_models),
         "scientific_quality_models": ctx["scientific_quality_models"],
         "scientific_quality_model_count": len(ctx["scientific_quality_models"]),
-        "portable_container_validation": _portable_container_validation_summary(artifacts_dir),
         "model_coverage": _model_coverage_summary(formal_models, formal_ready_models, validated_models, validation_summary),
         "attacks": list_plugins("attack"),
         "external_attack_status": _external_attack_runtime_status(project_root),
@@ -2351,12 +2258,10 @@ def build_system_compliance(request: Request) -> dict[str, Any]:
         "generated_at": utc_now_iso(),
         "checklist_semantics": (
             "Engineering checklist only: this endpoint summarizes taskbook mapping, artifact linkage, and interface coverage. "
-            "It does not by itself prove paper-grade scientific completion, full reproducibility, or a blocker-free live deployment. "
-            "The portable Docker offline-acceptance snapshot is exposed separately so it can be read without being confused with req_5."
+            "It does not by itself prove paper-grade scientific completion, full reproducibility, or a blocker-free live deployment."
         ),
         "taskbook_items": _taskbook_items(project_root, artifacts_dir, core_api_ready=_core_api_routes_ready(request)),
         "paper_coverage": _paper_coverage(project_root),
         "engineering_views": _engineering_views(project_root, request),
-        "portable_container_validation": _portable_container_validation_summary(artifacts_dir),
         "result_conformance": _result_conformance_v2(project_root, artifacts_dir),
     }
