@@ -1,0 +1,8 @@
+sources:
+  ADVEDM_Fine-grained_Adversarial_Attack_against_VLM-based_Embodied_Agents.pdf: "assets/papers/ADVEDM_Fine-grained_Adversarial_Attack_against_VLM-based_Embodied_Agents.pdf"
+  Advclip_Downstream-agnostic_adversarial_examples_in_multimodal_contrastive_learning.pdf: "assets/papers/Advclip_Downstream-agnostic_adversarial_examples_in_multimodal_contrastive_learning.pdf"
+  Transferable_Multimodal_Attack_on_Vision-Language_Pre-training_Models.pdf: "assets/papers/Transferable_Multimodal_Attack_on_Vision-Language_Pre-training_Models.pdf"
+  面向多模态大模型的对抗样本安全测评工具的设计与实现 任务书.doc: "assets/papers/面向多模态大模型的对抗样本安全测评工具的设计与实现 任务书.doc"
+  多模态大模型对抗样本安全评测工具：按周可复现的工程与论文方案.pdf: "assets/papers/多模态大模型对抗样本安全评测工具：按周可复现的工程与论文方案.pdf"
+  面向多模态大模型的对抗样本安全测评工具实施方案 (1).pdf: "assets/papers/面向多模态大模型的对抗样本安全测评工具实施方案 (1).pdf"
+

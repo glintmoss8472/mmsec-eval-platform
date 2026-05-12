@@ -1,0 +1,61 @@
+seed: 7
+artifacts_dir: "artifacts"
+device_preference: "cuda"
+
+plugins:
+  model_adapter: "clip_hf"
+  attack: "advedm"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: true
+  num_workers: 0
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+  blip_itm_model_name: "Salesforce/blip-itm-base-coco"
+  vilt_itm_model_name: "dandelin/vilt-b32-finetuned-coco"
+  enable_gradients: true
+
+dataset:
+  kind: "coco_subset"
+  root: "data/coco"
+  image_dir: "val2017"
+  captions_file: "annotations/captions_val2017_subset.json"
+  split: "val"
+  max_items: 5000
+  benchmark_tag: "full_vlr_advedm_coco"
+
+task:
+  kind: "vlr"
+  retrieval_k: [1, 5, 10]
+  eval_scope: "image"
+
+attack:
+  mode: "A"
+  epsilon: 0.0470588
+  step_size: 0.008
+  steps: 12
+  patch_size: 16
+  topk: 6
+  batch_size: 16
+
+runner:
+  save_plots: true
+  max_samples: 0
+  continue_on_error: false
+  surrogate_model_adapter: "clip_hf"
+  victim_model_adapters: ["clip_hf", "blip_itm", "vilt_itm"]
+  max_pairs: 16384
+
+defense:
+  enabled: true
+  apply_on_clean: true
+  apply_on_attacked: true
+
+risk:
+  scenario: "retrieval"

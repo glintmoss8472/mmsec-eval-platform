@@ -1,0 +1,4 @@
+{"plugins": {"attack": "advedm"}, "attack": {"mode": "A", "steps": 5}}
+{"plugins": {"attack": "advclip"}, "attack": {"mode": "A", "patch_size": 14}}
+{"plugins": {"attack": "tmm"}, "attack": {"mode": "B", "steps": 6}}
+

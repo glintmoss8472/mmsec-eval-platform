@@ -1,0 +1,49 @@
+seed: 7
+artifacts_dir: "artifacts"
+device_preference: "cuda"
+
+plugins:
+  model_adapter: "clip_hf"
+  attack: "advclip"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: true
+  num_workers: 0
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+  enable_gradients: true
+
+dataset:
+  kind: "coco_subset"
+  root: "data/coco"
+  image_dir: "val2017"
+  captions_file: "annotations/captions_val2017_subset.json"
+  split: "val"
+  max_items: 16
+  benchmark_tag: "req1_observed_image_clip"
+
+task:
+  kind: "vlr"
+  retrieval_k: [1, 5, 10]
+  eval_scope: "image"
+
+attack:
+  mode: "A"
+  epsilon: 0.0470588
+  step_size: 0.01
+  steps: 6
+  patch_size: 16
+
+runner:
+  save_plots: true
+  max_samples: 0
+  continue_on_error: false
+  surrogate_model_adapter: "clip_hf"
+  victim_model_adapters: ["clip_hf"]
+  max_pairs: 2048

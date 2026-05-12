@@ -1,0 +1,57 @@
+seed: 7
+artifacts_dir: "artifacts"
+device_preference: "cuda"
+
+plugins:
+  model_adapter: "clip_hf"
+  attack: "advclip"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: true
+  num_workers: 0
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+  openai_model_name: "OpenGVLab/InternVL3_5-8B-HF"
+  openai_base_url: "http://127.0.0.1:8014/v1"
+  openai_api_key_env: "LOCAL_INTERNVL35_API_KEY"
+  openai_timeout: 90.0
+  enable_gradients: true
+
+dataset:
+  kind: "coco_subset"
+  root: "data/coco"
+  image_dir: "val2017"
+  captions_file: "annotations/captions_val2017_subset.json"
+  split: "val"
+  max_items: 128
+  benchmark_tag: "internvl35_8b_local_coco"
+
+task:
+  kind: "vlr"
+  retrieval_k: [1, 5, 10]
+  eval_scope: "image"
+
+attack:
+  mode: "A"
+  epsilon: 0.0470588
+  step_size: 0.01
+  steps: 6
+  patch_size: 16
+  patch_train_steps: 20
+
+runner:
+  save_plots: true
+  max_samples: 0
+  continue_on_error: false
+  surrogate_model_adapter: "clip_hf"
+  victim_model_adapters: ["openai_compat"]
+  max_pairs: 2048
+
+risk:
+  scenario: "retrieval"

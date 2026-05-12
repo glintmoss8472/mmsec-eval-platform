@@ -1,0 +1,43 @@
+seed: 123
+device_preference: "cuda"
+artifacts_dir: "artifacts"
+
+plugins:
+  model_adapter: "clip_hf"
+  attack: "advedm"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: false
+  num_workers: 2
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+  surrogate_models:
+    - "openai/clip-vit-base-patch32"
+  enable_gradients: false
+
+dataset:
+  kind: "flickr30k"
+  root: "data/flickr30k"
+  image_dir: "images"
+  captions_file: "captions_index.jsonl"
+  split: "test"
+  max_items: 128
+  benchmark_tag: "flickr30k_public"
+
+attack:
+  mode: "A"
+  epsilon: 0.04
+  step_size: 0.01
+  steps: 8
+  patch_size: 16
+
+runner:
+  save_plots: true
+  max_samples: 128
+  continue_on_error: false

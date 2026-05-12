@@ -1,0 +1,61 @@
+seed: 123
+device_preference: "cuda"
+plugins:
+  model_adapter: "clip_hf"
+  attack: "advedm"
+  defense: "sanitize_v1"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: false
+  num_workers: 0
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+  surrogate_models:
+    - "openai/clip-vit-base-patch32"
+  http_endpoint: ""
+  enable_gradients: false
+
+attack:
+  mode: "A"
+  steps: 6
+  epsilon: 0.04
+  step_size: 0.01
+  epochs: 1
+  batch_size: 8
+
+defense:
+  enabled: false
+  apply_on_clean: true
+  apply_on_attacked: true
+  jpeg_quality: 85
+  bit_depth: 5
+  blur_sigma: 0.8
+  resize_ratio: 0.9
+  text_normalize: true
+
+dataset:
+  kind: "toy_shapes"
+  num_samples: 16
+  image_size: 96
+
+runner:
+  save_plots: true
+  max_samples: 16
+  continue_on_error: false
+  experiment_id: ""
+
+report:
+  save_heatmaps: true
+  save_patch_preview: true
+  top_k_cases: 20
+
+sample_store:
+  enabled: true
+  save_images: true
+  save_traces: true

@@ -1,0 +1,64 @@
+seed: 7
+artifacts_dir: "artifacts"
+device_preference: "cuda"
+
+plugins:
+  model_adapter: "openai_qwen35_9b"
+  attack: "vqa_visual_corruption"
+  defense: "sanitize_v1"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: false
+  num_workers: 0
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+
+dataset:
+  kind: "generation_jsonl"
+  max_items: 10
+  benchmark_tag: "vqa_visual_corruption_quick"
+
+task:
+  kind: "vqa"
+  eval_scope: "image"
+  cases_jsonl: "data/coco2014/generation/vqa_v2_coco_val.jsonl"
+  vqa_prompt: "Answer the question about the image. Use a short answer.
+Question: {question}"
+
+attack:
+  mode: "A"
+  epsilon: 0.02
+  step_size: 0.01
+  steps: 1
+  repo_dir: "external/VQA-Visual-Robustness-Benchmark"
+  command_template: "{python} {project_root}/scripts/external_attacks/vqa_visual_corruption_one.py --repo_dir {repo_dir} --input_image {input_image} --output_image {output_image} --corruption_type {corruption_type} --severity {severity} --seed {seed} --trace_json {external_trace}"
+  timeout_sec: 300
+  corruption_type: "gaussian_noise"
+  severity: 2
+  corruption_seed: 7
+
+defense:
+  enabled: false
+
+runner:
+  save_plots: true
+  max_samples: 10
+  continue_on_error: false
+  surrogate_model_adapter: "clip_hf"
+  victim_model_adapters: ["openai_qwen35_9b"]
+
+report:
+  save_heatmaps: true
+  save_patch_preview: false
+  top_k_cases: 10
+
+sample_store:
+  enabled: true
+  save_images: true
+  save_traces: true

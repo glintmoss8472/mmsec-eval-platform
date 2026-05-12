@@ -1,0 +1,62 @@
+seed: 7
+artifacts_dir: "artifacts"
+device_preference: "cuda"
+
+plugins:
+  model_adapter: "clip_hf"
+  attack: "xtransfer_uap"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: true
+  num_workers: 0
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+
+dataset:
+  kind: "toy_shapes"
+  num_samples: 10
+  image_size: 96
+  max_items: 10
+  benchmark_tag: "xtransfer_uap_quick_vlr"
+
+task:
+  kind: "vlr"
+  retrieval_k: [1]
+  eval_scope: "image"
+
+attack:
+  mode: "A"
+  epsilon: 0.0470588
+  step_size: 0.01
+  steps: 1
+  repo_dir: "external/XTransferBench"
+  uap_name: "xtransfer_large_linf_eps12_non_targeted"
+  uap_path: "external/XTransferBench/.cache/xtransfer_large_linf_eps12_non_targeted/model.safetensors"
+  threat_model: "linf_non_targeted"
+  cache_dir: "/root/autodl-tmp/hf-cache"
+  hf_endpoint: "https://hf-mirror.com"
+  timeout_sec: 300
+
+runner:
+  save_plots: true
+  max_samples: 10
+  continue_on_error: false
+  surrogate_model_adapter: "clip_hf"
+  victim_model_adapters: ["clip_hf"]
+  max_pairs: 100
+
+report:
+  save_heatmaps: true
+  save_patch_preview: false
+  top_k_cases: 10
+
+sample_store:
+  enabled: true
+  save_images: true
+  save_traces: true

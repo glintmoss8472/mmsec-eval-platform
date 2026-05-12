@@ -1,0 +1,61 @@
+schema_version: 1
+experiment_id: "transfer_matrix_coco_flickr"
+title: "COCO 与 Flickr30K 多模型迁移矩阵"
+title_en: "COCO and Flickr30K multi-model transfer matrix"
+description: "用统一的图文检索口径比较代理模型生成的对抗样本迁移到多个受测模型后的风险。"
+seeds: [20260502, 20260503, 20260504]
+datasets:
+  - name: "coco_subset"
+    root: "data/coco"
+    image_dir: "val2017"
+    captions_file: "annotations/captions_val2017_subset.json"
+    max_items: 500
+  - name: "flickr30k"
+    root: "data/flickr30k"
+    image_dir: "images"
+    captions_file: "captions_index.jsonl"
+    max_items: 500
+surrogate_models:
+  - "clip_hf"
+  - "blip_itm"
+  - "vilt_itm"
+victim_models:
+  - "clip_hf"
+  - "blip_itm"
+  - "vilt_itm"
+  - "openai_compat"
+  - "gemini_vision"
+attacks:
+  image_only:
+    - "advclip"
+    - "pgd"
+    - "mifgsm"
+    - "dtmifgsm"
+    - "vmifgsm"
+    - "advedm"
+  joint:
+    - "tmm"
+    - "advedm_plus"
+budget:
+  linf: 0.05
+  text_edits: 1
+  retrieval_pairs: "full_matrix"
+outputs:
+  summary: "artifacts/transfer_matrix_coco_flickr/summary.json"
+  matrix_csv: "artifacts/transfer_matrix_coco_flickr/transfer_matrix.csv"
+  manifest_group: "transfer_matrix_coco_flickr"
+statistics:
+  aggregate_by:
+    - "dataset"
+    - "attack"
+    - "surrogate_model"
+    - "victim_model"
+  report:
+    - "均值"
+    - "标准差"
+    - "置信区间"
+    - "有效样本数"
+quality_gates:
+  require_clean_hit_before_attack: true
+  flag_constant_scores: true
+  minimum_effective_pairs: 300

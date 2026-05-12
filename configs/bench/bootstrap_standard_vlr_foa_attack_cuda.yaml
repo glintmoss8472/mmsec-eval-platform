@@ -1,0 +1,66 @@
+seed: 7
+artifacts_dir: "artifacts"
+device_preference: "cuda"
+
+plugins:
+  model_adapter: "clip_hf"
+  attack: "foa_attack"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: true
+  num_workers: 0
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+
+dataset:
+  kind: "toy_shapes"
+  num_samples: 10
+  image_size: 96
+  max_items: 0
+  benchmark_tag: "foa_attack_standard_vlr"
+
+task:
+  kind: "vlr"
+  retrieval_k: [1]
+  eval_scope: "image"
+
+attack:
+  mode: "A"
+  epsilon: 0.0627451
+  step_size: 0.00392157
+  steps: 300
+  device: "cuda:0"
+  repo_dir: "external/FOA-Attack"
+  command_template: "{python} {project_root}/scripts/external_attacks/clip_feature_alignment_one.py --method foa_attack --repo_dir {repo_dir} --input_image {input_image} --target_image {target_image} --output_image {output_image} --device {device} --epsilon {epsilon} --alpha {alpha} --steps {steps} --backbones {surrogate_models} --attack fgsm --use_source_crop --use_target_crop --crop_scale {crop_scale},{crop_ratio} --cluster_num 3"
+  target_image: "external/FOA-Attack/resources/images/target_images/1/0.jpg"
+  target_text: ""
+  timeout_sec: 3600
+  cache_dir: "/root/autodl-tmp/hf-cache"
+  hf_endpoint: "https://hf-mirror.com"
+  surrogate_models: ["B16", "B32", "Laion"]
+  crop_scale: 0.5
+  crop_ratio: 0.9
+
+runner:
+  save_plots: true
+  max_samples: 0
+  continue_on_error: false
+  surrogate_model_adapter: "clip_hf"
+  victim_model_adapters: ["clip_hf"]
+  max_pairs: 0
+
+report:
+  save_heatmaps: true
+  save_patch_preview: false
+  top_k_cases: 0
+
+sample_store:
+  enabled: true
+  save_images: true
+  save_traces: true

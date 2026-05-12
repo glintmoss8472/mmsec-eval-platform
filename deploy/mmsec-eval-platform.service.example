@@ -1,0 +1,16 @@
+[Unit]
+Description=mmsec-eval-platform API service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/mmsec-eval-platform
+EnvironmentFile=/opt/mmsec-eval-platform/.env
+ExecStart=/bin/bash /opt/mmsec-eval-platform/scripts/run_backend.sh
+Restart=always
+RestartSec=5
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

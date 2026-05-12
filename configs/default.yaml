@@ -1,0 +1,144 @@
+seed: 42
+device_preference: "cuda"
+artifacts_dir: "artifacts"
+
+docs:
+  max_pages: 5
+  snippet_chars: 800
+  local_paths_file: "configs/local_paths.yaml"
+  paths:
+    - "/mnt/data/ADVEDM_Fine-grained_Adversarial_Attack_against_VLM-based_Embodied_Agents.pdf"
+    - "/mnt/data/Advclip_Downstream-agnostic_adversarial_examples_in_multimodal_contrastive_learning.pdf"
+    - "/mnt/data/Transferable_Multimodal_Attack_on_Vision-Language_Pre-training_Models.pdf"
+    - "/mnt/data/mmsec_task_book.doc"
+    - "/mnt/data/mmsec_codex_blueprint.pdf"
+    - "/mnt/data/mmsec_impl_plan.pdf"
+
+plugins:
+  model_adapter: "clip_hf"
+  attack: "advedm"
+  defense: "sanitize_v1"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: false
+  num_workers: 0
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+  surrogate_models:
+    - "openai/clip-vit-base-patch32"
+  http_endpoint: ""
+  http_retries: 2
+  http_timeout: 15.0
+  enable_gradients: false
+
+dataset:
+  kind: "toy_shapes"
+  num_samples: 24
+  image_size: 96
+  folder_jsonl: ""
+  root: ""
+  image_dir: ""
+  captions_file: ""
+  split: "train"
+  max_items: 0
+  benchmark_tag: ""
+
+attack:
+  mode: "A"
+  epsilon: 0.05
+  step_size: 0.01
+  steps: 8
+  patch_size: 16
+  topk: 6
+  threshold: 0.5
+  alpha: 10.0
+  beta: 5.0
+  gamma: 1.0
+  ratio_r: 0.4
+  lambda_att: 0.1
+  batch_size: 8
+  epochs: 1
+  tau_patch: 0.07
+  tv_weight: 0.0
+  nps_weight: 0.0
+  gan_steps: 1
+  loss_weights:
+    target: 1.0
+    preserve: 1.0
+    fixation: 1.0
+    topology: 1.0
+    gan: 1.0
+    orth: 1.0
+    ssim: 1.0
+
+defense:
+  enabled: false
+  apply_on_clean: true
+  apply_on_attacked: true
+  jpeg_quality: 85
+  bit_depth: 5
+  blur_sigma: 0.8
+  resize_ratio: 0.9
+  text_normalize: true
+
+risk:
+  enabled: true
+  scenario: "general"
+  transfer_success_threshold: 0.2
+  # Optional override:
+  # weights:
+  #   effectiveness: 0.35
+  #   semantic: 0.20
+  #   cost: 0.20
+  #   transfer: 0.15
+  #   stability: 0.10
+  l2_reference: 25.0
+  linf_reference: 0.2
+  rank_reference: 100.0
+
+runner:
+  save_plots: true
+  max_samples: 0
+  continue_on_error: false
+  experiment_id: ""
+
+report:
+  save_heatmaps: true
+  save_patch_preview: true
+  top_k_cases: 20
+
+sample_store:
+  enabled: true
+  save_images: true
+  save_traces: true
+
+judge:
+  llm_enabled: false
+  llm_provider: "none"
+  llm_endpoint: ""
+  llm_api_key_env: "OPENAI_API_KEY"
+
+sweep:
+  enabled: false
+  path: "configs/sweep/examples.jsonl"
+
+bootstrap:
+  enabled: true
+  seed_dir: "seed"
+  auto_prepare_datasets: true
+  auto_ingest_docs: true
+  auto_run_benchmark: true
+  model_warmup: true
+  dataset_auto_download: true
+  max_warmup_minutes: 30
+  docs_config: "configs/mvp.yaml"
+  demo_benchmark_config: "configs/bench/bootstrap_quick.yaml"
+  public_benchmark_config: "configs/bench/flickr30k_clip.yaml"
+  flickr_root: "data/flickr30k"
+  coco_root: "data/coco"

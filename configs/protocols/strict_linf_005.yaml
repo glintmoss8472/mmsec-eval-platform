@@ -1,0 +1,103 @@
+seed: 20260502
+device_preference: "cuda"
+artifacts_dir: "artifacts"
+
+plugins:
+  model_adapter: "clip_hf"
+  attack: "tmm"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: true
+  num_workers: 4
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+  blip_itm_model_name: "Salesforce/blip-itm-base-coco"
+  vilt_itm_model_name: "dandelin/vilt-b32-finetuned-coco"
+  enable_gradients: true
+
+dataset:
+  kind: "coco_subset"
+  root: "data/coco"
+  image_dir: "val2017"
+  captions_file: "annotations/captions_val2017_subset.json"
+  split: "val"
+  max_items: 5000
+  benchmark_tag: "strict_linf_005_coco"
+
+task:
+  kind: "vlr"
+  retrieval_k: [1, 5, 10]
+  eval_scope: "joint"
+  compare_stages: ["clean", "attacked", "defended"]
+
+attack:
+  mode: "A"
+  epsilon: 0.05
+  step_size: 0.005
+  steps: 20
+  ratio_r: 0.8
+  lambda_att: 0.7
+  alpha: 10.0
+  eps_t: 1
+  text_candidates_k: 24
+  batch_size: 64
+
+runner:
+  save_plots: false
+  max_samples: 5000
+  continue_on_error: false
+  surrogate_model_adapter: "clip_hf"
+  victim_model_adapters: ["clip_hf", "blip_itm", "vilt_itm"]
+  max_pairs: 0
+  experiment_id: "strict_linf_005_coco_seed20260502"
+
+risk:
+  enabled: true
+  scenario: "retrieval"
+  linf_reference: 0.05
+  transfer_success_threshold: 0.2
+
+report:
+  save_heatmaps: false
+  save_patch_preview: true
+  top_k_cases: 50
+
+sample_store:
+  enabled: true
+  save_images: true
+  save_traces: false
+
+extra:
+  protocol_name: "严格无穷范数 0.05 视觉语言检索协议"
+  protocol_name_en: "strict Linf 0.05 vision-language retrieval protocol"
+  random_seeds: [20260502, 20260503, 20260504]
+  branches:
+    image_only:
+      task_eval_scope: "image"
+      attacks: ["fgsm", "pgd", "mifgsm", "difgsm", "tifgsm", "dtmifgsm", "vmifgsm", "vnifgsm", "advclip", "advedm"]
+    text_only:
+      task_eval_scope: "text"
+      attacks: ["tmm"]
+      text_budget: "eps_t=1"
+    joint:
+      task_eval_scope: "joint"
+      attacks: ["tmm", "advedm_plus"]
+  reporting:
+    required_metrics:
+      - "条件攻击成功率"
+      - "攻击后错误率"
+      - "前 K 名召回率下降"
+      - "平均排序变化"
+      - "语义保持"
+      - "无穷范数扰动"
+      - "运行耗时"
+    required_statistics:
+      - "均值"
+      - "标准差"
+      - "置信区间"

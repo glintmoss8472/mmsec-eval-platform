@@ -1,0 +1,24 @@
+﻿runtime:
+  device: "cuda"
+  amp: false
+  num_workers: 0
+  deterministic: true
+  fallback_cpu: false
+
+plugins:
+  model_adapter: "clip_hf"
+
+attack:
+  mode: "A"
+  steps: 3
+  epochs: 1
+  batch_size: 4
+  patch_size: 10
+
+dataset:
+  kind: "toy_shapes"
+  num_samples: 8
+  image_size: 64
+
+runner:
+  max_samples: 8

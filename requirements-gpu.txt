@@ -1,0 +1,4 @@
+# GPU extras (torch/torchvision must be installed as CUDA builds on Windows).
+# Use: scripts/install_torch_cuda.ps1
+accelerate>=0.27
+

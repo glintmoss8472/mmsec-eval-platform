@@ -1,0 +1,38 @@
+﻿runtime:
+  device: "cuda"
+  amp: true
+  num_workers: 4
+  deterministic: false
+  fallback_cpu: false
+
+plugins:
+  model_adapter: "clip_hf"
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+  surrogate_models:
+    - "openai/clip-vit-base-patch32"
+    - "openai/clip-vit-large-patch14"
+  enable_gradients: true
+
+dataset:
+  kind: "toy_shapes"
+  num_samples: 64
+  image_size: 224
+
+attack:
+  mode: "B"
+  steps: 20
+  epochs: 3
+  batch_size: 16
+  epsilon: 0.05
+  step_size: 0.005
+  patch_size: 32
+  loss_weights:
+    target: 1.0
+    preserve: 0.7
+    fixation: 0.5
+    topology: 1.2
+    gan: 0.8
+    orth: 1.0
+    ssim: 0.8

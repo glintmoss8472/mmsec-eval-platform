@@ -1,0 +1,62 @@
+seed: 7
+artifacts_dir: "artifacts"
+device_preference: "cuda"
+
+plugins:
+  # Used as the default adapter in configs; VLR runner will use runner.surrogate_model_adapter + victim list.
+  model_adapter: "clip_hf"
+  attack: "advclip"
+  metric: "basic"
+  judge: "rule"
+
+runtime:
+  device: "cuda"
+  amp: true
+  num_workers: 0
+  deterministic: true
+  fallback_cpu: false
+
+model:
+  clip_model_name: "openai/clip-vit-base-patch32"
+  blip_itm_model_name: "Salesforce/blip-itm-base-coco"
+  vilt_itm_model_name: "dandelin/vilt-b32-finetuned-coco"
+  enable_gradients: true
+
+dataset:
+  kind: "coco_subset"
+  root: "data/coco"
+  image_dir: "val2017"
+  captions_file: "annotations/captions_val2017_subset.json"
+  split: "val"
+  max_items: 64
+  benchmark_tag: "seed_bootstrap_vlr_coco"
+
+task:
+  kind: "vlr"
+  retrieval_k: [1, 5, 10]
+  # clean | image | text | joint
+  eval_scope: "image"
+
+attack:
+  mode: "A"
+  # eps_v default ~ 12/255
+  epsilon: 0.0470588
+  step_size: 0.01
+  steps: 8
+  patch_size: 32
+  # AdvCLIP training knobs (used by `train-advclip`)
+  patch_train_steps: 120
+  topology_k: 5
+  lambda_at: 1.0
+  lambda_tpd: 1.0
+  tv_weight: 0.0
+  nps_weight: 0.0
+
+runner:
+  save_plots: true
+  max_samples: 0
+  continue_on_error: false
+  surrogate_model_adapter: "clip_hf"
+  victim_model_adapters: ["clip_hf", "blip_itm", "vilt_itm"]
+  # Cap NxM scoring to keep quick runs manageable.
+  max_pairs: 25000
