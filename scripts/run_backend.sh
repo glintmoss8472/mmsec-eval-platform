@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 文件说明：该文件属于运维与实验脚本，集中实现 run backend 相关逻辑。
 set -euo pipefail
 
 LISTEN_HOST="${LISTEN_HOST:-0.0.0.0}"
@@ -20,6 +21,7 @@ RUNTIME_PYTHON_BIN=""
 
 cd "${PROJECT_ROOT}"
 
+# 中文注释：实现 python_mm 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 python_mm() {
   local bin_path="$1"
   "${bin_path}" - <<'PY'
@@ -28,6 +30,7 @@ print(f"{sys.version_info[0]}.{sys.version_info[1]}")
 PY
 }
 
+# 中文注释：实现 python_ok 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 python_ok() {
   local version
   version="$(python_mm "$1" 2>/dev/null || echo '0.0')"
@@ -38,6 +41,7 @@ python_ok() {
   (( major > 3 || (major == 3 && minor >= 10) ))
 }
 
+# 中文注释：实现 python_has_runtime_deps 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 python_has_runtime_deps() {
   local bin_path="$1"
   "${bin_path}" - <<'PY' >/dev/null 2>&1

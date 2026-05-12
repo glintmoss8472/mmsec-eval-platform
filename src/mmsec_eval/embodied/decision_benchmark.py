@@ -1,3 +1,4 @@
+# 文件说明：该文件属于项目工程，集中实现 decision benchmark 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -7,6 +8,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
+# 中文注释：定义 DecisionCaseResult 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class DecisionCaseResult:
     case_id: str
@@ -21,6 +23,7 @@ class DecisionCaseResult:
     target_region_changed: bool
 
 
+# 中文注释：封装 _extract_json_text 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _extract_json_text(text: str) -> dict[str, Any]:
     raw = str(text or "").strip()
     if not raw:
@@ -39,6 +42,7 @@ def _extract_json_text(text: str) -> dict[str, Any]:
     return data if isinstance(data, dict) else {"value": data}
 
 
+# 中文注释：实现 normalize_decision 的核心流程，支撑项目工程中的业务语义和异常边界。
 def normalize_decision(output: str | dict[str, Any], valid_decisions: Iterable[str]) -> str:
     valid = {str(item).strip().lower() for item in valid_decisions if str(item).strip()}
     if isinstance(output, dict):
@@ -55,6 +59,7 @@ def normalize_decision(output: str | dict[str, Any], valid_decisions: Iterable[s
     return hits[0] if hits else ""
 
 
+# 中文注释：实现 evaluate_decision_case 的核心流程，支撑项目工程中的业务语义和异常边界。
 def evaluate_decision_case(row: dict[str, Any]) -> DecisionCaseResult:
     valid_decisions = row.get("valid_decisions") or row.get("allowed_decisions") or []
     correct = str(row.get("correct_decision", "")).strip().lower()
@@ -75,10 +80,12 @@ def evaluate_decision_case(row: dict[str, Any]) -> DecisionCaseResult:
     )
 
 
+# 中文注释：实现 evaluate_decision_cases 的核心流程，支撑项目工程中的业务语义和异常边界。
 def evaluate_decision_cases(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     return [evaluate_decision_case(row).__dict__ for row in rows]
 
 
+# 中文注释：实现 summarize_decision_cases 的核心流程，支撑项目工程中的业务语义和异常边界。
 def summarize_decision_cases(results: Iterable[dict[str, Any]]) -> dict[str, Any]:
     rows = list(results)
     n = len(rows)
@@ -93,6 +100,7 @@ def summarize_decision_cases(results: Iterable[dict[str, Any]]) -> dict[str, Any
     }
 
 
+# 中文注释：实现 load_decision_cases 的核心流程，支撑项目工程中的业务语义和异常边界。
 def load_decision_cases(path: str | Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for line in Path(path).read_text(encoding="utf-8").splitlines():

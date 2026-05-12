@@ -1,3 +1,4 @@
+# 文件说明：该文件属于攻击算法公共层，集中实现 text utils 相关逻辑。
 from __future__ import annotations
 
 import os
@@ -12,6 +13,7 @@ from mmsec_eval.model_adapters.hf_local import resolve_hf_model_source
 _BERT_CACHE: dict[str, Any] = {}
 
 
+# 中文注释：定义 _MlmEditMode 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class _MlmEditMode:
     method: str
@@ -20,6 +22,7 @@ class _MlmEditMode:
     minimize_score: bool
 
 
+# 中文注释：封装 _load_bert_mlm 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _load_bert_mlm(device: str):
     key = f"bert:{device}"
     if key in _BERT_CACHE:
@@ -38,19 +41,23 @@ def _load_bert_mlm(device: str):
     return tokenizer, model
 
 
+# 中文注释：封装 _score_text 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _score_text(adapter: Any, image: np.ndarray, text: str) -> float:
     return float(adapter.score_pairs([(image, str(text))], batch_size=1)[0])
 
 
+# 中文注释：封装 _tokens_from_text 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _tokens_from_text(text: str) -> list[str]:
     return [tok for tok in str(text).split() if tok]
 
 
+# 中文注释：封装 _noop_text_result 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _noop_text_result(*, image: np.ndarray, text: str, adapter: Any, reason: str) -> tuple[str, dict[str, Any]]:
     score = float(_score_text(adapter, image, text))
     return str(text), {"method": "noop", "reason": reason, "score_orig": score, "score_new": score}
 
 
+# 中文注释：封装 _greedy_token_drop 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _greedy_token_drop(
     *,
     image: np.ndarray,
@@ -124,6 +131,7 @@ def _greedy_token_drop(
     }
 
 
+# 中文注释：封装 _fallback_token_drop_attack 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _fallback_token_drop_attack(
     *,
     image: np.ndarray,
@@ -143,6 +151,7 @@ def _fallback_token_drop_attack(
     )
 
 
+# 中文注释：封装 _fallback_token_drop_repair 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _fallback_token_drop_repair(
     *,
     image: np.ndarray,
@@ -162,10 +171,12 @@ def _fallback_token_drop_repair(
     )
 
 
+# 中文注释：封装 _score_is_better 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _score_is_better(candidate: float, best: float, *, minimize_score: bool) -> bool:
     return candidate < best if minimize_score else candidate > best
 
 
+# 中文注释：封装 _select_mask_position 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _select_mask_position(
     *,
     tokenizer: Any,
@@ -195,11 +206,13 @@ def _select_mask_position(
     return best_pos, float(best_delta)
 
 
+# 中文注释：封装 _encode_mlm_inputs 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _encode_mlm_inputs(*, tokenizer: Any, text: str, device: str) -> tuple[Any, Any]:
     enc = tokenizer(text, return_tensors="pt")
     return enc["input_ids"].to(device), enc["attention_mask"].to(device)
 
 
+# 中文注释：封装 _candidate_token_ids 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _candidate_token_ids(*, torch_mod: Any, mlm: Any, input_ids: Any, attention_mask: Any, best_pos: int, candidates_k: int) -> list[int]:
     with torch_mod.no_grad():
         out = mlm(input_ids=input_ids, attention_mask=attention_mask)
@@ -208,6 +221,7 @@ def _candidate_token_ids(*, torch_mod: Any, mlm: Any, input_ids: Any, attention_
     return [int(token_id) for token_id in top_ids]
 
 
+# 中文注释：封装 _choose_best_replacement 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _choose_best_replacement(
     *,
     tokenizer: Any,
@@ -241,6 +255,7 @@ def _choose_best_replacement(
     return best_text, best_score, best_token
 
 
+# 中文注释：封装 _mlm_edit_result 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _mlm_edit_result(
     *,
     mode: _MlmEditMode,
@@ -259,6 +274,7 @@ def _mlm_edit_result(
     }
 
 
+# 中文注释：封装 _mlm_edit_record 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _mlm_edit_record(
     *,
     mode: _MlmEditMode,
@@ -280,6 +296,7 @@ def _mlm_edit_record(
     }
 
 
+# 中文注释：封装 _run_mlm_text_edit 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _run_mlm_text_edit(
     *,
     image: np.ndarray,
@@ -360,6 +377,7 @@ def _run_mlm_text_edit(
     )
 
 
+# 中文注释：实现 run_text_replacement_attack 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
 def run_text_replacement_attack(
     *,
     image: np.ndarray,
@@ -402,6 +420,7 @@ def run_text_replacement_attack(
     return _fallback_token_drop_attack(image=image, text=text, adapter=adapter, eps_t=eps_t)
 
 
+# 中文注释：实现 run_text_repair 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
 def run_text_repair(
     *,
     image: np.ndarray,

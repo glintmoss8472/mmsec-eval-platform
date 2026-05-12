@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 CaseReviewPage 相关逻辑。
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -17,19 +18,23 @@ const SERVER_TIME_ZONE = "Asia/Shanghai";
 const CASE_PAGE_SIZES = [20, 50, 100];
 const CASE_REFRESH_MS = 30000;
 
+/** 中文注释：实现 asRecord 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null ? value as Record<string, unknown> : {};
 }
 
+/** 中文注释：实现 relativeRunPath 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function relativeRunPath(path: string) {
   return path.replace(/^.*runs[\\/][^\\/]+[\\/]/, "");
 }
 
+/** 中文注释：实现 caseAsset 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function caseAsset(runId: string, path: unknown) {
   const raw = String(path || "");
   return raw ? runAssetUrl(runId, relativeRunPath(raw)) : "";
 }
 
+/** 中文注释：实现 taskKindLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function taskKindLabel(kind: string | undefined) {
   if (kind === "vlr") return "图文检索";
   if (kind === "vqa") return "视觉问答";
@@ -37,6 +42,7 @@ function taskKindLabel(kind: string | undefined) {
   return "通用测评";
 }
 
+/** 中文注释：实现 confidenceLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function confidenceLabel(value: string | undefined) {
   if (value === "high") return "高置信";
   if (value === "medium") return "中置信";
@@ -44,6 +50,7 @@ function confidenceLabel(value: string | undefined) {
   return "未标注";
 }
 
+/** 中文注释：实现 artifactLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function artifactLabel(value: string | undefined) {
   if (value === "complete") return "证据完整";
   if (value === "partial") return "证据部分";
@@ -51,34 +58,41 @@ function artifactLabel(value: string | undefined) {
   return "未标注";
 }
 
+/** 中文注释：实现 successLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function successLabel(value: unknown, taskKind = "") {
   const ok = value === true || String(value).toLowerCase() === "true";
   if (taskKind === "vlr") return ok ? "攻击成功" : "未形成检索失败";
   return ok ? "攻击成功" : "攻击未成功";
 }
 
+/** 中文注释：实现 statusClass 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function statusClass(ok: unknown) {
   const success = ok === true || String(ok).toLowerCase() === "true";
   return success ? "att-chip att-chip-red" : "att-chip att-chip-ok";
 }
 
+/** 中文注释：实现 datasetLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function datasetLabel(item: CaseIndexItem) {
   return formatRunDatasetName(item.dataset_name || "", item.benchmark_tag || "", item.task_kind || "");
 }
 
+/** 中文注释：实现 modelLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function modelLabel(item: CaseIndexItem) {
   return formatAdapterName(item.model_adapter || "-");
 }
 
+/** 中文注释：实现 fixed 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function fixed(value: unknown, digits = 4) {
   const num = Number(value);
   return Number.isFinite(num) ? num.toFixed(digits) : "未记录";
 }
 
+/** 中文注释：实现 unique 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function unique(values: Array<string | undefined>) {
   return [...new Set(values.filter((value): value is string => Boolean(value)))].sort();
 }
 
+/** 中文注释：实现 createdAtText 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function createdAtText(value: string | undefined) {
   if (!value) return "未记录时间";
   const date = new Date(value);
@@ -86,15 +100,18 @@ function createdAtText(value: string | undefined) {
   return date.toLocaleString("zh-CN", { hour12: false, timeZone: SERVER_TIME_ZONE });
 }
 
+/** 中文注释：实现 nextCaseSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function nextCaseSort(current: CaseSortState, key: CaseSortKey): CaseSortState {
   return { key, direction: current.key === key && current.direction === "asc" ? "desc" : "asc" };
 }
 
+/** 中文注释：实现 caseAriaSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function caseAriaSort(sort: CaseSortState, key: CaseSortKey): "none" | "ascending" | "descending" {
   if (sort.key !== key) return "none";
   return sort.direction === "asc" ? "ascending" : "descending";
 }
 
+/** 中文注释：实现 CaseSortHeader 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function CaseSortHeader({ sort, sortKey, label, onSort }: { sort: CaseSortState; sortKey: CaseSortKey; label: string; onSort: (key: CaseSortKey) => void }) {
   const active = sort.key === sortKey;
   const icon = active ? (sort.direction === "asc" ? "↑" : "↓") : "↕";
@@ -132,6 +149,7 @@ export default function CaseReviewPage() {
   const totalPages = Math.max(1, Math.ceil(totalCases / pageSize));
   const safePage = totalCases ? Math.min(page, totalPages) : page;
   const selectedCase = cases.find((item) => `${item.run_id}::${item.sample_id}` === selectedKey) ?? cases[0];
+  /** 中文注释：实现 handleSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   const handleSort = (key: CaseSortKey) => { setSort((current) => nextCaseSort(current, key)); setPage(1); };
 
   useEffect(() => {

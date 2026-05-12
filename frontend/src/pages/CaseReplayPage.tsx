@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 CaseReplayPage 相关逻辑。
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 
@@ -5,24 +6,29 @@ import { getCaseDetail, runAssetUrl } from "../lib/api";
 import { caseInputLabel, caseInputText, caseOutputLabel, caseOutputText } from "../lib/caseBundleText";
 import { formatAdapterName, formatAttackName, formatRunDatasetName } from "../lib/uiLabels";
 
+/** 中文注释：实现 relativeRunPath 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function relativeRunPath(path: string) {
   return path.replace(/^.*runs[\\/][^\\/]+[\\/]/, "");
 }
 
+/** 中文注释：实现 asRecord 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
 }
 
+/** 中文注释：实现 assetUrl 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function assetUrl(runId: string, path: string): string {
   if (!path) return "";
   return runAssetUrl(runId, relativeRunPath(path));
 }
 
+/** 中文注释：实现 formatOptionalValue 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function formatOptionalValue(value: unknown, fallback = "未记录 / 不适用"): string {
   const text = String(value ?? "").trim();
   return text && text !== "-" && text !== "null" && text !== "undefined" ? text : fallback;
 }
 
+/** 中文注释：实现 formatOptionalMetric 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function formatOptionalMetric(value: unknown, fallback = "未记录 / 不适用"): string {
   const text = formatOptionalValue(value, fallback);
   if (text === fallback) return text;
@@ -30,6 +36,7 @@ function formatOptionalMetric(value: unknown, fallback = "未记录 / 不适用"
   return Number.isFinite(numeric) ? numeric.toFixed(6) : text;
 }
 
+/** 中文注释：实现 formatBooleanMetric 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function formatBooleanMetric(value: unknown): string {
   if (value === true) return "是";
   if (value === false) return "否";
@@ -39,6 +46,7 @@ function formatBooleanMetric(value: unknown): string {
   return "未记录 / 不适用";
 }
 
+/** 中文注释：实现 formatCaptionGoal 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function formatCaptionGoal(value: unknown): string {
   const goal = String(value ?? "").trim().toLowerCase();
   if (["remove", "remove_object", "hide_object"].includes(goal)) return "移除目标对象（remove）";
@@ -46,6 +54,7 @@ function formatCaptionGoal(value: unknown): string {
   return formatOptionalValue(value);
 }
 
+/** 中文注释：实现 taskKindLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function taskKindLabel(kind: string): string {
   if (kind === "vlr") return "图文检索";
   if (kind === "vqa") return "视觉问答";
@@ -53,6 +62,7 @@ function taskKindLabel(kind: string): string {
   return "通用测评";
 }
 
+/** 中文注释：实现 verdictText 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function verdictText(taskKind: string, metrics: Record<string, unknown>, judge: Record<string, unknown>): string {
   const success = metrics.attack_success ?? judge.success;
   const ok = success === true || String(success).toLowerCase() === "true";
@@ -60,6 +70,7 @@ function verdictText(taskKind: string, metrics: Record<string, unknown>, judge: 
   return ok ? "攻击成功" : "攻击未成功";
 }
 
+/** 中文注释：实现 verdictExplain 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function verdictExplain(taskKind: string, metrics: Record<string, unknown>): string {
   if (taskKind === "vqa") {
     return `标准答案为 ${formatOptionalValue(metrics.answer)}，原始答案正确=${formatBooleanMetric(metrics.clean_correct)}，攻击后答案正确=${formatBooleanMetric(metrics.attacked_correct)}，答案变化=${formatBooleanMetric(metrics.answer_changed)}。`;
@@ -70,6 +81,7 @@ function verdictExplain(taskKind: string, metrics: Record<string, unknown>): str
   return `检索案例通过输入文本变化、检索分数和嵌入偏移判断是否破坏图文匹配。`;
 }
 
+/** 中文注释：实现 generationMetricRows 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function generationMetricRows(taskKind: string, metrics: Record<string, unknown>) {
   if (taskKind === "vqa") {
     return [
@@ -177,7 +189,9 @@ export default function CaseReplayPage() {
   const hasCotShiftScore = formatOptionalMetric(cotShiftScore) !== "未记录 / 不适用";
   const outputFallback = isGenerationTask ? "当前案例未记录该阶段生成输出" : "当前案例未记录该阶段检索分数";
   const generationRows = isGenerationTask ? generationMetricRows(taskKind, metrics) : [];
+  /** 中文注释：实现 stageInputHeading 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   const stageInputHeading = (stageKey: "clean" | "adv", value: unknown) => caseInputLabel(stageKey, taskKind, value);
+  /** 中文注释：实现 stageOutputHeading 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   const stageOutputHeading = (stageKey: "clean" | "adv", value: unknown) => caseOutputLabel(stageKey, taskKind, value);
   const visualStages = [
     {

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test registry 相关逻辑。
 import pytest
 
 from mmsec_eval.exceptions import PluginNotFoundError
@@ -5,6 +6,7 @@ from mmsec_eval.plugins.builtin import register_builtin_plugins
 from mmsec_eval.plugins.registry import create, list_plugins
 
 
+# 中文注释：验证 test_registry_builtin_create 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_registry_builtin_create():
     register_builtin_plugins()
     adapters = set(list_plugins("model_adapter"))
@@ -35,6 +37,7 @@ def test_registry_builtin_create():
         assert create("attack", attack_id) is not None
 
 
+# 中文注释：验证 test_registry_missing 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_registry_missing():
     with pytest.raises(PluginNotFoundError):
         create("attack", "missing_attack")

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 probe advclip official assets 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -14,11 +15,13 @@ DEFAULT_SHARE_ID = "JqKbqGfTRs"
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
+# 中文注释：封装 _write_json 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 中文注释：实现 probe_cstcloud_share 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 def probe_cstcloud_share(share_id: str, *, timeout: int) -> dict[str, Any]:
     api_url = f"https://pan.cstcloud.cn/s/api/shareGetInfo?shareId={share_id}"
     page_url = f"https://pan.cstcloud.cn/s/{share_id}"
@@ -50,6 +53,7 @@ def probe_cstcloud_share(share_id: str, *, timeout: int) -> dict[str, Any]:
     return result
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Probe the official AdvCLIP CSTCloud dataset share without downloading local files.")
     parser.add_argument("--share-id", default=DEFAULT_SHARE_ID)

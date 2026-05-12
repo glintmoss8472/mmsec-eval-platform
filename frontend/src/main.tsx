@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端工程配置，集中实现 main 相关逻辑。
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 prepare coco subset 相关逻辑。
 Param(
   [string]$Root = "data/coco",
   [string]$Split = "val2017",

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 audit code quality 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -27,6 +28,7 @@ LONG_FUNCTION_ALLOWLIST = {
 }
 
 
+# 中文注释：封装 _git_files 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _git_files(root: Path, pattern: str | None = None) -> list[str]:
     cmd = ["git", "ls-files"]
     if pattern:
@@ -34,10 +36,12 @@ def _git_files(root: Path, pattern: str | None = None) -> list[str]:
     return subprocess.check_output(cmd, cwd=root, text=True).splitlines()
 
 
+# 中文注释：封装 _is_project_file 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _is_project_file(rel_path: str) -> bool:
     return not rel_path.startswith(EXCLUDED_PREFIXES)
 
 
+# 中文注释：封装 _read_text 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _read_text(path: Path) -> str | None:
     try:
         return path.read_text(encoding="utf-8")
@@ -45,6 +49,7 @@ def _read_text(path: Path) -> str | None:
         return None
 
 
+# 中文注释：封装 _scan_python_file 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _scan_python_file(root: Path, rel_path: str, *, max_function_lines: int) -> dict[str, list[dict[str, Any]]]:
     path = root / rel_path
     text = _read_text(path)
@@ -83,15 +88,18 @@ def _scan_python_file(root: Path, rel_path: str, *, max_function_lines: int) -> 
     }
 
 
+# 中文注释：封装 _except_body_is_silent 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _except_body_is_silent(body: list[ast.stmt]) -> bool:
     statements = [stmt for stmt in body if not _is_docstring_expr(stmt)]
     return bool(statements) and all(isinstance(stmt, ast.Pass) for stmt in statements)
 
 
+# 中文注释：封装 _is_docstring_expr 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _is_docstring_expr(stmt: ast.stmt) -> bool:
     return isinstance(stmt, ast.Expr) and isinstance(getattr(stmt, "value", None), ast.Constant) and isinstance(stmt.value.value, str)
 
 
+# 中文注释：封装 _python_quality 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _python_quality(root: Path, *, max_function_lines: int) -> dict[str, Any]:
     long_functions: list[dict[str, Any]] = []
     wide_exceptions: list[dict[str, Any]] = []
@@ -114,6 +122,7 @@ def _python_quality(root: Path, *, max_function_lines: int) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _line_count_summary 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _line_count_summary(root: Path, *, top_n: int) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     for rel_path in _git_files(root):
@@ -131,6 +140,7 @@ def _line_count_summary(root: Path, *, top_n: int) -> dict[str, Any]:
     return {"tracked_source_doc_files": len(rows), "nonblank_total": sum(int(row["nonblank_lines"]) for row in rows), "largest_files": rows[:top_n]}
 
 
+# 中文注释：封装 _build_report 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _build_report(root: Path, *, max_function_lines: int, top_n: int) -> dict[str, Any]:
     quality = _python_quality(root, max_function_lines=max_function_lines)
     line_counts = _line_count_summary(root, top_n=top_n)
@@ -150,6 +160,7 @@ def _build_report(root: Path, *, max_function_lines: int, top_n: int) -> dict[st
     }
 
 
+# 中文注释：封装 _print_text 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _print_text(report: dict[str, Any]) -> None:
     print(f"project_root: {report['project_root']}")
     print(f"python_file_count: {report['python_file_count']}")
@@ -167,6 +178,7 @@ def _print_text(report: dict[str, Any]) -> None:
             print(f"  {row['lines']:4d} {row['file']}:{row['line']} {row['name']}")
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=str(Path(__file__).resolve().parents[1]))

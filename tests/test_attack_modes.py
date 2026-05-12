@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test attack modes 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -16,6 +17,7 @@ from mmsec_eval.plugins.registry import create
 from mmsec_eval.types import AttackContext, Sample
 
 
+# 中文注释：封装 _cuda_available 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _cuda_available() -> bool:
     try:
         import torch
@@ -28,12 +30,14 @@ def _cuda_available() -> bool:
 pytestmark = pytest.mark.skipif(not _cuda_available(), reason="attack mode integration tests require CUDA")
 
 
+# 中文注释：封装 _sample 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _sample() -> Sample:
     img = np.zeros((64, 64, 3), dtype=np.float32)
     img[16:48, 16:48] = 0.8
     return Sample(sample_id="s1", image=img, text="a blue square", target_text="circle")
 
 
+# 中文注释：封装 _run_attack 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _run_attack(plugin, mode: str, *, artifacts_dir: str):
     register_builtin_plugins()
     cfg = load_config("configs/mvp.yaml")
@@ -54,6 +58,7 @@ def _run_attack(plugin, mode: str, *, artifacts_dir: str):
     return plugin.attack(_sample(), ctx)
 
 
+# 中文注释：验证 test_advedm_a_b_modes 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_advedm_a_b_modes(tmp_path: Path):
     p = ADVEDMAttack()
     a = _run_attack(p, "A", artifacts_dir=str(tmp_path / "artifacts"))
@@ -64,6 +69,7 @@ def test_advedm_a_b_modes(tmp_path: Path):
     assert len(b.attack_trace) > 0
 
 
+# 中文注释：验证 test_advedm_plus_a_b_modes 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_advedm_plus_a_b_modes(tmp_path: Path):
     p = ADVEDMPlusAttack()
     a = _run_attack(p, "A", artifacts_dir=str(tmp_path / "artifacts"))
@@ -74,6 +80,7 @@ def test_advedm_plus_a_b_modes(tmp_path: Path):
     assert len(b.attack_trace) > 0
 
 
+# 中文注释：验证 test_advclip_a_b_modes 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_advclip_a_b_modes(tmp_path: Path):
     p = AdvCLIPPatchAttack()
     a = _run_attack(p, "A", artifacts_dir=str(tmp_path / "artifacts"))
@@ -84,6 +91,7 @@ def test_advclip_a_b_modes(tmp_path: Path):
     assert len(b.attack_trace) > 0
 
 
+# 中文注释：验证 test_tmm_a_b_modes 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_tmm_a_b_modes(tmp_path: Path):
     p = TMMAttack()
     a = _run_attack(p, "A", artifacts_dir=str(tmp_path / "artifacts"))

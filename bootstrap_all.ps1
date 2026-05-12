@@ -1,3 +1,4 @@
+# 文件说明：该文件属于项目工程，集中实现 bootstrap all 相关逻辑。
 Param(
   [switch]$SkipTests,
   [switch]$SkipInstall,
@@ -8,6 +9,7 @@ Param(
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "scripts\_python_env.ps1")
 
+# 中文注释：实现 Assert-Command 的核心流程，支撑项目工程中的业务语义和异常边界。
 function Assert-Command($name) {
   if (-not (Get-Command $name -ErrorAction SilentlyContinue)) {
     Write-Host "[ERR] Missing command: $name"
@@ -15,6 +17,7 @@ function Assert-Command($name) {
   }
 }
 
+# 中文注释：实现 try 的核心流程，支撑项目工程中的业务语义和异常边界。
 try {
   Write-Host "[INFO] Bootstrapping mmsec-eval-platform ..."
   Assert-Command "git"

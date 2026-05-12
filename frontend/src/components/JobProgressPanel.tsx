@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端组件，集中实现 JobProgressPanel 相关逻辑。
 import { useMemo } from "react";
 
 import type { JobProgressResponse } from "../lib/api";
@@ -6,6 +7,7 @@ import { formatJobStatus } from "../lib/uiLabels";
 import { GlossaryLink } from "./GlossaryLink";
 import { useDismissible } from "../hooks/useDismissible";
 
+/** 中文注释：实现 formatDuration 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function formatDuration(seconds: number | undefined) {
   if (!Number.isFinite(seconds) || Number(seconds) <= 0) {
     return "正在估算";
@@ -24,6 +26,7 @@ type JobProgressPanelProps = {
   panelId?: string;
 };
 
+/** 中文注释：实现 JobProgressPanel 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 export function JobProgressPanel({ progress, panelId }: JobProgressPanelProps) {
   const { visible, dismiss, restore } = useDismissible(panelId);
   const currentStage = useMemo(

@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 JobCenterPage.failureDisplay.test 相关逻辑。
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -20,6 +21,7 @@ vi.mock("../lib/api", () => ({
   listJobLogs: vi.fn(async () => apiState.logs),
 }));
 
+/** 中文注释：实现 setFailureScenario 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function setFailureScenario() {
   apiState.jobs = {
     total: 1,
@@ -83,6 +85,7 @@ function setFailureScenario() {
   };
 }
 
+/** 中文注释：实现 setGenerationSuccessScenario 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function setGenerationSuccessScenario() {
   apiState.jobs = {
     total: 1,
@@ -142,6 +145,7 @@ function setGenerationSuccessScenario() {
   };
 }
 
+/** 中文注释：实现 setSampleGenerationOnlyScenario 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function setSampleGenerationOnlyScenario() {
   apiState.jobs = {
     total: 1,
@@ -206,6 +210,7 @@ function setSampleGenerationOnlyScenario() {
   };
 }
 
+/** 中文注释：实现 createClient 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function createClient() {
   return new QueryClient({
     defaultOptions: {
@@ -217,6 +222,7 @@ function createClient() {
   });
 }
 
+/** 中文注释：实现 rowFor 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function rowFor(label: string): HTMLElement {
   const rows = screen.getAllByRole("row");
   const row = rows.find((item) => within(item).queryByText(label));

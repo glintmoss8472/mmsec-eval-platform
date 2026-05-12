@@ -1,3 +1,4 @@
+# 文件说明：该文件属于实验配置，集中实现 lightweight vqa dialogue 相关逻辑。
 schema_version: 1
 experiment_id: "lightweight_vqa_dialogue"
 title: "轻量视觉问答与多模态对话验证"

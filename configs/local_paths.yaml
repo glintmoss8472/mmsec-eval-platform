@@ -1,3 +1,4 @@
+# 文件说明：该文件属于实验配置，集中实现 local paths 相关逻辑。
 sources:
   ADVEDM_Fine-grained_Adversarial_Attack_against_VLM-based_Embodied_Agents.pdf: "assets/papers/ADVEDM_Fine-grained_Adversarial_Attack_against_VLM-based_Embodied_Agents.pdf"
   Advclip_Downstream-agnostic_adversarial_examples_in_multimodal_contrastive_learning.pdf: "assets/papers/Advclip_Downstream-agnostic_adversarial_examples_in_multimodal_contrastive_learning.pdf"

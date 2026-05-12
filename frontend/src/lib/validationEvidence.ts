@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端业务工具，集中实现 validationEvidence 相关逻辑。
 import type { JobItem, SystemOverview } from "./api";
 
 export interface ValidationSnapshotView {
@@ -25,6 +26,7 @@ export interface ValidationBlockerRow {
   scientific_quality_ok?: boolean;
 }
 
+/** 中文注释：实现 deriveValidationEvidence 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 export function deriveValidationEvidence(
   overview: SystemOverview | undefined,
   _jobs: JobItem[] | undefined,

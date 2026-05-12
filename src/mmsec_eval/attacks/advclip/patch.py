@@ -1,13 +1,16 @@
+# 文件说明：该文件属于AdvCLIP 攻击模块，集中实现 patch 相关逻辑。
 from __future__ import annotations
 
 import numpy as np
 
 
+# 中文注释：实现 patch_initialization 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def patch_initialization(patch_size: int, seed: int = 42) -> np.ndarray:
     rng = np.random.default_rng(seed)
     return rng.uniform(0, 1, size=(patch_size, patch_size, 3)).astype(np.float32)
 
 
+# 中文注释：实现 random_location 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def random_location(
     image_shape: tuple[int, int, int],
     patch_size: int,
@@ -27,6 +30,7 @@ def random_location(
     return y, x
 
 
+# 中文注释：实现 mask_generation 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def mask_generation(image_shape: tuple[int, int, int], patch_size: int, margin: int = 14) -> tuple[np.ndarray, tuple[int, int]]:
     h, w, _ = image_shape
     ph = min(h, patch_size)
@@ -38,10 +42,12 @@ def mask_generation(image_shape: tuple[int, int, int], patch_size: int, margin: 
     return mask, (y, x)
 
 
+# 中文注释：实现 clamp_patch 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def clamp_patch(patch: np.ndarray) -> np.ndarray:
     return np.clip(patch, 0.0, 1.0)
 
 
+# 中文注释：实现 apply_patch 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def apply_patch(image: np.ndarray, patch: np.ndarray, location: tuple[int, int]) -> np.ndarray:
     y, x = location
     h, w, _ = image.shape
@@ -52,6 +58,7 @@ def apply_patch(image: np.ndarray, patch: np.ndarray, location: tuple[int, int])
     return np.clip(out, 0.0, 1.0)
 
 
+# 中文注释：实现 apply_patch_torch 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def apply_patch_torch(images, patch, locs: list[tuple[int, int]]):
     """Apply a universal patch to a BCHW image tensor.
 
@@ -83,12 +90,14 @@ def apply_patch_torch(images, patch, locs: list[tuple[int, int]]):
     return out.clamp(0.0, 1.0)
 
 
+# 中文注释：实现 patch_tv 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def patch_tv(patch: np.ndarray) -> float:
     dx = np.abs(np.diff(patch, axis=1)).mean()
     dy = np.abs(np.diff(patch, axis=0)).mean()
     return float(dx + dy)
 
 
+# 中文注释：实现 patch_tv_torch 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def patch_tv_torch(patch) -> float:
     """Total variation on a [3,Ph,Pw] patch tensor."""
     import torch

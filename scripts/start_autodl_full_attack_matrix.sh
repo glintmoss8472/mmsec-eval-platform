@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 文件说明：该文件属于运维与实验脚本，集中实现 start autodl full attack matrix 相关逻辑。
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -27,6 +28,7 @@ export NO_PROXY="${NO_PROXY:-127.0.0.1,localhost}"
 export no_proxy="${no_proxy:-127.0.0.1,localhost}"
 unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
 
+# 中文注释：实现 wait_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 wait_backend() {
   "${PYTHON_BIN}" - <<'PY'
 import requests, time, sys
@@ -48,6 +50,7 @@ raise SystemExit(1)
 PY
 }
 
+# 中文注释：实现 ensure_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 ensure_backend() {
   if wait_backend >/dev/null 2>&1; then
     return 0
@@ -61,6 +64,7 @@ ensure_backend() {
   wait_backend
 }
 
+# 中文注释：实现 stop_local_vlm_ports 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 stop_local_vlm_ports() {
   ps -eo pid,args \
     | awk '/local_openai_mm_server.py/ && /--port 801[1-7]/ && !/awk/ {print $1}' \
@@ -68,6 +72,7 @@ stop_local_vlm_ports() {
   sleep 3
 }
 
+# 中文注释：实现 wait_local_model 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 wait_local_model() {
   local port="$1"
   "${PYTHON_BIN}" - <<PY
@@ -90,6 +95,7 @@ raise SystemExit(1)
 PY
 }
 
+# 中文注释：实现 export_prompt_order 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 export_prompt_order() {
   local adapter="$1"
   local order="$2"
@@ -104,6 +110,7 @@ export_prompt_order() {
   esac
 }
 
+# 中文注释：实现 calibrate_prompt_order 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 calibrate_prompt_order() {
   local adapter="$1"
   local out_json="${OUT_ROOT}/${adapter}_prompt_order_calibration.json"
@@ -127,6 +134,7 @@ calibrate_prompt_order() {
   fi
 }
 
+# 中文注释：实现 run_matrix 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 run_matrix() {
   local shard_name="$1"
   local models="$2"

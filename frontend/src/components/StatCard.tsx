@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端组件，集中实现 StatCard 相关逻辑。
 import { useDismissible } from "../hooks/useDismissible";
 
 interface StatCardProps {
@@ -7,6 +8,7 @@ interface StatCardProps {
   dismissKey?: string;
 }
 
+/** 中文注释：实现 StatCard 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 export function StatCard({ title, value, hint, dismissKey }: StatCardProps) {
   const { visible, dismiss, restore } = useDismissible(dismissKey);
 

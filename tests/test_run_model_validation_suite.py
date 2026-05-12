@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test run model validation suite 相关逻辑。
 from __future__ import annotations
 
 import importlib.util
@@ -9,6 +10,7 @@ from types import SimpleNamespace
 import pytest
 
 
+# 中文注释：封装 _load_module 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _load_module():
     path = Path("scripts/run_model_validation_suite.py").resolve()
     scripts_dir = str(path.parent)
@@ -21,6 +23,7 @@ def _load_module():
     return module
 
 
+# 中文注释：验证 test_load_existing_rows_dedupes_by_identity_and_keeps_supplementary_runs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_load_existing_rows_dedupes_by_identity_and_keeps_supplementary_runs(tmp_path: Path):
     module = _load_module()
     path = tmp_path / "rows.json"
@@ -65,6 +68,7 @@ def test_load_existing_rows_dedupes_by_identity_and_keeps_supplementary_runs(tmp
     assert rows[1]["experiment_id"] == "scientific_validation_clip_hf_fgsm_single"
 
 
+# 中文注释：验证 test_successful_keys_only_marks_canonical_success_rows 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_successful_keys_only_marks_canonical_success_rows():
     module = _load_module()
     rows = [
@@ -89,6 +93,7 @@ def test_successful_keys_only_marks_canonical_success_rows():
     assert keys == {("clip_hf", "fgsm")}
 
 
+# 中文注释：验证 test_upsert_row_replaces_failed_result_for_same_key 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_upsert_row_replaces_failed_result_for_same_key():
     module = _load_module()
     rows = [
@@ -118,6 +123,7 @@ def test_upsert_row_replaces_failed_result_for_same_key():
     assert rows[0]["run_id"] == "r1"
 
 
+# 中文注释：验证 test_payload_sets_runtime_device 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_payload_sets_runtime_device():
     module = _load_module()
 
@@ -137,6 +143,7 @@ def test_payload_sets_runtime_device():
     assert payload["override"]["model"]["openai_timeout"] == 180
 
 
+# 中文注释：验证 test_extract_run_evidence_captures_clean_attack_defense_metrics 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_extract_run_evidence_captures_clean_attack_defense_metrics():
     module = _load_module()
 
@@ -167,6 +174,7 @@ def test_extract_run_evidence_captures_clean_attack_defense_metrics():
     assert evidence["mean_rank_delta_mean"] == pytest.approx(0.75)
 
 
+# 中文注释：验证 test_summarize_requires_nontrivial_attack_signal 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_summarize_requires_nontrivial_attack_signal():
     module = _load_module()
     rows = [
@@ -223,6 +231,7 @@ def test_summarize_requires_nontrivial_attack_signal():
     assert summary["criterion"]["minimum_clean_r1_mean"] == module.MIN_CLEAN_R1_MEAN
 
 
+# 中文注释：验证 test_summarize_rejects_model_without_any_qualifying_attack 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_summarize_rejects_model_without_any_qualifying_attack():
     module = _load_module()
     rows = [
@@ -262,6 +271,7 @@ def test_summarize_rejects_model_without_any_qualifying_attack():
     assert summary["per_model"][0]["qualifying_attack_count"] == 0
 
 
+# 中文注释：验证 test_summarize_can_scope_to_selected_models 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_summarize_can_scope_to_selected_models():
     module = _load_module()
     summary = module._summarize(
@@ -278,6 +288,7 @@ def test_summarize_can_scope_to_selected_models():
     assert summary["missing_models"] == ["openai_qwen3_vl"]
 
 
+# 中文注释：验证 test_summarize_ignores_supplementary_success_when_primary_run_failed 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_summarize_ignores_supplementary_success_when_primary_run_failed():
     module = _load_module()
     rows = [
@@ -318,6 +329,7 @@ def test_summarize_ignores_supplementary_success_when_primary_run_failed():
     assert summary["supplementary_rows"][0]["experiment_id"].endswith("_single")
 
 
+# 中文注释：验证 test_summarize_marks_low_clean_baseline_as_not_scientific_quality 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_summarize_marks_low_clean_baseline_as_not_scientific_quality():
     module = _load_module()
     rows = [
@@ -357,6 +369,7 @@ def test_summarize_marks_low_clean_baseline_as_not_scientific_quality():
     assert summary["per_model"][0]["scientific_quality_ok"] is False
 
 
+# 中文注释：验证 test_hydrate_row_from_run_summary_backfills_missing_evidence 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_hydrate_row_from_run_summary_backfills_missing_evidence(tmp_path: Path, monkeypatch):
     module = _load_module()
     run_dir = tmp_path / "artifacts" / "runs" / "run123"
@@ -392,6 +405,7 @@ def test_hydrate_row_from_run_summary_backfills_missing_evidence(tmp_path: Path,
     assert hydrated["defense_recovery_r1_mean"] == pytest.approx(0.25)
 
 
+# 中文注释：验证 test_local_vlm_launcher_skips_classic_adapter 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_local_vlm_launcher_skips_classic_adapter(monkeypatch):
     module = _load_module()
     monkeypatch.setattr(
@@ -408,14 +422,17 @@ def test_local_vlm_launcher_skips_classic_adapter(monkeypatch):
     assert event["cleanup"]["stopped"] is True
 
 
+# 中文注释：验证 test_run_validation_jobs_records_local_vlm_launch_event 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_run_validation_jobs_records_local_vlm_launch_event(tmp_path: Path, monkeypatch):
     module = _load_module()
     calls: list[str] = []
 
+    # 中文注释：实现 fake_launch 的核心流程，支撑自动化测试中的业务语义和异常边界。
     def fake_launch(model_adapter: str, *, startup_timeout_seconds: int, poll_seconds: float):
         calls.append(model_adapter)
         return {"adapter": model_adapter, "launched": True}
 
+    # 中文注释：实现 fake_run_one 的核心流程，支撑自动化测试中的业务语义和异常边界。
     def fake_run_one(args, api, row):
         row["job_status"] = "success"
         row["run_id"] = f"{row['model_adapter']}-{row['attack']}"
@@ -449,11 +466,14 @@ def test_run_validation_jobs_records_local_vlm_launch_event(tmp_path: Path, monk
     assert [event["adapter"] for event in status["local_vlm_events"]] == ["clip_hf", "openai_qwen3_vl"]
 
 
+# 中文注释：验证 test_wait_for_validation_job_tolerates_transient_request_error 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_wait_for_validation_job_tolerates_transient_request_error(monkeypatch):
     module = _load_module()
     calls = {"count": 0}
 
+    # 中文注释：定义 FakeApi 的结构化职责，作为自动化测试中状态、配置或行为的边界。
     class FakeApi:
+        # 中文注释：实现 FakeApi.get_job 的核心行为，维护自动化测试在该对象上的调用契约。
         def get_job(self, job_id: str):
             calls["count"] += 1
             if calls["count"] == 1:

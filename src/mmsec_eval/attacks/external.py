@@ -1,3 +1,4 @@
+# 文件说明：该文件属于攻击算法公共层，集中实现 external 相关逻辑。
 from __future__ import annotations
 
 import importlib
@@ -19,10 +20,12 @@ from mmsec_eval.plugins.base import AttackPlugin
 from mmsec_eval.types import AttackContext, AttackedSample, AttackTraceStep, Sample
 
 
+# 中文注释：定义 ExternalAttackPrerequisiteError 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class ExternalAttackPrerequisiteError(RuntimeError):
     pass
 
 
+# 中文注释：定义 ExternalAttackExecutionError 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class ExternalAttackExecutionError(RuntimeError):
     pass
 
@@ -40,6 +43,7 @@ TRACEABLE_EXTERNAL_ERRORS = (
 )
 
 
+# 中文注释：定义 ExternalCommandSpec 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class ExternalCommandSpec:
     name: str
@@ -53,6 +57,7 @@ class ExternalCommandSpec:
     requires_target_image: bool = False
 
 
+# 中文注释：封装 _cfg 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _cfg(ctx: AttackContext, attack_name: str, key: str, default: Any = None) -> Any:
     extra = getattr(ctx.config, "extra", {}) or {}
     if isinstance(extra, dict):
@@ -65,10 +70,12 @@ def _cfg(ctx: AttackContext, attack_name: str, key: str, default: Any = None) ->
     return default if value is None else value
 
 
+# 中文注释：封装 _str_cfg 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _str_cfg(ctx: AttackContext, attack_name: str, key: str, default: str = "") -> str:
     return str(_cfg(ctx, attack_name, key, default) or "").strip()
 
 
+# 中文注释：封装 _to_pil 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _to_pil(image: np.ndarray) -> Image.Image:
     arr = np.asarray(image)
     if arr.dtype != np.uint8:
@@ -82,19 +89,23 @@ def _to_pil(image: np.ndarray) -> Image.Image:
     return Image.fromarray(arr[:, :, :3], mode="RGB")
 
 
+# 中文注释：封装 _from_pil 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _from_pil(image: Image.Image) -> np.ndarray:
     return np.asarray(image.convert("RGB"), dtype=np.float32) / 255.0
 
 
+# 中文注释：封装 _save 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _save(path: Path, image: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     _to_pil(image).save(path)
 
 
+# 中文注释：封装 _load 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _load(path: Path) -> np.ndarray:
     return _from_pil(Image.open(path))
 
 
+# 中文注释：封装 _resize_like_clean 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _resize_like_clean(adv: np.ndarray, clean: np.ndarray, trace: dict[str, Any] | None = None) -> np.ndarray:
     adv = clip01(np.asarray(adv, dtype=np.float32))
     clean_arr = np.asarray(clean, dtype=np.float32)
@@ -108,11 +119,13 @@ def _resize_like_clean(adv: np.ndarray, clean: np.ndarray, trace: dict[str, Any]
     return resized
 
 
+# 中文注释：封装 _tail 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _tail(text: str, chars: int = 4000) -> str:
     text = str(text or "")
     return text if len(text) <= chars else text[-chars:]
 
 
+# 中文注释：封装 _safe_json 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _safe_json(value: Any) -> Any:
     if isinstance(value, Path):
         return str(value)
@@ -127,11 +140,13 @@ def _safe_json(value: Any) -> Any:
     return value
 
 
+# 中文注释：封装 _write_trace 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _write_trace(path: Path, trace: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(_safe_json(trace), ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 中文注释：封装 _debug_dir 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _debug_dir(ctx: AttackContext, attack_name: str, sample: Sample) -> Path:
     raw = str(getattr(ctx, "sample_debug_dir", "") or "").strip()
     if raw:
@@ -145,6 +160,7 @@ def _debug_dir(ctx: AttackContext, attack_name: str, sample: Sample) -> Path:
     return path
 
 
+# 中文注释：封装 _attacked 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _attacked(clean_sample: Sample, adv: np.ndarray, attack_name: str, attack_mode: str, trace: dict[str, Any], refs: dict[str, str]) -> AttackedSample:
     adv = _resize_like_clean(adv, np.asarray(clean_sample.image, dtype=np.float32), trace)
     l0, l2, linf = perturb_stats(np.asarray(clean_sample.image, dtype=np.float32), adv)
@@ -169,6 +185,7 @@ def _attacked(clean_sample: Sample, adv: np.ndarray, attack_name: str, attack_mo
     )
 
 
+# 中文注释：封装 _existing 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _existing(raw: str, label: str, required: bool) -> Path | None:
     text = str(raw or "").strip()
     if not text:
@@ -183,14 +200,17 @@ def _existing(raw: str, label: str, required: bool) -> Path | None:
     return path
 
 
+# 中文注释：封装 _resample 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _resample(name: str) -> int:
     return int(getattr(getattr(Image, "Resampling", Image), name))
 
 
+# 中文注释：定义 XTransferUAPAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class XTransferUAPAttack(AttackPlugin):
     name = "xtransfer_uap"
     attack_mode = "universal_perturbation"
 
+    # 中文注释：实现 XTransferUAPAttack.attack 的核心行为，维护攻击算法公共层在该对象上的调用契约。
     def attack(self, sample: Sample, ctx: AttackContext) -> AttackedSample:
         start = time.monotonic()
         debug = _debug_dir(ctx, self.name, sample)
@@ -242,6 +262,7 @@ class XTransferUAPAttack(AttackPlugin):
             _write_trace(trace_path, trace)
             raise
 
+    # 中文注释：封装 XTransferUAPAttack._prepare_repo 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _prepare_repo(self, repo_dir: str) -> Path:
         repo = Path(repo_dir).expanduser()
         if not repo.exists():
@@ -252,6 +273,7 @@ class XTransferUAPAttack(AttackPlugin):
                 sys.path.insert(0, text)
         return repo
 
+    # 中文注释：封装 XTransferUAPAttack._normalize_threat_model 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _normalize_threat_model(self, value: str) -> str:
         normalized = str(value or "").strip().lower().replace("-", "_")
         mapping = {
@@ -264,6 +286,7 @@ class XTransferUAPAttack(AttackPlugin):
         }
         return mapping.get(normalized, normalized or "linf_non_targeted")
 
+    # 中文注释：封装 XTransferUAPAttack._load_local 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _load_local(self, path: Path | None) -> np.ndarray:
         assert path is not None
         if path.suffix.lower() == ".npy":
@@ -287,6 +310,7 @@ class XTransferUAPAttack(AttackPlugin):
             return _load(path)
         raise ExternalAttackPrerequisiteError(f"unsupported xtransfer_uap uap_path suffix: {path.suffix}")
 
+    # 中文注释：封装 XTransferUAPAttack._apply_official_zoo 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _apply_official_zoo(self, clean: np.ndarray, uap_name: str, threat_model: str, epsilon: float, cache_dir: str, device: str) -> np.ndarray:
         if cache_dir:
             cache = str(Path(cache_dir).expanduser())
@@ -328,6 +352,7 @@ class XTransferUAPAttack(AttackPlugin):
         arr = out.detach().cpu().clamp(0, 1).squeeze(0).numpy().transpose(1, 2, 0)
         return clip01(arr)
 
+    # 中文注释：封装 XTransferUAPAttack._apply 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _apply(self, clean: np.ndarray, delta: np.ndarray, epsilon: float, threat_model: str) -> np.ndarray:
         delta = np.squeeze(np.asarray(delta, dtype=np.float32))
         if delta.ndim == 2:
@@ -352,9 +377,11 @@ class XTransferUAPAttack(AttackPlugin):
         return clip01(clean + delta)
 
 
+# 中文注释：定义 ExternalCommandAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class ExternalCommandAttack(AttackPlugin):
     spec: ExternalCommandSpec
 
+    # 中文注释：实现 ExternalCommandAttack.attack 的核心行为，维护攻击算法公共层在该对象上的调用契约。
     def attack(self, sample: Sample, ctx: AttackContext) -> AttackedSample:
         start = time.monotonic(); debug = _debug_dir(ctx, self.spec.name, sample); trace_path = debug / f"{self.spec.name}_trace.json"
         trace: dict[str, Any] = {"attack_name": self.spec.name, "attack_mode": self.spec.attack_mode, "attack_scope": "image", "status": "starting"}
@@ -426,11 +453,13 @@ class ExternalCommandAttack(AttackPlugin):
             trace.setdefault("status", "failed_precondition" if isinstance(exc, ExternalAttackPrerequisiteError) else "failed")
             trace.setdefault("failure_reason", str(exc)); _write_trace(trace_path, trace); raise
 
+    # 中文注释：封装 ExternalCommandAttack._python 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _python(self, ctx: AttackContext) -> str:
         conda_env = _str_cfg(ctx, self.spec.name, "conda_env", "")
         python_bin = _str_cfg(ctx, self.spec.name, "python_bin", "") or sys.executable or "python"
         return f"conda run -n {shlex.quote(conda_env)} python" if conda_env else shlex.quote(python_bin)
 
+    # 中文注释：封装 ExternalCommandAttack._command 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _command(self, template: str, ctx: AttackContext, repo: Path, input_path: Path, output_path: Path, checkpoint: Path | None, target_image: Path | None, target_text: str, sample: Sample) -> str:
         values: dict[str, Any] = {
             "python": self._python(ctx), "project_root": shlex.quote(str(Path(__file__).resolve().parents[3])), "repo_dir": shlex.quote(str(repo)), "input_image": shlex.quote(str(input_path)), "clean_image": shlex.quote(str(input_path)), "output_image": shlex.quote(str(output_path)), "output_dir": shlex.quote(str(output_path.parent)), "external_trace": shlex.quote(str(output_path.with_name(f"{output_path.stem}_external_trace.json"))), "target_image": shlex.quote(str(target_image)) if target_image else "", "target_text": shlex.quote(target_text), "source_text": shlex.quote(str(sample.text or "")), "sample_text": shlex.quote(str(sample.text or "")), "device": shlex.quote(_str_cfg(ctx, self.spec.name, "device", getattr(getattr(ctx.config, "runtime", object()), "device", "cuda")) or "cuda"), "steps": str(int(_cfg(ctx, self.spec.name, "steps", 0) or 0)), "epsilon": str(float(_cfg(ctx, self.spec.name, "epsilon", 0) or 0)), "alpha": str((lambda v: v * 255.0 if v < 1.0 else v)(float(_cfg(ctx, self.spec.name, "step_size", _cfg(ctx, self.spec.name, "alpha", 1.0)) or 1.0))), "corruption_type": shlex.quote(_str_cfg(ctx, self.spec.name, "corruption_type", "gaussian_noise") or "gaussian_noise"), "severity": str(int(_cfg(ctx, self.spec.name, "severity", 2) or 2)), "corruption_seed": str(int(_cfg(ctx, self.spec.name, "corruption_seed", _cfg(ctx, self.spec.name, "seed", getattr(ctx.config, "seed", 42))) or 42)), "seed": str(int(_cfg(ctx, self.spec.name, "corruption_seed", _cfg(ctx, self.spec.name, "seed", getattr(ctx.config, "seed", 42))) or 42)), "surrogate_models": shlex.quote(",".join(str(x) for x in (_cfg(ctx, self.spec.name, "surrogate_models", []) or []))), "ensemble_models": shlex.quote(",".join(str(x) for x in (_cfg(ctx, self.spec.name, "ensemble_models", []) or []))), "clip_backbones": shlex.quote(",".join(str(x) for x in (_cfg(ctx, self.spec.name, "clip_backbones", []) or []))), "crop_scale": str(float(_cfg(ctx, self.spec.name, "crop_scale", 1) or 1)), "crop_ratio": str(float(_cfg(ctx, self.spec.name, "crop_ratio", 1) or 1)), "input_res": str(int(_cfg(ctx, self.spec.name, "input_res", 224) or 224)), "lam": str(float(_cfg(ctx, self.spec.name, "lam", 0.6) or 0.6)), "tau": str(float(_cfg(ctx, self.spec.name, "tau", 0.2) or 0.2)), "omega": str(float(_cfg(ctx, self.spec.name, "omega", 2.0) or 2.0)), "input_format": shlex.quote(_str_cfg(ctx, self.spec.name, "input_format", "image") or "image"),
@@ -442,13 +471,16 @@ class ExternalCommandAttack(AttackPlugin):
         except KeyError as exc:
             raise ExternalAttackPrerequisiteError(f"{self.spec.name} command_template references unknown placeholder: {exc}") from exc
 
+    # 中文注释：封装 ExternalCommandAttack._extra_trace 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _extra_trace(self, ctx: AttackContext) -> dict[str, Any]:
         return {}
 
 
+# 中文注释：定义 VQAVisualCorruptionAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class VQAVisualCorruptionAttack(ExternalCommandAttack):
     spec = ExternalCommandSpec("vqa_visual_corruption", "official_visual_corruption")
 
+    # 中文注释：封装 VQAVisualCorruptionAttack._extra_trace 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _extra_trace(self, ctx: AttackContext) -> dict[str, Any]:
         severity = int(_cfg(ctx, self.spec.name, "severity", 2) or 2)
         if not 1 <= severity <= 5:
@@ -465,21 +497,27 @@ class VQAVisualCorruptionAttack(ExternalCommandAttack):
         }
 
 
+# 中文注释：定义 FOAAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class FOAAttack(ExternalCommandAttack):
     spec = ExternalCommandSpec("foa_attack", "targeted_transfer", requires_target=True)
+    # 中文注释：封装 FOAAttack._extra_trace 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _extra_trace(self, ctx: AttackContext) -> dict[str, Any]:
         return {"surrogate_models": _cfg(ctx, self.spec.name, "surrogate_models", []) or [], "steps": int(_cfg(ctx, self.spec.name, "steps", 0) or 0), "epsilon": float(_cfg(ctx, self.spec.name, "epsilon", 0) or 0), "blackbox_evaluation": False}
 
 
+# 中文注释：定义 AnyAttackPlugin 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class AnyAttackPlugin(ExternalCommandAttack):
     spec = ExternalCommandSpec("anyattack", "pretrained_generator_targeted", "decoder_path", "decoder_path", True, True)
+    # 中文注释：封装 AnyAttackPlugin._extra_trace 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _extra_trace(self, ctx: AttackContext) -> dict[str, Any]:
         return {"training": False, "decoder_path_basename": Path(_str_cfg(ctx, self.spec.name, "decoder_path", "")).name}
 
 
+# 中文注释：定义 MPCAttackPlugin 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class MPCAttackPlugin(ExternalCommandAttack):
     spec = ExternalCommandSpec("mpc_attack", "multi_paradigm_collaborative_transfer", requires_target=True, target_description="target_image", requires_target_image=True)
 
+    # 中文注释：封装 MPCAttackPlugin._extra_trace 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _extra_trace(self, ctx: AttackContext) -> dict[str, Any]:
         return {
             "surrogate_models": _cfg(ctx, self.spec.name, "surrogate_models", []) or [],
@@ -496,7 +534,9 @@ class MPCAttackPlugin(ExternalCommandAttack):
         }
 
 
+# 中文注释：定义 MAttackPlugin 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class MAttackPlugin(ExternalCommandAttack):
     spec = ExternalCommandSpec("m_attack", "targeted_transfer_local_semantic", requires_target=True, supports_disable_wandb=True)
+    # 中文注释：封装 MAttackPlugin._extra_trace 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _extra_trace(self, ctx: AttackContext) -> dict[str, Any]:
         return {"ensemble_models": _cfg(ctx, self.spec.name, "ensemble_models", []) or [], "steps": int(_cfg(ctx, self.spec.name, "steps", 0) or 0), "epsilon": float(_cfg(ctx, self.spec.name, "epsilon", 0) or 0), "crop_scale": float(_cfg(ctx, self.spec.name, "crop_scale", 1) or 1), "crop_ratio": float(_cfg(ctx, self.spec.name, "crop_ratio", 1) or 1), "local_matching": True, "model_ensemble": True, "blackbox_evaluation": False}

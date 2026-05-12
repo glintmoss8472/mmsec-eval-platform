@@ -1,8 +1,10 @@
+# 文件说明：该文件属于自动化测试，集中实现 test vqa dialogue benchmark 相关逻辑。
 from __future__ import annotations
 
 from mmsec_eval.interaction.vqa_dialogue_benchmark import evaluate_interaction_cases, summarize_interaction_cases
 
 
+# 中文注释：验证 test_vqa_dialogue_counts_clean_correct_and_attacked_wrong 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_vqa_dialogue_counts_clean_correct_and_attacked_wrong():
     rows = [
         {

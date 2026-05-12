@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端业务工具，集中实现 datasetCatalog.test 相关逻辑。
 import { describe, expect, it } from "vitest";
 
 import { datasetCatalogMap } from "./datasetCatalog";

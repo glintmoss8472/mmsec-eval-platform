@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test api bootstrap 相关逻辑。
 from __future__ import annotations
 
 import importlib
@@ -17,6 +18,7 @@ from mmsec_api.worker.queue import JobQueue
 from mmsec_eval.config.schema import BootstrapConfig
 
 
+# 中文注释：实现 make_client 的核心流程，支撑自动化测试中的业务语义和异常边界。
 def make_client(tmp_path: Path, monkeypatch) -> TestClient:
     art = tmp_path / "artifacts"
     cfg = tmp_path / "bootstrap.yaml"
@@ -49,6 +51,7 @@ def make_client(tmp_path: Path, monkeypatch) -> TestClient:
     return TestClient(api_main.app)
 
 
+# 中文注释：验证 test_bootstrap_status_and_logs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_bootstrap_status_and_logs(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         final = {}
@@ -87,6 +90,7 @@ def test_bootstrap_status_and_logs(tmp_path: Path, monkeypatch):
         assert "bootstrap_state" in h.json()
 
 
+# 中文注释：验证 test_seed_runs_skip_fake_model_adapters 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_seed_runs_skip_fake_model_adapters(tmp_path: Path):
     seed_root = tmp_path / "seed"
     run_dir = seed_root / "runs" / "fake_seed"

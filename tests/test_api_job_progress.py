@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test api job progress 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -5,10 +6,12 @@ from pathlib import Path
 from api_test_utils import make_client, wait_job_done, write_toy_eval_cfg
 
 
+# 中文注释：实现 write_cfg 的核心流程，支撑自动化测试中的业务语义和异常边界。
 def write_cfg(path: Path) -> None:
     write_toy_eval_cfg(path)
 
 
+# 中文注释：验证 test_job_progress_endpoint_tracks_stage_and_run_id 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_job_progress_endpoint_tracks_stage_and_run_id(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch, skip_model_preflight=True) as client:
         cfg = tmp_path / "cfg.yaml"

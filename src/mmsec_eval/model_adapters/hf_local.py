@@ -1,3 +1,4 @@
+# 文件说明：该文件属于模型适配层，集中实现 hf local 相关逻辑。
 from __future__ import annotations
 
 import os
@@ -10,6 +11,7 @@ from mmsec_eval.runtime import env_runtime_device, torch_install_hint
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 
+# 中文注释：封装 _looks_like_hf_model_dir 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
 def _looks_like_hf_model_dir(path: Path) -> bool:
     if not path.exists() or not path.is_dir():
         return False
@@ -18,6 +20,7 @@ def _looks_like_hf_model_dir(path: Path) -> bool:
     return bool(has_config and has_weights)
 
 
+# 中文注释：封装 _candidate_hf_model_dirs 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
 def _candidate_hf_model_dirs(local_dir_name: str) -> list[Path]:
     candidates: list[Path] = []
     artifacts_dir = str(os.getenv("MMSEC_ARTIFACTS_DIR", "artifacts")).strip() or "artifacts"
@@ -42,6 +45,7 @@ def _candidate_hf_model_dirs(local_dir_name: str) -> list[Path]:
     return deduped
 
 
+# 中文注释：实现 resolve_hf_model_source 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def resolve_hf_model_source(model_name: str, *, local_only: bool, local_dir_name: str) -> str:
     """
     Resolve model source for strict local-only mode.
@@ -59,11 +63,13 @@ def resolve_hf_model_source(model_name: str, *, local_only: bool, local_dir_name
     return name
 
 
+# 中文注释：实现 hf_model_local_dir 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def hf_model_local_dir(local_dir_name: str) -> Path:
     artifacts_dir = str(os.getenv("MMSEC_ARTIFACTS_DIR", "artifacts")).strip() or "artifacts"
     return Path(artifacts_dir) / "hf_models" / str(local_dir_name)
 
 
+# 中文注释：实现 hf_model_ready 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def hf_model_ready(model_name: str, *, local_only: bool, local_dir_name: str) -> tuple[str, bool]:
     source = resolve_hf_model_source(model_name, local_only=local_only, local_dir_name=local_dir_name)
     if not local_only:
@@ -71,6 +77,7 @@ def hf_model_ready(model_name: str, *, local_only: bool, local_dir_name: str) ->
     return source, bool(source != str(model_name or "").strip() and _looks_like_hf_model_dir(Path(source)))
 
 
+# 中文注释：实现 hf_load_failure_message 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def hf_load_failure_message(
     *,
     adapter_label: str,
@@ -92,6 +99,7 @@ def hf_load_failure_message(
     )
 
 
+# 中文注释：实现 require_cuda_device 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def require_cuda_device(adapter_label: str, torch_module: Any) -> str:
     requested = str(env_runtime_device(default="cuda")).strip() or "cuda"
     if not requested.lower().startswith("cuda"):

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 install torch cuda 相关逻辑。
 Param(
   [string[]]$CudaIndices = @("cu126", "cu124", "cu121"),
   [switch]$Nightly
@@ -11,8 +12,10 @@ Set-Location $projectRoot
 
 $pythonExe = Get-ProjectPython -ProjectRoot $projectRoot -EnsureVenv
 
+# 中文注释：实现 Get-TorchInfo 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 function Get-TorchInfo {
   param([string]$Py)
+  # 中文注释：实现 try 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
   try {
     $raw = & $Py -c "import json; import torch; print(json.dumps({'torch': torch.__version__, 'cuda': torch.version.cuda, 'cuda_available': bool(torch.cuda.is_available())}))"
     if ($LASTEXITCODE -ne 0) { return $null }
@@ -22,6 +25,7 @@ function Get-TorchInfo {
   }
 }
 
+# 中文注释：实现 Assert-TorchCudaReady 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 function Assert-TorchCudaReady {
   param([string]$Py)
   $ti = Get-TorchInfo -Py $Py
@@ -62,6 +66,7 @@ foreach ($v in $variants) {
   foreach ($idx in $CudaIndices) {
     $url = "$base/$idx"
     Write-Host "[TORCH] Installing CUDA build from: $url"
+    # 中文注释：实现 try 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
     try {
       # Only install torch here (torchvision/torchaudio are optional and make downloads much heavier).
       & $pythonExe -m pip install --no-cache-dir --index-url $url --extra-index-url $pypi torch

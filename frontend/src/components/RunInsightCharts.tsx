@@ -1,16 +1,20 @@
+// 文件说明：该文件属于前端组件，集中实现 RunInsightCharts 相关逻辑。
 import ReactECharts from "echarts-for-react";
 
 import { GlossaryLink } from "./GlossaryLink";
 import { useDismissible } from "../hooks/useDismissible";
 
+/** 中文注释：实现 asRecord 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
 }
 
+/** 中文注释：实现 asRows 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function asRows(value: unknown): Array<Record<string, unknown>> {
   return Array.isArray(value) ? value.map((item) => asRecord(item)) : [];
 }
 
+/** 中文注释：实现 asNum 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function asNum(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -24,6 +28,7 @@ type RunInsightChartsProps = {
   panelId?: string;
 };
 
+/** 中文注释：实现 RunInsightCharts 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 export function RunInsightCharts({ runId, summary = {}, reportData = {}, cases = [], panelId }: RunInsightChartsProps) {
   const { visible, dismiss, restore } = useDismissible(panelId);
 
@@ -77,6 +82,7 @@ export function RunInsightCharts({ runId, summary = {}, reportData = {}, cases =
   const attackedStage = asRecord(stageMetrics.attacked);
   const cleanStage = asRecord(stageMetrics.clean);
 
+  /** 中文注释：实现 averageStageValue 的核心流程，支撑前端组件中的业务语义和异常边界。 */
   const averageStageValue = (node: Record<string, unknown>, key: string) => {
     const values = Object.values(node)
       .map((value) => asNum(asRecord(value)[key]))

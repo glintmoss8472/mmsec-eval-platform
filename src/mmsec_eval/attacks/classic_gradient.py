@@ -1,3 +1,4 @@
+# 文件说明：该文件属于攻击算法公共层，集中实现 classic gradient 相关逻辑。
 from __future__ import annotations
 
 import hashlib
@@ -18,6 +19,7 @@ except ImportError:  # pragma: no cover - optional dependency
     torchattacks = None
 
 
+# 中文注释：定义 ClassicAttackSpec 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class ClassicAttackSpec:
     key: str
@@ -32,11 +34,13 @@ class ClassicAttackSpec:
     torchattack_name: str | None = None
 
 
+# 中文注释：封装 _seed 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _seed(sample_id: str, attack_name: str, mode: str) -> int:
     raw = f"classic:{attack_name}:{sample_id}:{mode}".encode("utf-8")
     return int(hashlib.sha256(raw).hexdigest(), 16) % (2**31 - 1)
 
 
+# 中文注释：封装 _require_gradient_adapter 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _require_gradient_adapter(adapter: Any) -> str:
     if not hasattr(adapter, "score_pairs_torch"):
         raise RuntimeError("classic gradient attacks require adapter.score_pairs_torch")
@@ -46,12 +50,14 @@ def _require_gradient_adapter(adapter: Any) -> str:
     return device
 
 
+# 中文注释：封装 _to_tensor 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _to_tensor(image: np.ndarray, device: str):
     import torch
 
     return torch.from_numpy(np.asarray(image, dtype=np.float32)).permute(2, 0, 1).unsqueeze(0).to(device)
 
 
+# 中文注释：封装 _score_loss 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _score_loss(adapter: Any, image_bchw, text: str | list[str]):
     batch_size = int(image_bchw.shape[0])
     if isinstance(text, (list, tuple)):
@@ -64,10 +70,12 @@ def _score_loss(adapter: Any, image_bchw, text: str | list[str]):
     return scores.mean()
 
 
+# 中文注释：封装 _normalized_grad 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _normalized_grad(grad):
     return grad / (grad.abs().mean(dim=(1, 2, 3), keepdim=True) + 1e-8)
 
 
+# 中文注释：封装 _make_kernel 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _make_kernel(kernel_size: int, sigma: float, device: str, channels: int):
     import torch
 
@@ -81,6 +89,7 @@ def _make_kernel(kernel_size: int, sigma: float, device: str, channels: int):
     return kernel.view(1, 1, size, size).repeat(int(channels), 1, 1, 1)
 
 
+# 中文注释：封装 _smooth_grad 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _smooth_grad(grad, kernel):
     import torch.nn.functional as F
 
@@ -88,6 +97,7 @@ def _smooth_grad(grad, kernel):
     return F.conv2d(grad, kernel, padding=pad, groups=int(grad.shape[1]))
 
 
+# 中文注释：封装 _input_diversity 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _input_diversity(x, cfg: Any, rng: np.random.Generator):
     import torch.nn.functional as F
 
@@ -114,6 +124,7 @@ def _input_diversity(x, cfg: Any, rng: np.random.Generator):
     return F.pad(resized, (left, right, top, bottom), value=0.0)
 
 
+# 中文注释：封装 _variance_grad 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _variance_grad(
     *,
     adapter: Any,
@@ -140,6 +151,7 @@ def _variance_grad(
     return torch.stack(grads, dim=0).mean(dim=0)
 
 
+# 中文注释：封装 _write_debug 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _write_debug(sample_debug_dir: str, payload: dict[str, Any]) -> str:
     debug_dir = Path(sample_debug_dir)
     debug_dir.mkdir(parents=True, exist_ok=True)
@@ -148,25 +160,32 @@ def _write_debug(sample_debug_dir: str, payload: dict[str, Any]) -> str:
     return str(out)
 
 
+# 中文注释：封装 _torchattacks_available 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
 def _torchattacks_available() -> bool:
     return torchattacks is not None
 
 
+# 中文注释：定义 _TorchAttackScoringModel 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class _TorchAttackScoringModel:
+    # 中文注释：封装 _TorchAttackScoringModel.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self, adapter: Any, *, device: str, text: str):
         import torch
         import torch.nn as nn
 
+        # 中文注释：定义 _Module 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
         class _Module(nn.Module):
+            # 中文注释：封装 _Module.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
             def __init__(self, adapter_obj: Any, module_device: str, module_text: str) -> None:
                 super().__init__()
                 self.adapter = adapter_obj
                 self.texts = [module_text]
                 self.anchor = nn.Parameter(torch.zeros(1, device=module_device), requires_grad=False)
 
+            # 中文注释：实现 _Module.set_texts 的核心行为，维护攻击算法公共层在该对象上的调用契约。
             def set_texts(self, texts: list[str]) -> None:
                 self.texts = [str(text) for text in texts] or [""]
 
+            # 中文注释：实现 _Module.forward 的核心行为，维护攻击算法公共层在该对象上的调用契约。
             def forward(self, images):
                 scores = self.adapter.score_pairs_torch(images, self.texts * int(images.shape[0]), output_attentions=False)
                 if scores.ndim == 0:
@@ -176,10 +195,13 @@ class _TorchAttackScoringModel:
         self.module = _Module(adapter, device, text)
 
 
+# 中文注释：定义 _ClassicGradientAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class _ClassicGradientAttack(AttackPlugin):
+    # 中文注释：封装 _ClassicGradientAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self, spec: ClassicAttackSpec) -> None:
         self.spec = spec
 
+    # 中文注释：封装 _ClassicGradientAttack._torchattack_kwargs 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _torchattack_kwargs(self, cfg: Any) -> dict[str, Any]:
         epsilon = float(getattr(cfg, "epsilon", 0.05) or 0.05)
         step_size = float(getattr(cfg, "step_size", 0.01) or 0.01)
@@ -245,6 +267,7 @@ class _ClassicGradientAttack(AttackPlugin):
             }
         return {}
 
+    # 中文注释：封装 _ClassicGradientAttack._build_torchattack 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _build_torchattack(self, *, adapter: Any, cfg: Any, text: str, device: str):
         if not (_torchattacks_available() and self.spec.torchattack_name):
             return None
@@ -262,6 +285,7 @@ class _ClassicGradientAttack(AttackPlugin):
             setattr(attacker, "_mmsec_set_device_status", f"skipped:{type(exc).__name__}")
         return attacker, scoring_model.module
 
+    # 中文注释：封装 _ClassicGradientAttack._run_with_torchattacks 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _run_with_torchattacks(self, *, clean, text: str, adapter: Any, cfg: Any, device: str) -> tuple[np.ndarray, list[AttackTraceStep], dict[str, Any]]:
         import torch
 
@@ -304,6 +328,7 @@ class _ClassicGradientAttack(AttackPlugin):
             "set_device_status": str(getattr(attacker, "_mmsec_set_device_status", "unknown")),
         }
 
+    # 中文注释：封装 _ClassicGradientAttack._run_cw 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _run_cw(self, *, clean, text: str, adapter: Any, cfg: Any) -> tuple[np.ndarray, list[AttackTraceStep], dict[str, Any]]:
         import torch
 
@@ -349,6 +374,7 @@ class _ClassicGradientAttack(AttackPlugin):
         adv_np = adv[0].detach().cpu().permute(1, 2, 0).numpy().astype(np.float32)
         return adv_np, traces, {"implementation": "builtin", "attack_class": "custom_cw"}
 
+    # 中文注释：封装 _ClassicGradientAttack._make_iterative_trace 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _make_iterative_trace(self, *, idx: int, loss: Any, grad: Any, momentum: Any) -> AttackTraceStep:
         return AttackTraceStep(
             step=idx + 1,
@@ -368,6 +394,7 @@ class _ClassicGradientAttack(AttackPlugin):
             },
         )
 
+    # 中文注释：封装 _ClassicGradientAttack._shape_grouped_attack_batch 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _shape_grouped_attack_batch(self, samples: list[Sample], ctx: AttackContext) -> list[AttackedSample]:
         grouped: dict[tuple[int, ...], list[tuple[int, Sample]]] = {}
         for idx, sample in enumerate(samples):
@@ -386,6 +413,7 @@ class _ClassicGradientAttack(AttackPlugin):
             raise RuntimeError("shape-grouped batch attack left empty outputs")
         return [item for item in ordered if item is not None]
 
+    # 中文注释：封装 _ClassicGradientAttack._batch_sample 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _batch_sample(self, *, sample: Sample, adv_np: np.ndarray, mode: str, traces: list[AttackTraceStep], implementation_meta: dict[str, Any], cfg: Any, batch_size: int) -> AttackedSample:
         l0, l2, linf = perturb_stats(np.asarray(sample.image, dtype=np.float32), adv_np)
         adv_sample = Sample(
@@ -408,6 +436,7 @@ class _ClassicGradientAttack(AttackPlugin):
         metadata["batch_size"] = int(batch_size)
         return AttackedSample(sample=adv_sample, perturbation_l0=l0, perturbation_l2=l2, perturbation_linf=linf, attack_trace=traces, metadata=metadata)
 
+    # 中文注释：封装 _ClassicGradientAttack._run_iterative 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _run_iterative(
         self,
         *,
@@ -481,6 +510,7 @@ class _ClassicGradientAttack(AttackPlugin):
         adv_np = adv.detach().cpu().permute(0, 2, 3, 1).numpy().astype(np.float32)
         return adv_np, traces, {"implementation": "builtin", "attack_class": "custom_iterative"}
 
+    # 中文注释：封装 _ClassicGradientAttack._run_single_variant 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _run_single_variant(
         self,
         *,
@@ -512,6 +542,7 @@ class _ClassicGradientAttack(AttackPlugin):
             )
         return adv_np, traces, implementation_meta, fallback_error
 
+    # 中文注释：封装 _ClassicGradientAttack._debug_payload 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _debug_payload(
         self,
         *,
@@ -549,6 +580,7 @@ class _ClassicGradientAttack(AttackPlugin):
             ],
         }
 
+    # 中文注释：封装 _ClassicGradientAttack._single_metadata 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def _single_metadata(self, *, cfg: Any, debug_path: str, implementation_meta: dict[str, Any]) -> dict[str, Any]:
         return {
             "variant": self.spec.key.upper(),
@@ -563,6 +595,7 @@ class _ClassicGradientAttack(AttackPlugin):
             },
         }
 
+    # 中文注释：实现 _ClassicGradientAttack.attack_batch 的核心行为，维护攻击算法公共层在该对象上的调用契约。
     def attack_batch(self, samples: list[Sample], ctx: AttackContext) -> list[AttackedSample]:
         if not samples:
             return []
@@ -597,6 +630,7 @@ class _ClassicGradientAttack(AttackPlugin):
             for idx, sample in enumerate(samples)
         ]
 
+    # 中文注释：实现 _ClassicGradientAttack.attack 的核心行为，维护攻击算法公共层在该对象上的调用契约。
     def attack(self, sample: Sample, ctx: AttackContext) -> AttackedSample:
         device = _require_gradient_adapter(ctx.surrogate_model_adapter or ctx.model_adapter)
         clean = _to_tensor(sample.image, device)
@@ -648,42 +682,58 @@ class _ClassicGradientAttack(AttackPlugin):
         )
 
 
+# 中文注释：定义 FGSMAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class FGSMAttack(_ClassicGradientAttack):
+    # 中文注释：封装 FGSMAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(ClassicAttackSpec(key="fgsm", steps_override=1, torchattack_name="FGSM"))
 
 
+# 中文注释：定义 BIMAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class BIMAttack(_ClassicGradientAttack):
+    # 中文注释：封装 BIMAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(ClassicAttackSpec(key="bim", torchattack_name="BIM"))
 
 
+# 中文注释：定义 PGDAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class PGDAttack(_ClassicGradientAttack):
+    # 中文注释：封装 PGDAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(ClassicAttackSpec(key="pgd", random_start=True, torchattack_name="PGD"))
 
 
+# 中文注释：定义 MIFGSMAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class MIFGSMAttack(_ClassicGradientAttack):
+    # 中文注释：封装 MIFGSMAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(ClassicAttackSpec(key="mifgsm", use_momentum=True, torchattack_name="MIFGSM"))
 
 
+# 中文注释：定义 NIFGSMAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class NIFGSMAttack(_ClassicGradientAttack):
+    # 中文注释：封装 NIFGSMAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(ClassicAttackSpec(key="nifgsm", use_momentum=True, nesterov=True, torchattack_name="NIFGSM"))
 
 
+# 中文注释：定义 DIFGSMAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class DIFGSMAttack(_ClassicGradientAttack):
+    # 中文注释：封装 DIFGSMAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(ClassicAttackSpec(key="difgsm", input_diversity=True, torchattack_name="DIFGSM"))
 
 
+# 中文注释：定义 TIFGSMAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class TIFGSMAttack(_ClassicGradientAttack):
+    # 中文注释：封装 TIFGSMAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(ClassicAttackSpec(key="tifgsm", translation_invariant=True, torchattack_name="TIFGSM"))
 
 
+# 中文注释：定义 DTMIFGSMAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class DTMIFGSMAttack(_ClassicGradientAttack):
+    # 中文注释：封装 DTMIFGSMAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(
             ClassicAttackSpec(
@@ -695,12 +745,16 @@ class DTMIFGSMAttack(_ClassicGradientAttack):
         )
 
 
+# 中文注释：定义 VMIFGSMAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class VMIFGSMAttack(_ClassicGradientAttack):
+    # 中文注释：封装 VMIFGSMAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(ClassicAttackSpec(key="vmifgsm", use_momentum=True, variance_tuning=True, torchattack_name="VMIFGSM"))
 
 
+# 中文注释：定义 VNIFGSMAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class VNIFGSMAttack(_ClassicGradientAttack):
+    # 中文注释：封装 VNIFGSMAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(
             ClassicAttackSpec(
@@ -713,6 +767,8 @@ class VNIFGSMAttack(_ClassicGradientAttack):
         )
 
 
+# 中文注释：定义 CWAttack 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 class CWAttack(_ClassicGradientAttack):
+    # 中文注释：封装 CWAttack.__init__ 的内部步骤，让攻击算法公共层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         super().__init__(ClassicAttackSpec(key="cw", cw_style=True, torchattack_name="CW"))

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test advedm semantic guidance 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,6 +12,7 @@ from mmsec_eval.plugins.registry import create
 from mmsec_eval.types import AttackContext, Sample
 
 
+# 中文注释：验证 test_advedm_writes_debug_and_variant 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_advedm_writes_debug_and_variant(tmp_path: Path):
     register_builtin_plugins()
     img = np.zeros((64, 64, 3), dtype=np.float32)

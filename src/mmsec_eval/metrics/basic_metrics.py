@@ -1,3 +1,4 @@
+# 文件说明：该文件属于指标计算层，集中实现 basic metrics 相关逻辑。
 from __future__ import annotations
 
 import math
@@ -9,6 +10,7 @@ from mmsec_eval.plugins.base import MetricPlugin
 from mmsec_eval.types import EvalRecord
 
 
+# 中文注释：封装 _text_similarity 的内部步骤，让指标计算层主流程保持清晰并隔离边界细节。
 def _text_similarity(a: str, b: str) -> float:
     sa = set((a or "").lower().split())
     sb = set((b or "").lower().split())
@@ -19,6 +21,7 @@ def _text_similarity(a: str, b: str) -> float:
     return float(inter / union)
 
 
+# 中文注释：封装 _psnr 的内部步骤，让指标计算层主流程保持清晰并隔离边界细节。
 def _psnr(x: np.ndarray, y: np.ndarray) -> float:
     mse = float(((x - y) ** 2).mean())
     if mse <= 1e-12:
@@ -26,6 +29,7 @@ def _psnr(x: np.ndarray, y: np.ndarray) -> float:
     return float(10.0 * math.log10(1.0 / mse))
 
 
+# 中文注释：封装 _safe_image_pair 的内部步骤，让指标计算层主流程保持清晰并隔离边界细节。
 def _safe_image_pair(record: EvalRecord) -> tuple[np.ndarray, np.ndarray]:
     clean = np.asarray(record.sample.image, dtype=np.float32)
     adv = np.asarray(record.attacked.sample.image, dtype=np.float32)
@@ -38,7 +42,9 @@ def _safe_image_pair(record: EvalRecord) -> tuple[np.ndarray, np.ndarray]:
     return clean, adv
 
 
+# 中文注释：定义 BasicMetrics 的结构化职责，作为指标计算层中状态、配置或行为的边界。
 class BasicMetrics(MetricPlugin):
+    # 中文注释：实现 BasicMetrics.compute 的核心行为，维护指标计算层在该对象上的调用契约。
     def compute(self, record: EvalRecord) -> dict[str, float]:
         try:
             clean, adv = _safe_image_pair(record)

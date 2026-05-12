@@ -1,3 +1,4 @@
+# 文件说明：该文件属于Streamlit 辅助界面，集中实现 Run MVP 相关逻辑。
 from __future__ import annotations
 
 import subprocess

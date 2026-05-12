@@ -1,3 +1,4 @@
+# 文件说明：该文件属于模型适配层，集中实现 http adapter 相关逻辑。
 from __future__ import annotations
 
 import os
@@ -11,14 +12,18 @@ from mmsec_eval.plugins.base import ModelAdapter
 from mmsec_eval.types import ModelOutput, Sample
 
 
+# 中文注释：定义 HttpAdapterError 的结构化职责，作为模型适配层中状态、配置或行为的边界。
 class HttpAdapterError(RuntimeError):
+    # 中文注释：封装 HttpAdapterError.__init__ 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def __init__(self, error_code: str, message: str, *, status_code: int = 0) -> None:
         super().__init__(message)
         self.error_code = error_code
         self.status_code = status_code
 
 
+# 中文注释：定义 HttpAdapter 的结构化职责，作为模型适配层中状态、配置或行为的边界。
 class HttpAdapter(ModelAdapter):
+    # 中文注释：封装 HttpAdapter.__init__ 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         self.endpoint = os.getenv("MMSEC_HTTP_ADAPTER_ENDPOINT", "").strip()
         self.timeout = float(os.getenv("MMSEC_HTTP_ADAPTER_TIMEOUT", "15"))
@@ -26,12 +31,15 @@ class HttpAdapter(ModelAdapter):
         if not self.endpoint:
             raise HttpAdapterError("http_endpoint_missing", "MMSEC_HTTP_ADAPTER_ENDPOINT is required for HttpAdapter")
 
+    # 中文注释：封装 HttpAdapter._encode_image 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def _encode_image(self, image: np.ndarray) -> str:
         return encode_image_b64(image, image_format="PNG")
 
+    # 中文注释：封装 HttpAdapter._payload 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def _payload(self, sample: Sample) -> dict[str, Any]:
         return {"text": sample.text, "image_b64": self._encode_image(sample.image), "metadata": dict(sample.metadata)}
 
+    # 中文注释：封装 HttpAdapter._generation_payload 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def _generation_payload(self, sample: Sample, *, task: str, prompt: str, question: str = "", object_name: str = "", max_tokens: int = 64) -> dict[str, Any]:
         return {
             "task": task,
@@ -44,6 +52,7 @@ class HttpAdapter(ModelAdapter):
             "metadata": dict(sample.metadata),
         }
 
+    # 中文注释：封装 HttpAdapter._parse_response 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def _parse_response(self, data: Any) -> ModelOutput:
         if not isinstance(data, dict):
             raise HttpAdapterError("http_schema_invalid", "response must be a JSON object")
@@ -73,10 +82,12 @@ class HttpAdapter(ModelAdapter):
             raw={"adapter": "http", "payload": data, "raw": raw_field},
         )
 
+    # 中文注释：实现 HttpAdapter.predict 的核心行为，维护模型适配层在该对象上的调用契约。
     def predict(self, sample: Sample) -> ModelOutput:
         payload = self._payload(sample)
         return self._post_payload(payload)
 
+    # 中文注释：封装 HttpAdapter._post_payload 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def _post_payload(self, payload: dict[str, Any]) -> ModelOutput:
         attempts = max(0, self.retries) + 1
         last_error: Exception | None = None
@@ -113,15 +124,18 @@ class HttpAdapter(ModelAdapter):
                 raise HttpAdapterError("http_invalid_json", f"response is not valid JSON: {e}") from e
         raise HttpAdapterError("http_unknown_error", f"http adapter failed: {last_error}")
 
+    # 中文注释：实现 HttpAdapter.generate_answer 的核心行为，维护模型适配层在该对象上的调用契约。
     def generate_answer(self, sample: Sample, question: str, *, prompt: str = "", max_tokens: int = 64) -> ModelOutput:
         template = str(prompt or "Answer the question about the image. Use a short answer.\nQuestion: {question}")
         rendered = template.format(question=str(question))
         return self._post_payload(self._generation_payload(sample, task="vqa", prompt=rendered, question=str(question), max_tokens=max_tokens))
 
+    # 中文注释：实现 HttpAdapter.generate_caption 的核心行为，维护模型适配层在该对象上的调用契约。
     def generate_caption(self, sample: Sample, *, prompt: str = "", max_tokens: int = 96) -> ModelOutput:
         rendered = str(prompt or "Describe only the visible content of this image in one concise sentence.")
         return self._post_payload(self._generation_payload(sample, task="caption", prompt=rendered, max_tokens=max_tokens))
 
+    # 中文注释：实现 HttpAdapter.object_probe 的核心行为，维护模型适配层在该对象上的调用契约。
     def object_probe(self, sample: Sample, object_name: str, *, prompt: str = "", max_tokens: int = 8) -> ModelOutput:
         template = str(prompt or "Is there a {object_name} in the image? Answer yes or no.")
         rendered = template.format(object_name=str(object_name))

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test sample store 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -8,6 +9,7 @@ from mmsec_eval.sample_store.manager import SampleStoreManager
 from mmsec_eval.types import AttackedSample, EvalRecord, JudgeResult, ModelOutput, Sample
 
 
+# 中文注释：验证 test_sample_store_manager 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_sample_store_manager(tmp_path: Path):
     run_dir = tmp_path / "artifacts" / "runs" / "r1"
     mgr = SampleStoreManager(str(run_dir), save_images=True, save_traces=True)

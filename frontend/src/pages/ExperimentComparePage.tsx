@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 ExperimentComparePage 相关逻辑。
 import ReactECharts from "echarts-for-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -19,15 +20,18 @@ const METRIC_OPTIONS: Array<{ value: MetricKey; label: string }> = [
   { value: "clean_recall", label: "原始召回率" },
 ];
 
+/** 中文注释：实现 asRecord 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
 }
 
+/** 中文注释：实现 asNum 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function asNum(value: unknown): number {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
 }
 
+/** 中文注释：实现 parseMetricPoint 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function parseMetricPoint(value: unknown): MetricPoint {
   const row = asRecord(value);
   const cleanRecall = asNum(row.clean_recall);
@@ -39,10 +43,12 @@ function parseMetricPoint(value: unknown): MetricPoint {
   };
 }
 
+/** 中文注释：实现 shortRunId 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function shortRunId(runId: string): string {
   return runId.length > 16 ? `${runId.slice(0, 8)}...${runId.slice(-6)}` : runId;
 }
 
+/** 中文注释：实现 metricLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function metricLabel(metric: MetricKey): string {
   return METRIC_OPTIONS.find((item) => item.value === metric)?.label ?? metric;
 }

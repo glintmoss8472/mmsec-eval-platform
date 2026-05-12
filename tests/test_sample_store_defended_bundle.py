@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test sample store defended bundle 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -9,6 +10,7 @@ from mmsec_eval.sample_store.manager import SampleStoreManager
 from mmsec_eval.types import AttackedSample, EvalRecord, JudgeResult, ModelOutput, Sample
 
 
+# 中文注释：验证 test_sample_store_persists_defended_outputs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_sample_store_persists_defended_outputs(tmp_path: Path):
     run_dir = tmp_path / "run"
     mgr = SampleStoreManager(run_dir=str(run_dir), save_images=True, save_traces=True, dataset_tag="toy", model_tag="clip_hf")

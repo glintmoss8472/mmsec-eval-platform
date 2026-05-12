@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 DashboardPage 相关逻辑。
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -7,6 +8,7 @@ import { getRunAnalytics, getSystemOverview, listRuns } from "../lib/api";
 import { isDemoRun, isHighRisk, riskBucket, riskText, riskTone } from "../lib/runPresentation";
 import { formatAdapterName, formatAttackName, formatRunDatasetName } from "../lib/uiLabels";
 
+/** 中文注释：实现 percent 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function percent(value: number | undefined, fallback = 0) {
   return Math.round(Number.isFinite(Number(value)) ? Number(value) * 100 : fallback);
 }

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于项目工程，集中实现 types 相关逻辑。
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -6,6 +7,7 @@ from typing import Any
 import numpy as np
 
 
+# 中文注释：定义 Sample 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass
 class Sample:
     sample_id: str
@@ -15,6 +17,7 @@ class Sample:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
+# 中文注释：定义 ModelOutput 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass
 class ModelOutput:
     text: str
@@ -27,6 +30,7 @@ class ModelOutput:
     raw: dict[str, Any] = field(default_factory=dict)
 
 
+# 中文注释：定义 AttackTraceStep 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass
 class AttackTraceStep:
     step: int
@@ -35,6 +39,7 @@ class AttackTraceStep:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
+# 中文注释：定义 AttackedSample 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass
 class AttackedSample:
     sample: Sample
@@ -46,6 +51,7 @@ class AttackedSample:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
+# 中文注释：定义 JudgeResult 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass
 class JudgeResult:
     success: bool
@@ -53,6 +59,7 @@ class JudgeResult:
     raw: dict[str, Any] = field(default_factory=dict)
 
 
+# 中文注释：定义 EvalRecord 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass
 class EvalRecord:
     sample: Sample
@@ -65,6 +72,7 @@ class EvalRecord:
     error_code: str = ""
 
 
+# 中文注释：定义 RunArtifacts 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass
 class RunArtifacts:
     run_id: str
@@ -76,6 +84,7 @@ class RunArtifacts:
     benchmark_summary_path: str = ""
 
 
+# 中文注释：定义 AttackContext 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass
 class AttackContext:
     config: Any
@@ -85,6 +94,7 @@ class AttackContext:
     sample_debug_dir: str = ""
 
 
+# 中文注释：定义 DefendedSample 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass
 class DefendedSample:
     sample: Sample
@@ -92,6 +102,7 @@ class DefendedSample:
     artifact_refs: dict[str, str] = field(default_factory=dict)
 
 
+# 中文注释：定义 DefenseContext 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass
 class DefenseContext:
     config: Any

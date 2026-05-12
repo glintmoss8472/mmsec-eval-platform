@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端组件，集中实现 GlossaryFormula 相关逻辑。
 import { BlockMath } from "react-katex";
 
 import type { GlossaryFormulaBlock } from "../lib/glossaryRegistry";
@@ -6,6 +7,7 @@ type GlossaryFormulaProps = {
   block: GlossaryFormulaBlock;
 };
 
+/** 中文注释：实现 GlossaryFormula 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 export function GlossaryFormula({ block }: GlossaryFormulaProps) {
   return (
     <div className="glossary-formula-block">

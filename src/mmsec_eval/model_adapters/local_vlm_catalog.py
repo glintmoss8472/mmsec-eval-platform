@@ -1,9 +1,11 @@
+# 文件说明：该文件属于模型适配层，集中实现 local vlm catalog 相关逻辑。
 from __future__ import annotations
 
 from dataclasses import dataclass
 from urllib.parse import urlparse
 
 
+# 中文注释：定义 LocalVLMModelSpec 的结构化职责，作为模型适配层中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class LocalVLMModelSpec:
     adapter: str
@@ -16,30 +18,37 @@ class LocalVLMModelSpec:
     launch_log: str
     timeout_default: str = "90"
 
+    # 中文注释：实现 LocalVLMModelSpec.model_name_env 的核心行为，维护模型适配层在该对象上的调用契约。
     @property
     def model_name_env(self) -> str:
         return f"MMSEC_OPENAI_{self.variant}_MODEL_NAME"
 
+    # 中文注释：实现 LocalVLMModelSpec.endpoint_env 的核心行为，维护模型适配层在该对象上的调用契约。
     @property
     def endpoint_env(self) -> str:
         return f"MMSEC_OPENAI_{self.variant}_BASE_URL"
 
+    # 中文注释：实现 LocalVLMModelSpec.prompt_order_env 的核心行为，维护模型适配层在该对象上的调用契约。
     @property
     def prompt_order_env(self) -> str:
         return f"MMSEC_OPENAI_{self.variant}_PROMPT_ORDER"
 
+    # 中文注释：实现 LocalVLMModelSpec.timeout_env 的核心行为，维护模型适配层在该对象上的调用契约。
     @property
     def timeout_env(self) -> str:
         return f"MMSEC_OPENAI_{self.variant}_TIMEOUT"
 
+    # 中文注释：实现 LocalVLMModelSpec.api_key_env 的核心行为，维护模型适配层在该对象上的调用契约。
     @property
     def api_key_env(self) -> str:
         return f"MMSEC_OPENAI_{self.variant}_API_KEY_ENV"
 
+    # 中文注释：实现 LocalVLMModelSpec.api_key_env_default 的核心行为，维护模型适配层在该对象上的调用契约。
     @property
     def api_key_env_default(self) -> str:
         return f"LOCAL_{self.variant}_API_KEY"
 
+    # 中文注释：实现 LocalVLMModelSpec.endpoint_port 的核心行为，维护模型适配层在该对象上的调用契约。
     @property
     def endpoint_port(self) -> int:
         port = urlparse(self.endpoint_default).port
@@ -125,6 +134,7 @@ LOCAL_OPENAI_COMPAT_ADAPTERS: tuple[str, ...] = tuple(spec.adapter for spec in L
 LOCAL_OPENAI_COMPAT_LOCAL_DIRS: tuple[str, ...] = tuple(spec.local_dir for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS)
 
 
+# 中文注释：实现 local_vlm_spec_by_adapter 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def local_vlm_spec_by_adapter(adapter: str) -> LocalVLMModelSpec:
     for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS:
         if spec.adapter == adapter:
@@ -132,6 +142,7 @@ def local_vlm_spec_by_adapter(adapter: str) -> LocalVLMModelSpec:
     raise KeyError(f"unknown local VLM adapter: {adapter}")
 
 
+# 中文注释：实现 local_vlm_spec_by_local_dir 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def local_vlm_spec_by_local_dir(local_dir: str) -> LocalVLMModelSpec:
     for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS:
         if spec.local_dir == local_dir:
@@ -139,10 +150,12 @@ def local_vlm_spec_by_local_dir(local_dir: str) -> LocalVLMModelSpec:
     raise KeyError(f"unknown local VLM directory: {local_dir}")
 
 
+# 中文注释：实现 local_vlm_model_map 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def local_vlm_model_map() -> dict[str, str]:
     return {spec.local_dir: spec.model_name_default for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS}
 
 
+# 中文注释：实现 local_vlm_calibration_map 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def local_vlm_calibration_map() -> dict[str, tuple[str, str, str]]:
     return {
         spec.adapter: (spec.variant, spec.model_name_default, spec.endpoint_default)
@@ -150,5 +163,6 @@ def local_vlm_calibration_map() -> dict[str, tuple[str, str, str]]:
     }
 
 
+# 中文注释：实现 local_vlm_launch_matrix 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def local_vlm_launch_matrix() -> tuple[tuple[str, str, int], ...]:
     return tuple((spec.adapter, spec.launch_script, spec.endpoint_port) for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS)

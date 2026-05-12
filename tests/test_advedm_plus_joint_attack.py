@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test advedm plus joint attack 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -9,21 +10,26 @@ from mmsec_eval.config.loader import load_config
 from mmsec_eval.types import AttackContext, Sample
 
 
+# 中文注释：定义 _DummyJointAdapter 的结构化职责，作为自动化测试中状态、配置或行为的边界。
 class _DummyJointAdapter:
+    # 中文注释：封装 _DummyJointAdapter.__init__ 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         self._device = "cpu"
 
+    # 中文注释：实现 _DummyJointAdapter.score_pairs 的核心行为，维护自动化测试在该对象上的调用契约。
     def score_pairs(self, pairs, batch_size: int = 8):
         vals = []
         for image, text in pairs:
             vals.append(float(np.asarray(image, dtype=np.float32).mean()) + 0.05 * len(str(text).split()))
         return np.asarray(vals, dtype=np.float32)
 
+    # 中文注释：实现 _DummyJointAdapter.attention_map 的核心行为，维护自动化测试在该对象上的调用契约。
     def attention_map(self, image: np.ndarray, text: str):
         h, w = image.shape[:2]
         grid = np.linspace(0.1, 0.9, num=h * w, dtype=np.float32).reshape(h, w)
         return grid
 
+    # 中文注释：实现 _DummyJointAdapter.score_pairs_torch 的核心行为，维护自动化测试在该对象上的调用契约。
     def score_pairs_torch(self, images_bchw, texts, *, output_attentions: bool = False):
         import torch
 
@@ -32,6 +38,7 @@ class _DummyJointAdapter:
         text_term = torch.tensor([0.05 * len(str(text).split()) for text in texts], device=images_bchw.device, dtype=images_bchw.dtype)
         return base + text_term
 
+    # 中文注释：实现 _DummyJointAdapter.patch_text_similarity_torch 的核心行为，维护自动化测试在该对象上的调用契约。
     def patch_text_similarity_torch(self, images_bchw, texts):
         import torch.nn.functional as F
 
@@ -40,11 +47,14 @@ class _DummyJointAdapter:
         return F.interpolate(sim, size=(8, 8), mode="bilinear", align_corners=False).squeeze(1)
 
 
+# 中文注释：定义 _CenterFocusAdapter 的结构化职责，作为自动化测试中状态、配置或行为的边界。
 class _CenterFocusAdapter(_DummyJointAdapter):
+    # 中文注释：实现 _CenterFocusAdapter.score_pairs 的核心行为，维护自动化测试在该对象上的调用契约。
     def score_pairs(self, pairs, batch_size: int = 8):
         del batch_size
         return np.asarray([0.25 + 0.01 * len(str(text).split()) for _, text in pairs], dtype=np.float32)
 
+    # 中文注释：实现 _CenterFocusAdapter.attention_map 的核心行为，维护自动化测试在该对象上的调用契约。
     def attention_map(self, image: np.ndarray, text: str):
         del text
         h, w = image.shape[:2]
@@ -55,6 +65,7 @@ class _CenterFocusAdapter(_DummyJointAdapter):
         dist = dist / max(1.0, float(dist.max()))
         return np.clip(1.0 - dist, 0.0, 1.0).astype(np.float32)
 
+    # 中文注释：实现 _CenterFocusAdapter.patch_text_similarity_torch 的核心行为，维护自动化测试在该对象上的调用契约。
     def patch_text_similarity_torch(self, images_bchw, texts):
         del texts
         import torch
@@ -62,6 +73,7 @@ class _CenterFocusAdapter(_DummyJointAdapter):
         return torch.ones((images_bchw.shape[0], 8, 8), device=images_bchw.device, dtype=images_bchw.dtype)
 
 
+# 中文注释：验证 test_compute_adaptive_budget_prefers_image_when_semantics_are_focused 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_compute_adaptive_budget_prefers_image_when_semantics_are_focused():
     focused_scores = np.zeros((4, 4), dtype=np.float32)
     focused_scores[0, 0] = 1.0
@@ -97,6 +109,7 @@ def test_compute_adaptive_budget_prefers_image_when_semantics_are_focused():
     assert focused["epsilon"] > flat["epsilon"]
 
 
+# 中文注释：验证 test_compute_adaptive_budget_rewards_fixation_focus 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_compute_adaptive_budget_rewards_fixation_focus():
     scores = np.zeros((4, 4), dtype=np.float32)
     scores[1:3, 1:3] = 1.0
@@ -134,6 +147,7 @@ def test_compute_adaptive_budget_rewards_fixation_focus():
     assert focused["epsilon"] >= flat["epsilon"]
 
 
+# 中文注释：验证 test_compute_adaptive_budget_can_expand_text_budget 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_compute_adaptive_budget_can_expand_text_budget():
     scores = np.zeros((4, 4), dtype=np.float32)
     scores[1:3, 1:3] = 1.0
@@ -156,6 +170,7 @@ def test_compute_adaptive_budget_can_expand_text_budget():
     assert budget["eps_t"] >= 2.0
 
 
+# 中文注释：验证 test_advedm_plus_joint_attack_writes_debug_and_changes_text 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_advedm_plus_joint_attack_writes_debug_and_changes_text(tmp_path: Path):
     cfg = load_config("configs/mvp.yaml")
     cfg.artifacts_dir = str(tmp_path / "artifacts")
@@ -186,6 +201,7 @@ def test_advedm_plus_joint_attack_writes_debug_and_changes_text(tmp_path: Path):
     assert (debug_dir / "advedm_plus_debug.json").exists()
 
 
+# 中文注释：验证 test_advedm_plus_adaptive_budget_is_stronger_than_fixed_budget 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_advedm_plus_adaptive_budget_is_stronger_than_fixed_budget(tmp_path: Path):
     cfg = load_config("configs/mvp.yaml")
     cfg.artifacts_dir = str(tmp_path / "artifacts")
@@ -222,6 +238,7 @@ def test_advedm_plus_adaptive_budget_is_stronger_than_fixed_budget(tmp_path: Pat
     assert full.metadata["adaptive_budget"]["steps"] >= fixed.metadata["adaptive_budget"]["steps"]
 
 
+# 中文注释：验证 test_advedm_plus_fixation_guides_perturbation_into_center 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_advedm_plus_fixation_guides_perturbation_into_center(tmp_path: Path):
     cfg = load_config("configs/mvp.yaml")
     cfg.artifacts_dir = str(tmp_path / "artifacts")

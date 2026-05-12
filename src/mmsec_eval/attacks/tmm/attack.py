@@ -1,3 +1,4 @@
+# 文件说明：该文件属于TMM 迁移攻击模块，集中实现 attack 相关逻辑。
 from __future__ import annotations
 
 import hashlib
@@ -16,10 +17,12 @@ from mmsec_eval.plugins.base import AttackPlugin
 from mmsec_eval.types import AttackContext, AttackTraceStep, AttackedSample, Sample
 
 
+# 中文注释：封装 _seed 的内部步骤，让TMM 迁移攻击模块主流程保持清晰并隔离边界细节。
 def _seed(sample_id: str, mode: str) -> int:
     return int(hashlib.sha256(f"tmm:{sample_id}:{mode}".encode("utf-8")).hexdigest(), 16) % (2**31 - 1)
 
 
+# 中文注释：封装 _tmm_text_attack 的内部步骤，让TMM 迁移攻击模块主流程保持清晰并隔离边界细节。
 def _tmm_text_attack(
     *,
     image: np.ndarray,
@@ -38,6 +41,7 @@ def _tmm_text_attack(
     )
 
 
+# 中文注释：封装 _tmm_scope 的内部步骤，让TMM 迁移攻击模块主流程保持清晰并隔离边界细节。
 def _tmm_scope(cfg: Any) -> tuple[str, bool, bool]:
     scope = str(getattr(cfg.task, "eval_scope", "joint") or "joint")
     if str(getattr(cfg.task, "kind", "pairwise")) != "vlr" or scope == "clean":
@@ -45,6 +49,7 @@ def _tmm_scope(cfg: Any) -> tuple[str, bool, bool]:
     return scope, scope in {"image", "joint"}, scope in {"text", "joint"}
 
 
+# 中文注释：封装 _attention_budget 的内部步骤，让TMM 迁移攻击模块主流程保持清晰并隔离边界细节。
 def _attention_budget(clean: np.ndarray, text: str, ctx: AttackContext, acfg: Any) -> tuple[np.ndarray, np.ndarray, float, float]:
     att_map = None
     try:
@@ -59,6 +64,7 @@ def _attention_budget(clean: np.ndarray, text: str, ctx: AttackContext, acfg: An
     return att_map, crit_mask, eps_crit, eps_non
 
 
+# 中文注释：定义 TMMAttack 的结构化职责，作为TMM 迁移攻击模块中状态、配置或行为的边界。
 class TMMAttack(AttackPlugin):
     """Transferable Multimodal Attack (TMM), image+text.
 
@@ -71,6 +77,7 @@ class TMMAttack(AttackPlugin):
     In VLR (task.kind=vlr) runs, we respect task.eval_scope (image/text/joint).
     """
 
+    # 中文注释：封装 TMMAttack._run_image_branch 的内部步骤，让TMM 迁移攻击模块主流程保持清晰并隔离边界细节。
     def _run_image_branch(self, *, sample_id: str, mode: str, scope: str, clean: np.ndarray, text: str, ctx: AttackContext, crit_mask: np.ndarray, eps_crit: float, eps_non: float) -> tuple[np.ndarray, list[AttackTraceStep]]:
         if not hasattr(ctx.model_adapter, "score_pairs_torch") or not hasattr(ctx.model_adapter, "projected_features_torch"):
             raise RuntimeError("TMM image attack requires torch scoring and projected features")
@@ -104,12 +111,14 @@ class TMMAttack(AttackPlugin):
             traces.append(trace)
         return adv[0].detach().cpu().permute(1, 2, 0).numpy().astype(np.float32), traces
 
+    # 中文注释：封装 TMMAttack._eps_map 的内部步骤，让TMM 迁移攻击模块主流程保持清晰并隔离边界细节。
     def _eps_map(self, *, crit_mask: np.ndarray, eps_crit: float, eps_non: float, clean: np.ndarray, device: Any):
         import torch
 
         m = torch.from_numpy(crit_mask).to(device=device, dtype=torch.float32).view(1, 1, clean.shape[0], clean.shape[1])
         return (eps_non * (1.0 - m) + eps_crit * m).expand(1, 3, clean.shape[0], clean.shape[1])
 
+    # 中文注释：封装 TMMAttack._image_step 的内部步骤，让TMM 迁移攻击模块主流程保持清晰并隔离边界细节。
     def _image_step(self, *, adv: Any, x0: Any, text: str, ctx: AttackContext, rng: Any, momentum: Any, eps_map: Any, img_feat_clean: Any, txt_feat_clean: Any, step: int, mode: str, scope: str):
         import torch
 
@@ -129,6 +138,7 @@ class TMMAttack(AttackPlugin):
         next_adv = (x0 + delta).clamp(0.0, 1.0)
         return next_adv, momentum, self._trace(step, total, score, lo, ls, lo_parts, momentum, mode, scope, eps_map)
 
+    # 中文注释：封装 TMMAttack._trace 的内部步骤，让TMM 迁移攻击模块主流程保持清晰并隔离边界细节。
     def _trace(self, step: int, total: Any, score: Any, lo: Any, ls: Any, lo_parts: dict[str, Any], momentum: Any, mode: str, scope: str, eps_map: Any) -> AttackTraceStep:
         return AttackTraceStep(
             step=step + 1,
@@ -145,6 +155,7 @@ class TMMAttack(AttackPlugin):
             metadata={"mode": mode, "scope": scope, "eps_crit": float(eps_map.max().detach().cpu().item()), "eps_non": float(eps_map.min().detach().cpu().item())},
         )
 
+    # 中文注释：实现 TMMAttack.attack 的核心行为，维护TMM 迁移攻击模块在该对象上的调用契约。
     def attack(self, sample: Sample, ctx: AttackContext) -> AttackedSample:
         acfg = ctx.config.attack
         mode = str(acfg.mode).upper()
@@ -214,6 +225,7 @@ class TMMAttack(AttackPlugin):
         )
 
 
+# 中文注释：封装 _make_tmm_sample 的内部步骤，让TMM 迁移攻击模块主流程保持清晰并隔离边界细节。
 def _make_tmm_sample(sample: Sample, adv_img: np.ndarray, adv_text: str, mode: str, scope: str) -> Sample:
     adv_sample = Sample(
         sample_id=sample.sample_id,
@@ -226,6 +238,7 @@ def _make_tmm_sample(sample: Sample, adv_img: np.ndarray, adv_text: str, mode: s
     return adv_sample
 
 
+# 中文注释：封装 _write_tmm_debug 的内部步骤，让TMM 迁移攻击模块主流程保持清晰并隔离边界细节。
 def _write_tmm_debug(
     *,
     sample_debug_dir: str,

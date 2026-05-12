@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 run backend 相关逻辑。
 Param(
   [string]$ListenHost = "127.0.0.1",
   [int]$Port = 8000,

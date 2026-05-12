@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 reproduce defense and benchmark 相关逻辑。
 Param(
   [string]$BenchmarkConfig = "configs/bench/flickr30k_clip.yaml"
 )

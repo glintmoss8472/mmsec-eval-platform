@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 prepare coco object subset 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -12,16 +13,19 @@ from typing import Any
 COCO_ANNOTATIONS_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
 
 
+# 中文注释：封装 _load_json 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 中文注释：封装 _download 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with urllib.request.urlopen(url, timeout=120) as resp:
         out_path.write_bytes(resp.read())
 
 
+# 中文注释：封装 _ensure_instances 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _ensure_instances(coco_root: Path, *, allow_download: bool) -> Path:
     ann_dir = coco_root / "annotations"
     instances = ann_dir / "instances_val2017.json"
@@ -45,6 +49,7 @@ def _ensure_instances(coco_root: Path, *, allow_download: bool) -> Path:
     return instances
 
 
+# 中文注释：封装 _caption_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _caption_rows(captions_path: Path) -> tuple[dict[int, str], dict[int, str]]:
     data = _load_json(captions_path)
     image_by_id: dict[int, str] = {}
@@ -73,6 +78,7 @@ def _caption_rows(captions_path: Path) -> tuple[dict[int, str], dict[int, str]]:
     return image_by_id, caption_by_id
 
 
+# 中文注释：实现 build_object_subset 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 def build_object_subset(
     *,
     coco_root: Path,
@@ -143,6 +149,7 @@ def build_object_subset(
     return rows
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build a real COCO object-level JSONL subset with target_text and bbox.")
     parser.add_argument("--coco-root", default="data/coco")

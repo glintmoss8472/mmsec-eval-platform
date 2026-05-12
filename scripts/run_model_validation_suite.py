@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 run model validation suite 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -33,10 +34,12 @@ MIN_CLEAN_R1_MEAN = 0.25
 LOCAL_OPENAI_ADAPTERS = set(LOCAL_OPENAI_COMPAT_ADAPTERS)
 
 
+# 中文注释：封装 _now_iso 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _now_iso() -> str:
     return datetime.now(UTC).isoformat()
 
 
+# 中文注释：封装 _dataset_override 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _dataset_override(dataset_name: str) -> dict[str, Any]:
     if dataset_name != "flickr1k":
         raise KeyError(f"unsupported validation dataset: {dataset_name}")
@@ -51,10 +54,12 @@ def _dataset_override(dataset_name: str) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _attack_scope 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _attack_scope(attack: str) -> str:
     return "joint" if attack in {"tmm", "advedm_plus"} else "image"
 
 
+# 中文注释：封装 _attack_params 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _attack_params(attack: str) -> dict[str, Any]:
     common: dict[str, Any] = {
         "epsilon": 0.05,
@@ -74,12 +79,14 @@ def _attack_params(attack: str) -> dict[str, Any]:
     return common
 
 
+# 中文注释：封装 _config_for_attack 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _config_for_attack(attack: str) -> str:
     if attack == "advedm_plus":
         return "configs/bench/bootstrap_full_vlr_advedm_plus_cuda.yaml"
     return "configs/bench/bootstrap_full_vlr_cuda.yaml"
 
 
+# 中文注释：封装 _payload 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _payload(
     *,
     dataset_name: str,
@@ -128,14 +135,17 @@ def _payload(
     }
 
 
+# 中文注释：封装 _canonical_experiment_id 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _canonical_experiment_id(model_adapter: str, attack: str) -> str:
     return f"scientific_validation_{str(model_adapter)}_{str(attack)}"
 
 
+# 中文注释：封装 _row_experiment_id 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _row_experiment_id(row: dict[str, Any]) -> str:
     return str(row.get("experiment_id", "") or "").strip()
 
 
+# 中文注释：封装 _row_identity 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _row_identity(row: dict[str, Any]) -> tuple[str, ...]:
     experiment_id = _row_experiment_id(row)
     if experiment_id:
@@ -143,6 +153,7 @@ def _row_identity(row: dict[str, Any]) -> tuple[str, ...]:
     return ("model_attack", str(row.get("model_adapter", "")), str(row.get("attack", "")))
 
 
+# 中文注释：封装 _is_primary_validation_row 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _is_primary_validation_row(row: dict[str, Any], *, dataset_name: str, attacks: list[str]) -> bool:
     model_adapter = str(row.get("model_adapter", "") or "").strip()
     attack = str(row.get("attack", "") or "").strip()
@@ -155,10 +166,12 @@ def _is_primary_validation_row(row: dict[str, Any], *, dataset_name: str, attack
     return _row_experiment_id(row) == _canonical_experiment_id(model_adapter, attack)
 
 
+# 中文注释：封装 _row_key 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _row_key(row: dict[str, Any]) -> tuple[str, str]:
     return (str(row.get("model_adapter", "")), str(row.get("attack", "")))
 
 
+# 中文注释：封装 _stage_r1 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _stage_r1(metrics: dict[str, Any]) -> float:
     return 0.5 * (
         float(metrics.get("ir_r@1", 0.0) or 0.0)
@@ -166,6 +179,7 @@ def _stage_r1(metrics: dict[str, Any]) -> float:
     )
 
 
+# 中文注释：封装 _extract_run_evidence 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _extract_run_evidence(summary: dict[str, Any]) -> dict[str, float]:
     victim_compare = [item for item in list(summary.get("victim_compare", [])) if isinstance(item, dict)]
     defense_compare = [item for item in list(summary.get("defense_compare", [])) if isinstance(item, dict)]
@@ -201,6 +215,7 @@ def _extract_run_evidence(summary: dict[str, Any]) -> dict[str, float]:
     }
 
 
+# 中文注释：封装 _hydrate_row_from_run_summary 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _hydrate_row_from_run_summary(row: dict[str, Any], *, project_root: Path | None = None) -> dict[str, Any]:
     if str(row.get("job_status", "")).strip().lower() != "success":
         return row
@@ -221,6 +236,7 @@ def _hydrate_row_from_run_summary(row: dict[str, Any], *, project_root: Path | N
     return row
 
 
+# 中文注释：封装 _dedupe_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _dedupe_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     deduped: list[dict[str, Any]] = []
     index_by_key: dict[tuple[str, ...], int] = {}
@@ -234,6 +250,7 @@ def _dedupe_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return deduped
 
 
+# 中文注释：封装 _load_existing_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _load_existing_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -244,6 +261,7 @@ def _load_existing_rows(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+# 中文注释：封装 _successful_keys 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _successful_keys(rows: list[dict[str, Any]]) -> set[tuple[str, str]]:
     out: set[tuple[str, str]] = set()
     for row in rows:
@@ -256,6 +274,7 @@ def _successful_keys(rows: list[dict[str, Any]]) -> set[tuple[str, str]]:
     return out
 
 
+# 中文注释：封装 _upsert_row 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _upsert_row(rows: list[dict[str, Any]], row: dict[str, Any]) -> None:
     key = _row_identity(row)
     for index, existing in enumerate(rows):
@@ -265,6 +284,7 @@ def _upsert_row(rows: list[dict[str, Any]], row: dict[str, Any]) -> None:
     rows.append(row)
 
 
+# 中文注释：封装 _model_summary_row 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _model_summary_row(
     *,
     model_adapter: str,
@@ -318,6 +338,7 @@ def _model_summary_row(
     }, ok, scientific_quality_ok
 
 
+# 中文注释：封装 _supplementary_row_preview 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _supplementary_row_preview(supplementary_rows: list[dict[str, Any]]) -> list[dict[str, str]]:
     return [
         {
@@ -330,6 +351,7 @@ def _supplementary_row_preview(supplementary_rows: list[dict[str, Any]]) -> list
     ]
 
 
+# 中文注释：封装 _summarize 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _summarize(
     rows: list[dict[str, Any]],
     *,
@@ -405,6 +427,7 @@ def _summarize(
     }
 
 
+# 中文注释：封装 _parse_args 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--api-base", default="http://127.0.0.1:8000/api/v1")
@@ -425,6 +448,7 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+# 中文注释：封装 _validation_paths 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _validation_paths(args: argparse.Namespace) -> dict[str, Path]:
     out_dir = Path(args.out_dir).resolve() if args.out_dir else Path("artifacts") / f"model_validation_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -435,6 +459,7 @@ def _validation_paths(args: argparse.Namespace) -> dict[str, Path]:
     }
 
 
+# 中文注释：封装 _validation_targets 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _validation_targets(args: argparse.Namespace) -> tuple[list[str], list[str]]:
     attacks = [item.strip() for item in str(args.attacks or "").split(",") if item.strip()]
     selected_models = {item.strip() for item in str(args.models or "").split(",") if item.strip()}
@@ -442,11 +467,13 @@ def _validation_targets(args: argparse.Namespace) -> tuple[list[str], list[str]]
     return attacks, model_adapters
 
 
+# 中文注释：封装 _local_vlm_models_url 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _local_vlm_models_url(model_adapter: str) -> str:
     spec = local_vlm_spec_by_adapter(model_adapter)
     return f"{spec.endpoint_default.rstrip('/')}/models"
 
 
+# 中文注释：封装 _local_vlm_ready 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _local_vlm_ready(model_adapter: str, *, timeout_seconds: float = 5.0) -> bool:
     if model_adapter not in LOCAL_OPENAI_ADAPTERS:
         return True
@@ -460,6 +487,7 @@ def _local_vlm_ready(model_adapter: str, *, timeout_seconds: float = 5.0) -> boo
     return True
 
 
+# 中文注释：封装 _process_alive 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _process_alive(pid: str) -> bool:
     if not str(pid or "").strip().isdigit():
         return True
@@ -472,6 +500,7 @@ def _process_alive(pid: str) -> bool:
     return True
 
 
+# 中文注释：封装 _tail_text 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _tail_text(path: Path, max_chars: int = 4000) -> str:
     try:
         return path.read_text(encoding="utf-8", errors="ignore")[-max_chars:]
@@ -479,6 +508,7 @@ def _tail_text(path: Path, max_chars: int = 4000) -> str:
         return ""
 
 
+# 中文注释：封装 _drop_local_model_file_cache 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _drop_local_model_file_cache() -> dict[str, Any]:
     if not hasattr(os, "posix_fadvise") or not hasattr(os, "POSIX_FADV_DONTNEED"):
         return {"enabled": False, "reason": "posix_fadvise unavailable"}
@@ -507,6 +537,7 @@ def _drop_local_model_file_cache() -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _wait_for_local_vlm 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _wait_for_local_vlm(
     model_adapter: str,
     *,
@@ -529,6 +560,7 @@ def _wait_for_local_vlm(
     raise TimeoutError(f"local VLM server did not become ready: {model_adapter}")
 
 
+# 中文注释：封装 _stop_local_vlm_servers 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _stop_local_vlm_servers() -> dict[str, Any]:
     result = subprocess.run(
         ["pkill", "-f", "local_openai_mm_server.py"],
@@ -545,6 +577,7 @@ def _stop_local_vlm_servers() -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _launch_local_vlm 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _launch_local_vlm(model_adapter: str, *, startup_timeout_seconds: int, poll_seconds: float) -> dict[str, Any]:
     if model_adapter not in LOCAL_OPENAI_ADAPTERS:
         cleanup = _stop_local_vlm_servers()
@@ -601,6 +634,7 @@ def _launch_local_vlm(model_adapter: str, *, startup_timeout_seconds: int, poll_
     }
 
 
+# 中文注释：封装 _initial_validation_status 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _initial_validation_status(args: argparse.Namespace, attacks: list[str], model_adapters: list[str], rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "generated_at": _now_iso(),
@@ -616,6 +650,7 @@ def _initial_validation_status(args: argparse.Namespace, attacks: list[str], mod
     }
 
 
+# 中文注释：封装 _new_validation_row 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _new_validation_row(args: argparse.Namespace, model_adapter: str, attack: str, model_index: int, attack_index: int, attacks: list[str]) -> dict[str, Any]:
     return {
         "submitted_at": _now_iso(),
@@ -627,6 +662,7 @@ def _new_validation_row(args: argparse.Namespace, model_adapter: str, attack: st
     }
 
 
+# 中文注释：封装 _submit_validation_job 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _submit_validation_job(args: argparse.Namespace, api: ApiClient, row: dict[str, Any]) -> None:
     created = api.create_job(
         _payload(
@@ -643,6 +679,7 @@ def _submit_validation_job(args: argparse.Namespace, api: ApiClient, row: dict[s
     row["job_id"] = str(created.get("id", ""))
 
 
+# 中文注释：封装 _complete_validation_job 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _complete_validation_job(args: argparse.Namespace, api: ApiClient, row: dict[str, Any]) -> None:
     final_job = _wait_for_validation_job(
         api,
@@ -668,6 +705,7 @@ def _complete_validation_job(args: argparse.Namespace, api: ApiClient, row: dict
     row.update(_extract_run_evidence(summary))
 
 
+# 中文注释：封装 _mark_validation_job_failed 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _mark_validation_job_failed(api: ApiClient, row: dict[str, Any], exc: Exception) -> None:
     row["job_status"] = "failed"
     row["finished_at"] = _now_iso()
@@ -680,11 +718,13 @@ def _mark_validation_job_failed(api: ApiClient, row: dict[str, Any], exc: Except
         row["logs_error"] = str(log_exc)
 
 
+# 中文注释：封装 _clear_failure_fields 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _clear_failure_fields(row: dict[str, Any]) -> None:
     for key in ("exception", "traceback", "logs_error"):
         row.pop(key, None)
 
 
+# 中文注释：封装 _run_one_validation_job 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _run_one_validation_job(args: argparse.Namespace, api: ApiClient, row: dict[str, Any]) -> dict[str, Any]:
     _submit_validation_job(args, api, row)
     try:
@@ -694,6 +734,7 @@ def _run_one_validation_job(args: argparse.Namespace, api: ApiClient, row: dict[
     return row
 
 
+# 中文注释：封装 _recover_previous_validation_jobs 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _recover_previous_validation_jobs(args: argparse.Namespace, api: ApiClient, rows: list[dict[str, Any]]) -> None:
     """Attach to unfinished jobs from a previous resume run before submitting duplicates."""
     for row in rows:
@@ -738,6 +779,7 @@ def _recover_previous_validation_jobs(args: argparse.Namespace, api: ApiClient, 
             row["observed_previous_job_status"] = job_status
 
 
+# 中文注释：封装 _wait_for_validation_job 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _wait_for_validation_job(api: ApiClient, job_id: str, *, timeout_seconds: int, poll_seconds: float) -> dict[str, Any]:
     deadline = time.monotonic() + max(1, int(timeout_seconds))
     last_error: Exception | None = None
@@ -757,6 +799,7 @@ def _wait_for_validation_job(api: ApiClient, job_id: str, *, timeout_seconds: in
     raise TimeoutError(f"job timed out: {job_id}")
 
 
+# 中文注释：封装 _persist_validation_row 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _persist_validation_row(rows: list[dict[str, Any]], row: dict[str, Any], rows_path: Path, status_path: Path, status: dict[str, Any]) -> None:
     _upsert_row(rows, row)
     rows_path.write_text(json.dumps({"rows": rows}, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -770,6 +813,7 @@ def _persist_validation_row(rows: list[dict[str, Any]], row: dict[str, Any], row
     status_path.write_text(json.dumps(status, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 中文注释：封装 _run_validation_jobs 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _run_validation_jobs(args: argparse.Namespace, api: ApiClient, attacks: list[str], model_adapters: list[str], rows: list[dict[str, Any]], rows_path: Path, status_path: Path, status: dict[str, Any]) -> None:
     done = _successful_keys(rows)
     for model_index, model_adapter in enumerate(model_adapters):
@@ -805,6 +849,7 @@ def _run_validation_jobs(args: argparse.Namespace, api: ApiClient, attacks: list
             _persist_validation_row(rows, row, rows_path, status_path, status)
 
 
+# 中文注释：封装 _write_validation_summary 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _write_validation_summary(args: argparse.Namespace, rows: list[dict[str, Any]], attacks: list[str], model_adapters: list[str], summary_path: Path, status_path: Path, status: dict[str, Any]) -> int:
     summary = _summarize(
         rows,
@@ -823,6 +868,7 @@ def _write_validation_summary(args: argparse.Namespace, rows: list[dict[str, Any
     return 0 if bool(summary.get("passed", False)) else 1
 
 
+# 中文注释：封装 _mark_validation_suite_failed 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _mark_validation_suite_failed(status: dict[str, Any], status_path: Path, exc: Exception) -> None:
     status["status"] = "failed"
     status["ended_at"] = _now_iso()
@@ -834,6 +880,7 @@ def _mark_validation_suite_failed(status: dict[str, Any], status_path: Path, exc
     status_path.write_text(json.dumps(status, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> int:
     args = _parse_args()
     paths = _validation_paths(args)

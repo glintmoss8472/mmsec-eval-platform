@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test run benchmark 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -9,6 +10,7 @@ from PIL import Image
 from mmsec_eval.cli import cmd_run_benchmark
 
 
+# 中文注释：验证 test_run_benchmark_smoke 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_run_benchmark_smoke(tmp_path: Path):
     root = tmp_path / "bench_data"
     images = root / "images"

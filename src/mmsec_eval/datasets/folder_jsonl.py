@@ -1,3 +1,4 @@
+# 文件说明：该文件属于数据集加载层，集中实现 folder jsonl 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -9,6 +10,7 @@ from mmsec_eval.io.jsonl_io import read_jsonl
 from mmsec_eval.types import Sample
 
 
+# 中文注释：实现 load_folder_jsonl 的核心流程，支撑数据集加载层中的业务语义和异常边界。
 def load_folder_jsonl(path: str) -> list[Sample]:
     rows = read_jsonl(path)
     out: list[Sample] = []

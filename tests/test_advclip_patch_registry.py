@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test advclip patch registry 相关逻辑。
 from __future__ import annotations
 
 import numpy as np
@@ -13,6 +14,7 @@ from mmsec_eval.plugins.registry import create
 from mmsec_eval.types import AttackContext, Sample
 
 
+# 中文注释：验证 test_advclip_patch_registry_roundtrip 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_advclip_patch_registry_roundtrip(tmp_path: Path) -> None:
     register_builtin_plugins()
 

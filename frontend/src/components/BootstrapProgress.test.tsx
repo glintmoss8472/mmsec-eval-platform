@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端组件，集中实现 BootstrapProgress.test 相关逻辑。
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

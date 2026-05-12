@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 build protocol fault evidence 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -17,14 +18,17 @@ TARGET_PORTS = [22, 8000, 8011, 8012, 8013]
 OUT_DIR = ROOT / "artifacts" / "protocol_fault_evidence_20260419"
 
 
+# 中文注释：封装 _now_iso 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _now_iso() -> str:
     return datetime.now(timezone.utc).astimezone().isoformat()
 
 
+# 中文注释：封装 _ensure_out_dir 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _ensure_out_dir() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# 中文注释：封装 _clear_proxy_env 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _clear_proxy_env() -> None:
     for key in (
         "HTTP_PROXY",
@@ -39,6 +43,7 @@ def _clear_proxy_env() -> None:
     os.environ["no_proxy"] = os.environ["NO_PROXY"]
 
 
+# 中文注释：封装 _port_connect_and_read 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _port_connect_and_read(port: int, payload: bytes | None = None) -> dict[str, Any]:
     start = datetime.now(timezone.utc)
     record: dict[str, Any] = {
@@ -72,6 +77,7 @@ def _port_connect_and_read(port: int, payload: bytes | None = None) -> dict[str,
     return record
 
 
+# 中文注释：封装 _requests_probe 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _requests_probe(url: str) -> dict[str, Any]:
     session = requests.Session()
     session.trust_env = False
@@ -92,6 +98,7 @@ def _requests_probe(url: str) -> dict[str, Any]:
     return record
 
 
+# 中文注释：封装 _https_probe 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _https_probe(host: str, port: int) -> dict[str, Any]:
     context = ssl.create_default_context()
     record: dict[str, Any] = {
@@ -120,12 +127,14 @@ def _https_probe(host: str, port: int) -> dict[str, Any]:
     return record
 
 
+# 中文注释：封装 _write_json 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _write_json(name: str, payload: Any) -> Path:
     path = OUT_DIR / name
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return path
 
 
+# 中文注释：封装 _write_readme 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _write_readme(manifest: dict[str, Any]) -> None:
     content = f"""# Protocol Fault Evidence 2026-04-19
 
@@ -163,6 +172,7 @@ def _write_readme(manifest: dict[str, Any]) -> None:
     (OUT_DIR / "README.md").write_text(content, encoding="utf-8")
 
 
+# 中文注释：封装 _collect_fault_probes 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _collect_fault_probes() -> dict[str, Any]:
     tcp_matrix = [_port_connect_and_read(port) for port in TARGET_PORTS]
     http_raw = _port_connect_and_read(
@@ -206,6 +216,7 @@ def _collect_fault_probes() -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _write_probe_files 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _write_probe_files(probes: dict[str, Any]) -> None:
     _write_json("tcp_connect_matrix.json", probes["tcp_matrix"])
     _write_json("http_raw_probe_8000.json", probes["http_raw"])
@@ -215,6 +226,7 @@ def _write_probe_files(probes: dict[str, Any]) -> None:
     _write_json("https_health_probe.json", probes["https_health"])
 
 
+# 中文注释：封装 _build_manifest 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _build_manifest(probes: dict[str, Any]) -> dict[str, Any]:
     tcp_matrix = probes["tcp_matrix"]
     http_health = probes["http_health"]
@@ -275,6 +287,7 @@ def _build_manifest(probes: dict[str, Any]) -> dict[str, Any]:
     return manifest
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> None:
     _ensure_out_dir()
     _clear_proxy_env()

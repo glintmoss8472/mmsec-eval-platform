@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 ReportCenterPage.generationMetrics.test 相关逻辑。
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
@@ -38,6 +39,7 @@ vi.mock("../lib/api", () => ({
   })),
 }));
 
+/** 中文注释：实现 createClient 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function createClient() {
   return new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
 }

@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端组件，集中实现 AppLayout 相关逻辑。
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
@@ -21,21 +22,25 @@ const FONT_SCALE_MIN = 0.9;
 const FONT_SCALE_MAX = 1.3;
 const FONT_SCALE_STEP = 0.05;
 
+/** 中文注释：实现 clampFontScale 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function clampFontScale(value: number) {
   if (!Number.isFinite(value)) return 1;
   return Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, Math.round(value * 100) / 100));
 }
 
+/** 中文注释：实现 readStoredFontScale 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function readStoredFontScale() {
   if (typeof window === "undefined") return 1;
   const stored = window.localStorage.getItem(FONT_SCALE_STORAGE_KEY);
   return clampFontScale(stored ? Number.parseFloat(stored) : 1);
 }
 
+/** 中文注释：实现 fontScalePercent 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function fontScalePercent(value: number) {
   return `${Math.round(value * 100)}%`;
 }
 
+/** 中文注释：实现 navIcon 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function navIcon(code: string) {
   if (code === "home") {
     return (
@@ -87,6 +92,7 @@ function navIcon(code: string) {
   );
 }
 
+/** 中文注释：实现 pageMeta 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function pageMeta(pathname: string) {
   if (pathname.startsWith("/reports/") && pathname.includes("/cases/")) {
     const cases = PRIMARY_NAV_ITEMS.find((item) => item.to === "/cases") ?? PRIMARY_NAV_ITEMS[0];
@@ -105,6 +111,7 @@ function pageMeta(pathname: string) {
   return PRIMARY_NAV_ITEMS.find((item) => (item.to === "/" ? pathname === "/" : pathname.startsWith(item.to))) ?? PRIMARY_NAV_ITEMS[0];
 }
 
+/** 中文注释：实现 AppLayout 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 export function AppLayout() {
   const location = useLocation();
   const [noticeOpen, setNoticeOpen] = useState(false);
@@ -130,6 +137,7 @@ export function AppLayout() {
   const serviceDot = healthQ.isError ? "danger" : serviceReady ? "success" : "warn";
   const subtitle = PAGE_SUBTITLES[current.to] ?? PAGE_SUBTITLES["/"];
   const generatedAt = overviewQ.data?.generated_at ? new Date(overviewQ.data.generated_at).toLocaleString("zh-CN") : serviceReady ? "后端已连接" : "等待后端同步";
+  /** 中文注释：实现 setAndStoreFontScale 的核心流程，支撑前端组件中的业务语义和异常边界。 */
   const setAndStoreFontScale = (value: number) => {
     setFontScale(clampFontScale(value));
   };

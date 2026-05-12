@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test config validation 相关逻辑。
 from pathlib import Path
 
 from mmsec_eval.config.loader import load_config
@@ -5,12 +6,14 @@ from mmsec_eval.config.validate import validate_config
 from mmsec_eval.plugins.builtin import register_builtin_plugins
 
 
+# 中文注释：验证 test_validate_config_ok 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_validate_config_ok():
     register_builtin_plugins()
     cfg = load_config("configs/mvp.yaml")
     validate_config(cfg)
 
 
+# 中文注释：验证 test_validate_config_allows_mini_flickr_default_root 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_validate_config_allows_mini_flickr_default_root():
     register_builtin_plugins()
     cfg = load_config("configs/mvp.yaml")
@@ -23,6 +26,7 @@ def test_validate_config_allows_mini_flickr_default_root():
     assert Path(cfg.dataset.root).name == "mini_flickr"
     assert Path(cfg.dataset.root).parent.name == "data"
 
+# 中文注释：验证 test_validate_config_rejects_invalid_attack_defense_and_runtime_values 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_validate_config_rejects_invalid_attack_defense_and_runtime_values():
     import pytest
 

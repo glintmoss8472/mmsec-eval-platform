@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test prepare tmm official assets 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,6 +12,7 @@ from scripts.prepare_tmm_official_assets import (
 )
 
 
+# 中文注释：验证 test_safe_symlink_or_copy_links_existing_file 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_safe_symlink_or_copy_links_existing_file(tmp_path: Path) -> None:
     src = tmp_path / "src.bin"
     dst = tmp_path / "nested" / "dst.bin"
@@ -23,12 +25,14 @@ def test_safe_symlink_or_copy_links_existing_file(tmp_path: Path) -> None:
     assert dst.read_bytes() == b"checkpoint"
 
 
+# 中文注释：验证 test_safe_symlink_or_copy_reports_missing_source 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_safe_symlink_or_copy_reports_missing_source(tmp_path: Path) -> None:
     result = _safe_symlink_or_copy(tmp_path / "missing.bin", tmp_path / "dst.bin")
 
     assert result["status"] == "missing_source"
 
 
+# 中文注释：验证 test_domestic_only_blocks_known_foreign_asset_hosts 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_domestic_only_blocks_known_foreign_asset_hosts() -> None:
     assert _is_forbidden_foreign_url("https://github.com/whdii/TMM/releases/download/a/b.pth")
     assert _is_forbidden_foreign_url("https://storage.googleapis.com/sfr-pcl-data-research/ALBEF/mscoco.pth")
@@ -37,6 +41,7 @@ def test_domestic_only_blocks_known_foreign_asset_hosts() -> None:
     assert not _is_forbidden_foreign_url("https://ai.gitee.com/hf-datasets/HuggingFaceM4/flickr30k")
 
 
+# 中文注释：验证 test_prepare_coco_val2014_from_autodl_extracts_named_images 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_prepare_coco_val2014_from_autodl_extracts_named_images(tmp_path: Path) -> None:
     tmm_root = tmp_path / "TMM-main"
     dataset_dir = tmm_root / "datasets"

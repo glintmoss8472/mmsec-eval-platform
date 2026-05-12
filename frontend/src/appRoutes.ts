@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端工程配置，集中实现 appRoutes 相关逻辑。
 export const PRIMARY_NAV_ITEMS = [
   { to: "/", label: "首页总览", code: "home", entryId: "page-dashboard" },
   { to: "/testing", label: "新建测评", code: "plus", entryId: "page-testing" },

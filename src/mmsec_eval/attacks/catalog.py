@@ -1,3 +1,4 @@
+# 文件说明：该文件属于攻击算法公共层，集中实现 catalog 相关逻辑。
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -21,6 +22,7 @@ PAPER_ATTACKS: FrozenSet[str] = frozenset(
 )
 
 
+# 中文注释：定义 AttackSurrogatePolicy 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class AttackSurrogatePolicy:
     attacks: FrozenSet[str]
@@ -28,6 +30,7 @@ class AttackSurrogatePolicy:
     message: str
 
 
+# 中文注释：定义 ExternalAttackMetadata 的结构化职责，作为攻击算法公共层中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class ExternalAttackMetadata:
     attack_id: str
@@ -81,6 +84,7 @@ SURROGATE_POLICIES: tuple[AttackSurrogatePolicy, ...] = (
 )
 
 
+# 中文注释：实现 surrogate_policy_for_attack 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
 def surrogate_policy_for_attack(attack: str) -> AttackSurrogatePolicy | None:
     attack_id = str(attack or "").strip()
     for policy in SURROGATE_POLICIES:
@@ -89,6 +93,7 @@ def surrogate_policy_for_attack(attack: str) -> AttackSurrogatePolicy | None:
     return None
 
 
+# 中文注释：实现 attack_surrogate_error 的核心流程，支撑攻击算法公共层中的业务语义和异常边界。
 def attack_surrogate_error(attack: str, surrogate: str) -> str | None:
     attack_id = str(attack or "").strip()
     surrogate_id = str(surrogate or "").strip()

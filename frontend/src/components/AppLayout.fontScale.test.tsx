@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端组件，集中实现 AppLayout.fontScale.test 相关逻辑。
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -17,6 +18,7 @@ vi.mock("../lib/api", () => ({
   })),
 }));
 
+/** 中文注释：实现 createClient 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function createClient() {
   return new QueryClient({
     defaultOptions: {
@@ -28,6 +30,7 @@ function createClient() {
   });
 }
 
+/** 中文注释：实现 renderLayout 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function renderLayout() {
   return render(
     <QueryClientProvider client={createClient()}>

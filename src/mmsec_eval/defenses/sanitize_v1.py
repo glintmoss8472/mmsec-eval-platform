@@ -1,3 +1,4 @@
+# 文件说明：该文件属于项目工程，集中实现 sanitize v1 相关逻辑。
 from __future__ import annotations
 
 import io
@@ -13,6 +14,7 @@ from mmsec_eval.plugins.base import DefensePlugin
 from mmsec_eval.types import DefenseContext, DefendedSample, Sample
 
 
+# 中文注释：封装 _to_u8_hwc 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _to_u8_hwc(image: np.ndarray) -> np.ndarray:
     arr = np.asarray(image, dtype=np.float32)
     if arr.ndim != 3 or arr.shape[2] != 3:
@@ -20,16 +22,19 @@ def _to_u8_hwc(image: np.ndarray) -> np.ndarray:
     return (np.clip(arr, 0.0, 1.0) * 255.0).astype(np.uint8)
 
 
+# 中文注释：封装 _to_f32_hwc 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _to_f32_hwc(image_u8: np.ndarray) -> np.ndarray:
     return np.asarray(image_u8, dtype=np.float32) / 255.0
 
 
+# 中文注释：封装 _normalize_text 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _normalize_text(text: str) -> str:
     x = str(text or "").lower()
     x = re.sub(r"\s+", " ", x).strip()
     return x
 
 
+# 中文注释：封装 _dedupe_tokens 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _dedupe_tokens(text: str) -> str:
     tokens = [tok for tok in str(text or "").split() if tok]
     if not tokens:
@@ -41,6 +46,7 @@ def _dedupe_tokens(text: str) -> str:
     return " ".join(out)
 
 
+# 中文注释：封装 _token_delta_ratio 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _token_delta_ratio(src: str, dst: str) -> float:
     src_tokens = [tok for tok in str(src or "").split() if tok]
     dst_tokens = [tok for tok in str(dst or "").split() if tok]
@@ -52,6 +58,7 @@ def _token_delta_ratio(src: str, dst: str) -> float:
     return float(changed) / float(denom)
 
 
+# 中文注释：封装 _mean_abs_delta 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _mean_abs_delta(a: np.ndarray, b: np.ndarray) -> float:
     arr_a = np.asarray(a, dtype=np.float32)
     arr_b = np.asarray(b, dtype=np.float32)
@@ -60,6 +67,7 @@ def _mean_abs_delta(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.mean(np.abs(arr_a - arr_b)))
 
 
+# 中文注释：封装 _apply_recipe 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _apply_recipe(
     pil: Image.Image,
     *,
@@ -96,6 +104,7 @@ def _apply_recipe(
     return out
 
 
+# 中文注释：封装 _image_recipes 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _image_recipes(cfg) -> list[dict[str, float | int | str]]:
     strong_ratio = min(float(cfg.resize_ratio), float(cfg.strong_resize_ratio))
     strong_quality = min(int(cfg.jpeg_quality), int(cfg.strong_jpeg_quality))
@@ -138,6 +147,7 @@ def _image_recipes(cfg) -> list[dict[str, float | int | str]]:
     ]
 
 
+# 中文注释：封装 _text_candidates 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _text_candidates(text: str) -> list[str]:
     normalized = _normalize_text(text)
     punctuation_clean = re.sub(r"[^0-9a-z\s]+", " ", normalized)
@@ -158,6 +168,7 @@ def _text_candidates(text: str) -> list[str]:
     return out
 
 
+# 中文注释：封装 _score_pair 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _score_pair(adapter, image: np.ndarray, text: str) -> float:
     if adapter is None or not hasattr(adapter, "score_pairs"):
         return 0.0
@@ -167,6 +178,7 @@ def _score_pair(adapter, image: np.ndarray, text: str) -> float:
         return 0.0
 
 
+# 中文注释：封装 _defense_config_snapshot 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _defense_config_snapshot(cfg) -> dict[str, object]:
     return {
         "resize_ratio": float(cfg.resize_ratio),
@@ -186,6 +198,7 @@ def _defense_config_snapshot(cfg) -> dict[str, object]:
     }
 
 
+# 中文注释：封装 _maybe_repair_text 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _maybe_repair_text(*, image: np.ndarray, text: str, adapter, cfg) -> tuple[str, dict[str, object]]:
     if not (bool(cfg.text_repair) and hasattr(adapter, "score_pairs") and text):
         return str(text), {"method": "noop", "reason": "disabled"}
@@ -200,6 +213,7 @@ def _maybe_repair_text(*, image: np.ndarray, text: str, adapter, cfg) -> tuple[s
     return str(repaired_text), dict(debug)
 
 
+# 中文注释：封装 _select_text_variant 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _select_text_variant(
     *,
     image: np.ndarray,
@@ -227,6 +241,7 @@ def _select_text_variant(
     return best_text, float(best_score), rows
 
 
+# 中文注释：封装 _select_image_variant 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _select_image_variant(
     *,
     pil: Image.Image,
@@ -272,6 +287,7 @@ def _select_image_variant(
     return best_image, best_recipe, float(best_score), rows
 
 
+# 中文注释：封装 _write_defense_trace 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _write_defense_trace(sample_debug_dir: str, trace: dict[str, object]) -> dict[str, str]:
     if not sample_debug_dir:
         return {}
@@ -282,6 +298,7 @@ def _write_defense_trace(sample_debug_dir: str, trace: dict[str, object]) -> dic
     return {"defense_trace": str(trace_path)}
 
 
+# 中文注释：封装 _make_defended_sample 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _make_defended_sample(*, sample: Sample, image: np.ndarray, text: str, stage: str) -> Sample:
     defended = Sample(
         sample_id=str(sample.sample_id),
@@ -295,12 +312,14 @@ def _make_defended_sample(*, sample: Sample, image: np.ndarray, text: str, stage
     return defended
 
 
+# 中文注释：定义 SanitizeDefenseV1 的结构化职责，作为项目工程中状态、配置或行为的边界。
 class SanitizeDefenseV1(DefensePlugin):
     """Deterministic input sanitization defense.
 
     Pipeline: multi-strength image sanitization -> text normalization/repair -> score-guided selection.
     """
 
+    # 中文注释：实现 SanitizeDefenseV1.defend 的核心行为，维护项目工程在该对象上的调用契约。
     def defend(self, sample: Sample, ctx: DefenseContext) -> DefendedSample:
         cfg = ctx.config.defense
 

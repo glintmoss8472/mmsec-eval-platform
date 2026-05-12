@@ -1,3 +1,4 @@
+# 文件说明：该文件属于数据集加载层，集中实现 flickr30k 相关逻辑。
 from __future__ import annotations
 
 import csv
@@ -13,11 +14,13 @@ from mmsec_eval.io.jsonl_io import read_jsonl
 from mmsec_eval.types import Sample
 
 
+# 中文注释：封装 _resolve_path 的内部步骤，让数据集加载层主流程保持清晰并隔离边界细节。
 def _resolve_path(base: Path, value: str) -> Path:
     p = Path(value)
     return p if p.is_absolute() else base / p
 
 
+# 中文注释：封装 _read_rows 的内部步骤，让数据集加载层主流程保持清晰并隔离边界细节。
 def _read_rows(captions_path: Path) -> list[dict[str, Any]]:
     suffix = captions_path.suffix.lower()
     if suffix == ".jsonl":
@@ -66,6 +69,7 @@ def _read_rows(captions_path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+# 中文注释：封装 _select_value 的内部步骤，让数据集加载层主流程保持清晰并隔离边界细节。
 def _select_value(row: dict[str, Any], keys: tuple[str, ...]) -> str:
     for k in keys:
         if k in row and row[k] is not None:
@@ -75,6 +79,7 @@ def _select_value(row: dict[str, Any], keys: tuple[str, ...]) -> str:
     return ""
 
 
+# 中文注释：封装 _looks_like_placeholder_rows 的内部步骤，让数据集加载层主流程保持清晰并隔离边界细节。
 def _looks_like_placeholder_rows(rows: list[dict[str, Any]]) -> bool:
     sample = rows[: min(8, len(rows))]
     captions = [_select_value(row, ("caption", "text", "sentence")).lower() for row in sample]
@@ -84,6 +89,7 @@ def _looks_like_placeholder_rows(rows: list[dict[str, Any]]) -> bool:
     return all(("placeholder sample" in text) or text.startswith("demo caption ") for text in captions)
 
 
+# 中文注释：实现 load_flickr_like 的核心流程，支撑数据集加载层中的业务语义和异常边界。
 def load_flickr_like(dataset_cfg: Any, *, dataset_name: str = "flickr30k") -> list[Sample]:
     root = Path(dataset_cfg.root)
     image_dir = _resolve_path(root, dataset_cfg.image_dir)
@@ -142,5 +148,6 @@ def load_flickr_like(dataset_cfg: Any, *, dataset_name: str = "flickr30k") -> li
     return out
 
 
+# 中文注释：实现 load_flickr30k 的核心流程，支撑数据集加载层中的业务语义和异常边界。
 def load_flickr30k(dataset_cfg: Any) -> list[Sample]:
     return load_flickr_like(dataset_cfg, dataset_name="flickr30k")

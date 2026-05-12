@@ -1,9 +1,11 @@
+# 文件说明：该文件属于自动化测试，集中实现 test run server exhaustive matrix 相关逻辑。
 from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
 
 
+# 中文注释：封装 _load_module 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _load_module():
     path = Path("scripts/run_server_exhaustive_matrix.py").resolve()
     spec = importlib.util.spec_from_file_location("run_server_exhaustive_matrix", path)
@@ -13,6 +15,7 @@ def _load_module():
     return module
 
 
+# 中文注释：验证 test_classic_acceptance_uses_matrix_e1_e2_and_external_e4 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_classic_acceptance_uses_matrix_e1_e2_and_external_e4():
     module = _load_module()
     thresholds = module._load_thresholds()
@@ -51,6 +54,7 @@ def test_classic_acceptance_uses_matrix_e1_e2_and_external_e4():
     assert result["external_analysis_path"]
 
 
+# 中文注释：验证 test_dataset_override_supports_flickr1k 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_dataset_override_supports_flickr1k():
     module = _load_module()
     payload = module._dataset_override("flickr1k")

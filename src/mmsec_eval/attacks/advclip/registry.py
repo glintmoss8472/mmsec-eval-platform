@@ -1,3 +1,4 @@
+# 文件说明：该文件属于AdvCLIP 攻击模块，集中实现 registry 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -7,22 +8,27 @@ from pathlib import Path
 from typing import Any
 
 
+# 中文注释：封装 _utc_now_iso 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+# 中文注释：实现 registry_path 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def registry_path(artifacts_dir: str) -> Path:
     return Path(artifacts_dir) / "advclip_patch_registry.json"
 
 
+# 中文注释：实现 make_key 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def make_key(*, clip_model_name: str, mode: str, patch_size: int) -> str:
     return f"{clip_model_name}:{str(mode).upper()}:{int(patch_size)}"
 
 
+# 中文注释：封装 _empty_registry 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
 def _empty_registry() -> dict[str, Any]:
     return {"version": 1, "entries": {}}
 
 
+# 中文注释：实现 read_registry 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def read_registry(artifacts_dir: str) -> dict[str, Any]:
     p = registry_path(artifacts_dir)
     if not p.exists():
@@ -40,6 +46,7 @@ def read_registry(artifacts_dir: str) -> dict[str, Any]:
         return _empty_registry()
 
 
+# 中文注释：实现 write_registry_atomic 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def write_registry_atomic(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -47,6 +54,7 @@ def write_registry_atomic(path: Path, data: dict[str, Any]) -> None:
     tmp.replace(path)
 
 
+# 中文注释：封装 _relativize_under_artifacts 的内部步骤，让AdvCLIP 攻击模块主流程保持清晰并隔离边界细节。
 def _relativize_under_artifacts(artifacts_dir: str, patch_path: str) -> str:
     art = Path(artifacts_dir).resolve()
     p = Path(patch_path)
@@ -58,6 +66,7 @@ def _relativize_under_artifacts(artifacts_dir: str, patch_path: str) -> str:
         return str(patch_path)
 
 
+# 中文注释：实现 update_entry 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def update_entry(
     *,
     artifacts_dir: str,
@@ -84,6 +93,7 @@ def update_entry(
     write_registry_atomic(registry_path(artifacts_dir), data)
 
 
+# 中文注释：实现 resolve_patch 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def resolve_patch(artifacts_dir: str, key: str) -> str:
     data = read_registry(artifacts_dir)
     entry = (data.get("entries") or {}).get(str(key), {})
@@ -98,6 +108,7 @@ def resolve_patch(artifacts_dir: str, key: str) -> str:
     return str(p) if p.exists() else ""
 
 
+# 中文注释：定义 RegistryEntry 的结构化职责，作为AdvCLIP 攻击模块中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class RegistryEntry:
     key: str
@@ -108,6 +119,7 @@ class RegistryEntry:
     updated_at: str
 
 
+# 中文注释：实现 get_entry 的核心流程，支撑AdvCLIP 攻击模块中的业务语义和异常边界。
 def get_entry(artifacts_dir: str, key: str) -> RegistryEntry | None:
     data = read_registry(artifacts_dir)
     entry = (data.get("entries") or {}).get(str(key), {})

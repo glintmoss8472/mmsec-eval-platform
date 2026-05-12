@@ -1,3 +1,4 @@
+# 文件说明：该文件属于模型适配层，集中实现 vilt itm adapter 相关逻辑。
 from __future__ import annotations
 
 import logging
@@ -14,6 +15,7 @@ from mmsec_eval.types import ModelOutput, Sample
 LOG = logging.getLogger(__name__)
 
 
+# 中文注释：封装 _pick_text_length_limit 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
 def _pick_text_length_limit(*values: Any) -> int:
     valid: list[int] = []
     for value in values:
@@ -30,9 +32,11 @@ def _pick_text_length_limit(*values: Any) -> int:
     return min(valid) if valid else 40
 
 
+# 中文注释：定义 ViltITMAdapter 的结构化职责，作为模型适配层中状态、配置或行为的边界。
 class ViltITMAdapter(ModelAdapter):
     """ViLT retrieval (cross-encoder) adapter, CUDA-only and strict."""
 
+    # 中文注释：封装 ViltITMAdapter.__init__ 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def __init__(self) -> None:
         import torch
         from transformers import ViltForImageAndTextRetrieval, ViltProcessor
@@ -67,10 +71,12 @@ class ViltITMAdapter(ModelAdapter):
                 )
             ) from e
 
+    # 中文注释：实现 ViltITMAdapter.device 的核心行为，维护模型适配层在该对象上的调用契约。
     @property
     def device(self) -> str:
         return str(self._device)
 
+    # 中文注释：封装 ViltITMAdapter._prepare_inputs_torch 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def _prepare_inputs_torch(self, images_bchw, texts: list[str]):
         if images_bchw.ndim != 4:
             raise ValueError("images must be BCHW")
@@ -88,14 +94,17 @@ class ViltITMAdapter(ModelAdapter):
             out[k] = v.to(self._device)
         return out
 
+    # 中文注释：封装 ViltITMAdapter._prepare_numpy_batch 的内部步骤，让模型适配层主流程保持清晰并隔离边界细节。
     def _prepare_numpy_batch(self, images: list[np.ndarray]) -> np.ndarray:
         return stack_resized_rgb01(images, size_hw=processor_target_hw(self._processor, default_hw=(384, 384)))
 
+    # 中文注释：实现 ViltITMAdapter.score_pairs_torch 的核心行为，维护模型适配层在该对象上的调用契约。
     def score_pairs_torch(self, images_bchw, texts: list[str], *, output_attentions: bool = False):
         inp = self._prepare_inputs_torch(images_bchw, texts)
         out = self._model(**inp, output_attentions=bool(output_attentions), return_dict=True)
         return out.logits.squeeze(-1).float()
 
+    # 中文注释：实现 ViltITMAdapter.projected_features_torch 的核心行为，维护模型适配层在该对象上的调用契约。
     def projected_features_torch(self, images_bchw, texts: list[str]):
         inp = self._prepare_inputs_torch(images_bchw, texts)
         out = self._model.vilt(**inp, output_attentions=False, output_hidden_states=False, return_dict=True)
@@ -103,6 +112,7 @@ class ViltITMAdapter(ModelAdapter):
         # ViLT retrieval is cross-encoder; for compatibility we expose same vector twice.
         return pooled, pooled
 
+    # 中文注释：实现 ViltITMAdapter.score_pairs 的核心行为，维护模型适配层在该对象上的调用契约。
     def score_pairs(self, pairs: list[tuple[np.ndarray, str]], batch_size: int = 8) -> np.ndarray:
         import torch
 
@@ -120,6 +130,7 @@ class ViltITMAdapter(ModelAdapter):
             out.append(scores.detach().cpu().numpy().astype(np.float32))
         return np.concatenate(out, axis=0).astype(np.float32)
 
+    # 中文注释：实现 ViltITMAdapter.fused_embedding 的核心行为，维护模型适配层在该对象上的调用契约。
     def fused_embedding(self, image: np.ndarray, text: str) -> np.ndarray:
         import torch
 
@@ -128,6 +139,7 @@ class ViltITMAdapter(ModelAdapter):
             pooled, _ = self.projected_features_torch(x, [str(text)])
         return pooled[0].detach().cpu().numpy().astype(np.float32)
 
+    # 中文注释：实现 ViltITMAdapter.attention_map 的核心行为，维护模型适配层在该对象上的调用契约。
     def attention_map(self, image: np.ndarray, text: str, eps: float = 1e-8) -> np.ndarray:
         import math
         import torch
@@ -162,6 +174,7 @@ class ViltITMAdapter(ModelAdapter):
             m = t[0, 0].numpy().astype(np.float32)
         return np.clip(m, 0.0, 1.0).astype(np.float32)
 
+    # 中文注释：实现 ViltITMAdapter.predict 的核心行为，维护模型适配层在该对象上的调用契约。
     def predict(self, sample: Sample) -> ModelOutput:
         score = float(self.score_pairs([(sample.image, sample.text)], batch_size=1)[0])
         att = self.attention_map(sample.image, sample.text)
@@ -172,5 +185,6 @@ class ViltITMAdapter(ModelAdapter):
             raw={"adapter": "vilt_itm", "device": self._device, "model_name": self._model_name, "score": score},
         )
 
+    # 中文注释：实现 ViltITMAdapter.extra_debug 的核心行为，维护模型适配层在该对象上的调用契约。
     def extra_debug(self) -> dict[str, Any]:
         return {"device": str(self._device), "model_name": str(self._model_name)}

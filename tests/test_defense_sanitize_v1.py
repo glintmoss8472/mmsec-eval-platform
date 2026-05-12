@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test defense sanitize v1 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -10,6 +11,7 @@ from mmsec_eval.defenses.sanitize_v1 import SanitizeDefenseV1
 from mmsec_eval.types import DefenseContext, Sample
 
 
+# 中文注释：验证 test_sanitize_v1_deterministic_and_range 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_sanitize_v1_deterministic_and_range(tmp_path: Path):
     cfg = load_config("configs/mvp.yaml")
     cfg.defense.enabled = True

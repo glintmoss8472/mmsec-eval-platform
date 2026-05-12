@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test retrieval runner risk 相关逻辑。
 from __future__ import annotations
 
 import pytest
@@ -10,16 +11,19 @@ from mmsec_eval.runner.retrieval_runner import (
 )
 
 
+# 中文注释：验证 test_victim_stage_asr_at_1_averages_ir_and_tr 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_victim_stage_asr_at_1_averages_ir_and_tr():
     metrics = {"ir_asr@1": 0.8, "tr_asr@1": 0.4}
     assert _victim_stage_asr_at_1(metrics) == pytest.approx(0.6)
 
 
+# 中文注释：验证 test_victim_conditional_asr_at_1_averages_ir_and_tr 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_victim_conditional_asr_at_1_averages_ir_and_tr():
     metrics = {"ir_cond_asr@1": 0.25, "tr_cond_asr@1": 0.75}
     assert _victim_conditional_asr_at_1(metrics) == pytest.approx(0.5)
 
 
+# 中文注释：验证 test_victim_transfer_score_uses_cross_victim_coverage 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_victim_transfer_score_uses_cross_victim_coverage():
     victim_metrics = {
         "clip_hf": {"attacked": {"ir_asr@1": 0.8, "tr_asr@1": 0.6}},
@@ -37,6 +41,7 @@ def test_victim_transfer_score_uses_cross_victim_coverage():
     assert score == pytest.approx(2 / 3)
 
 
+# 中文注释：验证 test_victim_transfer_score_prefers_conditional_asr_when_available 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_victim_transfer_score_prefers_conditional_asr_when_available():
     victim_metrics = {
         "qwen25_vl": {
@@ -59,6 +64,7 @@ def test_victim_transfer_score_prefers_conditional_asr_when_available():
     assert score == pytest.approx(0.0)
 
 
+# 中文注释：验证 test_victim_transfer_score_does_not_reuse_attack_mean_for_single_victim 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_victim_transfer_score_does_not_reuse_attack_mean_for_single_victim():
     victim_metrics = {
         "clip_hf": {"attacked": {"ir_asr@1": 0.9, "tr_asr@1": 0.7}},
@@ -74,6 +80,7 @@ def test_victim_transfer_score_does_not_reuse_attack_mean_for_single_victim():
     assert score == pytest.approx(0.0)
 
 
+# 中文注释：验证 test_summarize_attack_outcomes_keeps_conditional_asr_separate_from_error_rate 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_summarize_attack_outcomes_keeps_conditional_asr_separate_from_error_rate():
     victim_metrics = {
         "qwen25_vl": {

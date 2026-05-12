@@ -1,3 +1,4 @@
+# 文件说明：该文件属于项目工程，集中实现 main 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -5,6 +6,7 @@ import argparse
 import uvicorn
 
 
+# 中文注释：封装 _parse_args 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the ATT-project FastAPI service.")
     parser.add_argument("--host", default="127.0.0.1")

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test model adapter image utils 相关逻辑。
 from __future__ import annotations
 
 import numpy as np
@@ -11,6 +12,7 @@ from mmsec_eval.model_adapters.image_utils import (
 )
 
 
+# 中文注释：验证 test_image_to_rgb01_accepts_grayscale_and_uint8_scale 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_image_to_rgb01_accepts_grayscale_and_uint8_scale():
     image = np.array([[0, 128], [255, 64]], dtype=np.uint8)
 
@@ -23,6 +25,7 @@ def test_image_to_rgb01_accepts_grayscale_and_uint8_scale():
     assert out[0, 1, 0] == pytest.approx(128.0 / 255.0)
 
 
+# 中文注释：验证 test_image_to_rgb01_accepts_single_channel_and_rgba 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_image_to_rgb01_accepts_single_channel_and_rgba():
     single = np.ones((3, 2, 1), dtype=np.float32) * 0.25
     rgba = np.dstack(
@@ -41,6 +44,7 @@ def test_image_to_rgb01_accepts_single_channel_and_rgba():
     assert rgb[0, 0].tolist() == pytest.approx([0.1, 0.2, 0.3])
 
 
+# 中文注释：验证 test_image_to_rgb01_rejects_invalid_shapes 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_image_to_rgb01_rejects_invalid_shapes():
     with pytest.raises(ValueError, match="unsupported image shape"):
         image_to_rgb01(np.zeros((1, 2, 3, 4), dtype=np.float32))
@@ -48,6 +52,7 @@ def test_image_to_rgb01_rejects_invalid_shapes():
         image_to_rgb01(np.zeros((0, 0), dtype=np.float32))
 
 
+# 中文注释：验证 test_resize_rgb01_and_pil_conversion_are_stable 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_resize_rgb01_and_pil_conversion_are_stable():
     image = np.random.default_rng(7).random((8, 6, 3), dtype=np.float32)
 
@@ -60,6 +65,7 @@ def test_resize_rgb01_and_pil_conversion_are_stable():
     assert pil.size == (5, 4)
 
 
+# 中文注释：验证 test_bchw_to_pil_images_preserves_batch_order 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_bchw_to_pil_images_preserves_batch_order():
     batch = np.zeros((2, 3, 4, 5), dtype=np.float32)
     batch[1, 0, :, :] = 1.0

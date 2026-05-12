@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 ExperimentBundle.test 相关逻辑。
 import { describe, expect, it } from "vitest";
 
 import { surrogateSupportedForAttack, victimSelectableForLaunch } from "./ExperimentStudioPage";

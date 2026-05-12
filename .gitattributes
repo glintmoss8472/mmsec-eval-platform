@@ -1,1 +1,2 @@
+# 文件说明：该文件属于项目工程，集中实现 .gitattributes 相关逻辑。
 *.sh text eol=lf

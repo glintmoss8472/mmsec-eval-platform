@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端业务工具，集中实现 runPresentation 相关逻辑。
 import { formatRiskLevel } from "./uiLabels";
 
 export interface RunPresentationLike {
@@ -9,6 +10,7 @@ export interface RunPresentationLike {
   risk_level?: string;
 }
 
+/** 中文注释：实现 isDemoRun 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 export function isDemoRun(run: RunPresentationLike): boolean {
   const dataset = `${String(run.dataset_name || "")} ${String(run.benchmark_tag || "")}`.toLowerCase();
   const modelText = `${String(run.model_adapter || "")} ${(run.victim_model_adapters || []).join(" ")}`.toLowerCase();
@@ -24,6 +26,7 @@ export function isDemoRun(run: RunPresentationLike): boolean {
   );
 }
 
+/** 中文注释：实现 riskText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 export function riskText(level: string | undefined, emptyText = "暂无风险结论"): string {
   if (!level) return emptyText;
   const raw = String(level).trim().toLowerCase();
@@ -42,6 +45,7 @@ export function riskText(level: string | undefined, emptyText = "暂无风险结
   return formatted;
 }
 
+/** 中文注释：实现 riskTone 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 export function riskTone(level: string | undefined): "red" | "orange" | "green" {
   const formatted = formatRiskLevel(String(level || ""));
   if (formatted.includes("高")) return "red";
@@ -49,6 +53,7 @@ export function riskTone(level: string | undefined): "red" | "orange" | "green" 
   return "green";
 }
 
+/** 中文注释：实现 riskBucket 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 export function riskBucket(level: string | undefined): "low" | "medium" | "high" {
   const tone = riskTone(level);
   if (tone === "red") return "high";
@@ -56,6 +61,7 @@ export function riskBucket(level: string | undefined): "low" | "medium" | "high"
   return "low";
 }
 
+/** 中文注释：实现 isHighRisk 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 export function isHighRisk(level: string | undefined): boolean {
   return riskBucket(level) === "high";
 }

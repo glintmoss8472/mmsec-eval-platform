@@ -1,3 +1,4 @@
+# 文件说明：该文件属于模型适配层，集中实现 remote common 相关逻辑。
 from __future__ import annotations
 
 import base64
@@ -11,6 +12,7 @@ import numpy as np
 from mmsec_eval.model_adapters.image_utils import image_to_pil_rgb
 
 
+# 中文注释：实现 encode_image_b64 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def encode_image_b64(image: np.ndarray, *, image_format: str = "PNG") -> str:
     pil = image_to_pil_rgb(image)
     buf = BytesIO()
@@ -18,6 +20,7 @@ def encode_image_b64(image: np.ndarray, *, image_format: str = "PNG") -> str:
     return base64.b64encode(buf.getvalue()).decode("ascii")
 
 
+# 中文注释：实现 extract_json_payload 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def extract_json_payload(text: str) -> dict[str, Any]:
     raw = str(text or "").strip()
     if not raw:
@@ -42,6 +45,7 @@ def extract_json_payload(text: str) -> dict[str, Any]:
     return payload
 
 
+# 中文注释：实现 normalize_score 的核心流程，支撑模型适配层中的业务语义和异常边界。
 def normalize_score(value: Any, default: float = 0.0) -> float:
     try:
         score = float(value)

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于项目工程，集中实现 runtime 相关逻辑。
 from __future__ import annotations
 
 import os
@@ -15,6 +16,7 @@ from mmsec_eval.config.schema import BootstrapConfig
 from mmsec_eval.plugins.builtin import register_builtin_plugins
 
 
+# 中文注释：封装 _load_bootstrap_config 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _load_bootstrap_config() -> BootstrapConfig:
     if os.getenv("MMSEC_BOOTSTRAP_ENABLED", "").strip() in {"0", "false", "False"}:
         cfg = BootstrapConfig()
@@ -27,6 +29,7 @@ def _load_bootstrap_config() -> BootstrapConfig:
         return BootstrapConfig()
 
 
+# 中文注释：实现 ensure_app_runtime 的核心流程，支撑项目工程中的业务语义和异常边界。
 def ensure_app_runtime(
     app: FastAPI,
     *,

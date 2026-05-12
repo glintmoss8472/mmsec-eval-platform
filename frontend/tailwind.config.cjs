@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端工程配置，集中实现 tailwind.config 相关逻辑。
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],

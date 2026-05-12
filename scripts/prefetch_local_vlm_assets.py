@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 prefetch local vlm assets 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -18,6 +19,7 @@ MODEL_MAP = local_vlm_model_map()
 DEFAULT_MODELS = ",".join(MODEL_MAP)
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", default="artifacts/local_vlm")

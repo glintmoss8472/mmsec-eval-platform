@@ -1,3 +1,4 @@
+# 文件说明：该文件属于项目工程，集中实现 vqa dialogue benchmark 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -7,6 +8,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
+# 中文注释：定义 InteractionCaseResult 的结构化职责，作为项目工程中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class InteractionCaseResult:
     case_id: str
@@ -21,6 +23,7 @@ class InteractionCaseResult:
     semantic_preserved: bool
 
 
+# 中文注释：封装 _extract_text 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _extract_text(output: str | dict[str, Any]) -> str:
     if isinstance(output, dict):
         for key in ("answer", "decision", "text", "content", "response"):
@@ -41,6 +44,7 @@ def _extract_text(output: str | dict[str, Any]) -> str:
     return str(data)
 
 
+# 中文注释：实现 normalize_answer 的核心流程，支撑项目工程中的业务语义和异常边界。
 def normalize_answer(answer: str | dict[str, Any]) -> str:
     text = _extract_text(answer).strip().lower()
     text = re.sub(r"\s+", " ", text)
@@ -48,6 +52,7 @@ def normalize_answer(answer: str | dict[str, Any]) -> str:
     return text.strip()
 
 
+# 中文注释：封装 _matches_any 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _matches_any(answer: str, candidates: Iterable[str]) -> bool:
     normalized = normalize_answer(answer)
     if not normalized:
@@ -59,11 +64,13 @@ def _matches_any(answer: str, candidates: Iterable[str]) -> bool:
     return False
 
 
+# 中文注释：封装 _contains_all 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _contains_all(answer: str, required_tokens: Iterable[str]) -> bool:
     normalized = normalize_answer(answer)
     return all(normalize_answer(token) in normalized for token in required_tokens if normalize_answer(token))
 
 
+# 中文注释：实现 evaluate_interaction_case 的核心流程，支撑项目工程中的业务语义和异常边界。
 def evaluate_interaction_case(row: dict[str, Any]) -> InteractionCaseResult:
     clean_answer = normalize_answer(row.get("clean_output", ""))
     attacked_answer = normalize_answer(row.get("attacked_output", ""))
@@ -89,10 +96,12 @@ def evaluate_interaction_case(row: dict[str, Any]) -> InteractionCaseResult:
     )
 
 
+# 中文注释：实现 evaluate_interaction_cases 的核心流程，支撑项目工程中的业务语义和异常边界。
 def evaluate_interaction_cases(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     return [evaluate_interaction_case(row).__dict__ for row in rows]
 
 
+# 中文注释：实现 summarize_interaction_cases 的核心流程，支撑项目工程中的业务语义和异常边界。
 def summarize_interaction_cases(results: Iterable[dict[str, Any]]) -> dict[str, Any]:
     rows = list(results)
     total = len(rows)
@@ -111,6 +120,7 @@ def summarize_interaction_cases(results: Iterable[dict[str, Any]]) -> dict[str, 
     }
 
 
+# 中文注释：实现 load_interaction_cases 的核心流程，支撑项目工程中的业务语义和异常边界。
 def load_interaction_cases(path: str | Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for line in Path(path).read_text(encoding="utf-8").splitlines():

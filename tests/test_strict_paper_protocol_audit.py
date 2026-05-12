@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test strict paper protocol audit 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -6,6 +7,7 @@ import sys
 from pathlib import Path
 
 
+# 中文注释：验证 test_strict_paper_protocol_audit_blocks_when_assets_are_missing 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_strict_paper_protocol_audit_blocks_when_assets_are_missing(tmp_path: Path) -> None:
     project_root = tmp_path / "project"
     advclip_root = tmp_path / "AdvCLIP"

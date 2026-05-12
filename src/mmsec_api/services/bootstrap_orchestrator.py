@@ -1,3 +1,4 @@
+# 文件说明：该文件属于后端业务服务，集中实现 bootstrap orchestrator 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -17,6 +18,7 @@ from mmsec_eval.config.schema import BootstrapConfig
 FAKE_MODEL_ADAPTERS = {"dummy", "fixture_vlm"}
 
 
+# 中文注释：封装 _iter_model_markers 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _iter_model_markers(payload: Any) -> list[str]:
     if isinstance(payload, dict):
         markers: list[str] = []
@@ -42,10 +44,12 @@ def _iter_model_markers(payload: Any) -> list[str]:
     return []
 
 
+# 中文注释：封装 _is_fake_model_payload 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _is_fake_model_payload(payload: Any) -> bool:
     return any(marker.lower() in FAKE_MODEL_ADAPTERS for marker in _iter_model_markers(payload))
 
 
+# 中文注释：定义 _Step 的结构化职责，作为后端业务服务中状态、配置或行为的边界。
 @dataclass
 class _Step:
     name: str
@@ -53,6 +57,7 @@ class _Step:
     message: str = ""
     updated_at: str = ""
 
+    # 中文注释：实现 _Step.as_dict 的核心行为，维护后端业务服务在该对象上的调用契约。
     def as_dict(self) -> dict[str, str]:
         return {
             "name": self.name,
@@ -62,9 +67,11 @@ class _Step:
         }
 
 
+# 中文注释：定义 BootstrapOrchestrator 的结构化职责，作为后端业务服务中状态、配置或行为的边界。
 class BootstrapOrchestrator:
     """Prepare seed artifacts immediately and queue warm-up jobs in background."""
 
+    # 中文注释：封装 BootstrapOrchestrator.__init__ 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def __init__(
         self,
         *,
@@ -114,6 +121,7 @@ class BootstrapOrchestrator:
                 step.message = "disabled by config"
                 step.updated_at = now
 
+    # 中文注释：实现 BootstrapOrchestrator.start_async 的核心行为，维护后端业务服务在该对象上的调用契约。
     def start_async(self) -> None:
         with self._lock:
             if self._thread and self._thread.is_alive():
@@ -123,6 +131,7 @@ class BootstrapOrchestrator:
             self._thread = threading.Thread(target=self._run, name="bootstrap-orchestrator", daemon=True)
             self._thread.start()
 
+    # 中文注释：实现 BootstrapOrchestrator.retry 的核心行为，维护后端业务服务在该对象上的调用契约。
     def retry(self) -> bool:
         with self._lock:
             if self._thread and self._thread.is_alive():
@@ -145,6 +154,7 @@ class BootstrapOrchestrator:
             self._thread.start()
             return True
 
+    # 中文注释：实现 BootstrapOrchestrator.get_status 的核心行为，维护后端业务服务在该对象上的调用契约。
     def get_status(self) -> dict[str, Any]:
         with self._lock:
             return {
@@ -161,10 +171,12 @@ class BootstrapOrchestrator:
                 },
             }
 
+    # 中文注释：实现 BootstrapOrchestrator.get_logs 的核心行为，维护后端业务服务在该对象上的调用契约。
     def get_logs(self, limit: int = 200) -> list[dict[str, str]]:
         with self._lock:
             return list(self._logs[-max(1, limit) :])
 
+    # 中文注释：封装 BootstrapOrchestrator._log 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _log(self, level: str, message: str) -> None:
         row = {"ts": utc_now_iso(), "level": level, "message": message}
         with self._lock:
@@ -173,6 +185,7 @@ class BootstrapOrchestrator:
                 self._logs = self._logs[-self._max_logs :]
             self._updated_at = row["ts"]
 
+    # 中文注释：封装 BootstrapOrchestrator._set_state 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _set_state(self, state: BootstrapState, reason: str = "") -> None:
         with self._lock:
             self._state = state
@@ -180,6 +193,7 @@ class BootstrapOrchestrator:
                 self._degraded_reason = reason
             self._updated_at = utc_now_iso()
 
+    # 中文注释：封装 BootstrapOrchestrator._set_step 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _set_step(self, name: str, *, state: BootstrapStepState, message: str = "") -> None:
         with self._lock:
             step = self._steps[name]
@@ -188,6 +202,7 @@ class BootstrapOrchestrator:
             step.updated_at = utc_now_iso()
             self._updated_at = step.updated_at
 
+    # 中文注释：封装 BootstrapOrchestrator._run_step 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _run_step(self, name: str, fn: Callable[[], None], *, critical: bool = False) -> None:
         self._set_step(name, state="running")
         try:
@@ -205,6 +220,7 @@ class BootstrapOrchestrator:
                 with self._lock:
                     self._degraded_reason = f"{name}: {e}"
 
+    # 中文注释：封装 BootstrapOrchestrator._run 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _run(self) -> None:
         with self._lock:
             if not self._started_at:
@@ -234,6 +250,7 @@ class BootstrapOrchestrator:
         self._set_state("ready")
         self._log("info", "bootstrap ready")
 
+    # 中文注释：封装 BootstrapOrchestrator._seed_sync 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _seed_sync(self) -> None:
         seed_root = self.project_root / self.bootstrap.seed_dir
         if not seed_root.exists():
@@ -255,6 +272,7 @@ class BootstrapOrchestrator:
         self._seed_data(seed_root)
         self._set_step("seed_data", state="success")
 
+    # 中文注释：封装 BootstrapOrchestrator._copy_if_missing 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _copy_if_missing(self, src: Path, dst: Path) -> bool:
         if not src.exists():
             return False
@@ -264,6 +282,7 @@ class BootstrapOrchestrator:
         shutil.copy2(src, dst)
         return True
 
+    # 中文注释：封装 BootstrapOrchestrator._seed_docs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _seed_docs(self, seed_root: Path) -> None:
         src_docs = seed_root / "docs"
         if not src_docs.exists():
@@ -287,6 +306,7 @@ class BootstrapOrchestrator:
         else:
             self._log("info", "seed docs already present")
 
+    # 中文注释：封装 BootstrapOrchestrator._seed_runs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _seed_runs(self, seed_root: Path) -> None:
         src_runs = seed_root / "runs"
         if not src_runs.exists():
@@ -330,6 +350,7 @@ class BootstrapOrchestrator:
         else:
             self._log("info", "seed runs already present")
 
+    # 中文注释：封装 BootstrapOrchestrator._seed_data 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _seed_data(self, seed_root: Path) -> None:
         src_data = seed_root / "data"
         if not src_data.exists():
@@ -368,6 +389,7 @@ class BootstrapOrchestrator:
         else:
             self._log("info", "seed data already present")
 
+    # 中文注释：封装 BootstrapOrchestrator._has_job 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _has_job(self, *, job_type: str, config_path: str = "", statuses: set[str] | None = None) -> bool:
         statuses = statuses or {"queued", "running", "success", "failed", "cancelled"}
         page = 1
@@ -385,6 +407,7 @@ class BootstrapOrchestrator:
             page += 1
         return False
 
+    # 中文注释：封装 BootstrapOrchestrator._enqueue_job 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _enqueue_job(
         self,
         *,
@@ -405,6 +428,7 @@ class BootstrapOrchestrator:
         self._log("info", f"queued {job_type} ({config_path})")
         return str(job["id"])
 
+    # 中文注释：封装 BootstrapOrchestrator._queue_docs_ingest 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _queue_docs_ingest(self) -> None:
         if not self.bootstrap.auto_ingest_docs:
             self._set_step("queue_docs_ingest", state="skipped", message="配置已禁用")
@@ -414,6 +438,7 @@ class BootstrapOrchestrator:
             return
         self._enqueue_job(job_type="docs_ingest", config_path=self.bootstrap.docs_config)
 
+    # 中文注释：封装 BootstrapOrchestrator._queue_dataset_prepare 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _queue_dataset_prepare(self) -> None:
         if not self.bootstrap.auto_prepare_datasets:
             self._set_step("queue_dataset_prepare", state="skipped", message="配置已禁用")
@@ -456,6 +481,7 @@ class BootstrapOrchestrator:
         else:
             self._set_step("queue_dataset_prepare", state="skipped", message="已存在相同作业")
 
+    # 中文注释：封装 BootstrapOrchestrator._queue_benchmark_demo 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _queue_benchmark_demo(self) -> None:
         cfg = self.bootstrap.demo_benchmark_config
         if self._has_job(job_type="run_benchmark", config_path=cfg):
@@ -463,6 +489,7 @@ class BootstrapOrchestrator:
             return
         self._enqueue_job(job_type="run_benchmark", config_path=cfg, benchmark_mode=True)
 
+    # 中文注释：封装 BootstrapOrchestrator._queue_benchmark_public 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _queue_benchmark_public(self) -> None:
         if not self.bootstrap.auto_run_benchmark:
             self._set_step("queue_benchmark_public", state="skipped", message="配置已禁用")
@@ -473,6 +500,7 @@ class BootstrapOrchestrator:
             return
         self._enqueue_job(job_type="run_benchmark", config_path=cfg, benchmark_mode=True)
 
+    # 中文注释：封装 BootstrapOrchestrator._model_warmup 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _model_warmup(self) -> None:
         if not self.bootstrap.model_warmup:
             self._set_step("model_warmup", state="skipped", message="配置已禁用")

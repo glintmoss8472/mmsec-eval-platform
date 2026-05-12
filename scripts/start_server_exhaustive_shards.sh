@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 文件说明：该文件属于运维与实验脚本，集中实现 start server exhaustive shards 相关逻辑。
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -26,6 +27,7 @@ BACKEND_TIMEOUT="${MMSEC_EXHAUSTIVE_TIMEOUT_SECONDS:-86400}"
 POLL_SECONDS="${MMSEC_EXHAUSTIVE_POLL_SECONDS:-15}"
 RUNNER_BIN="${PROJECT_ROOT}/.venv/bin/python"
 
+# 中文注释：实现 wait_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 wait_backend() {
   local port="$1"
   "${RUNNER_BIN}" - <<PY
@@ -49,6 +51,7 @@ raise SystemExit(1)
 PY
 }
 
+# 中文注释：实现 start_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 start_backend() {
   local port="$1"
   local backend_artifacts="$2"
@@ -71,6 +74,7 @@ start_backend() {
   wait_backend "${port}"
 }
 
+# 中文注释：实现 start_runner 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 start_runner() {
   local api_base="$1"
   local shard_name="$2"

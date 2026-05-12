@@ -1,9 +1,11 @@
+# 文件说明：该文件属于TMM 迁移攻击模块，集中实现 losses 相关逻辑。
 from __future__ import annotations
 
 import torch
 import torch.nn.functional as F
 
 
+# 中文注释：实现 cosine_similarity 的核心流程，支撑TMM 迁移攻击模块中的业务语义和异常边界。
 def cosine_similarity(a: torch.Tensor, b: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
     a = a.float().reshape(a.shape[0], -1) if a.ndim > 1 else a.float().reshape(1, -1)
     b = b.float().reshape(b.shape[0], -1) if b.ndim > 1 else b.float().reshape(1, -1)
@@ -12,6 +14,7 @@ def cosine_similarity(a: torch.Tensor, b: torch.Tensor, eps: float = 1e-8) -> to
     return (a * b).sum(dim=-1)
 
 
+# 中文注释：实现 ssim_loss 的核心流程，支撑TMM 迁移攻击模块中的业务语义和异常边界。
 def ssim_loss(x: torch.Tensor, y: torch.Tensor, window: int = 11, eps: float = 1e-8) -> torch.Tensor:
     """Differentiable SSIM-like loss: 1 - SSIM (lower is better)."""
     if x.ndim != 4 or y.ndim != 4:
@@ -41,6 +44,7 @@ def ssim_loss(x: torch.Tensor, y: torch.Tensor, window: int = 11, eps: float = 1
     return 1.0 - ssim.mean()
 
 
+# 中文注释：实现 ogfh_lo 的核心流程，支撑TMM 迁移攻击模块中的业务语义和异常边界。
 def ogfh_lo(
     *,
     img_feat_adv: torch.Tensor,

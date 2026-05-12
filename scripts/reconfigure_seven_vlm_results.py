@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 reconfigure seven vlm results 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -18,6 +19,7 @@ if str(SRC_DIR) not in sys.path:
 from mmsec_eval.risk.scoring import compute_risk_score, normalize_direct  # noqa: E402
 
 
+# 中文注释：封装 _as_float 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _as_float(value: Any) -> float:
     try:
         return float(value or 0.0)
@@ -25,14 +27,17 @@ def _as_float(value: Any) -> float:
         return 0.0
 
 
+# 中文注释：封装 _avg_metric 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _avg_metric(payload: dict[str, Any], left: str, right: str) -> float:
     return 0.5 * (_as_float(payload.get(left)) + _as_float(payload.get(right)))
 
 
+# 中文注释：封装 _read_json 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 中文注释：封装 _iter_success_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _iter_success_rows(results_index: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for line in results_index.read_text(encoding="utf-8").splitlines():
@@ -45,6 +50,7 @@ def _iter_success_rows(results_index: Path) -> list[dict[str, Any]]:
     return rows
 
 
+# 中文注释：封装 _risk_from_conditional 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _risk_from_conditional(summary: dict[str, Any], conditional_asr: float, conditional: dict[str, Any]) -> dict[str, Any]:
     risk_node = summary.get("risk", {}) if isinstance(summary.get("risk"), dict) else {}
     old_breakdown = summary.get("risk_breakdown", {}) if isinstance(summary.get("risk_breakdown"), dict) else {}
@@ -71,6 +77,7 @@ def _risk_from_conditional(summary: dict[str, Any], conditional_asr: float, cond
     )
 
 
+# 中文注释：封装 _row_from_index 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _row_from_index(index_row: dict[str, Any], project_root: Path) -> dict[str, Any]:
     summary_path = project_root / str(index_row["summary"])
     summary = _read_json(summary_path)
@@ -125,6 +132,7 @@ def _row_from_index(index_row: dict[str, Any], project_root: Path) -> dict[str, 
     }
 
 
+# 中文注释：封装 _write_outputs 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _write_outputs(out_base: Path, rows: list[dict[str, Any]]) -> None:
     out_base.parent.mkdir(parents=True, exist_ok=True)
     payload = {
@@ -156,6 +164,7 @@ def _write_outputs(out_base: Path, rows: list[dict[str, Any]]) -> None:
     out_base.with_suffix(".md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+# 中文注释：封装 _backup_existing 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _backup_existing(run_dir: Path) -> None:
     tag = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     for suffix in (".csv", ".json", ".md"):
@@ -164,6 +173,7 @@ def _backup_existing(run_dir: Path) -> None:
             shutil.copy2(src, run_dir / f"effective_results_28.legacy_stage_error_{tag}{suffix}")
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("run_dir", type=Path)

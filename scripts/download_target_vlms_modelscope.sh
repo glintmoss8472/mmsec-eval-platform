@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 文件说明：该文件属于运维与实验脚本，集中实现 download target vlms modelscope 相关逻辑。
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -8,6 +9,7 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 mkdir -p "${OUT_ROOT}"
 
+# 中文注释：实现 download_model 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 download_model() {
   local repo_id="$1"
   local local_name="$2"

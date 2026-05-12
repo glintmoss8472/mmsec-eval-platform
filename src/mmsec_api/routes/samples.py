@@ -1,3 +1,4 @@
+# 文件说明：该文件属于后端接口路由，集中实现 samples 相关逻辑。
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -10,6 +11,7 @@ from mmsec_api.store.sqlite import SQLiteStore
 router = APIRouter(prefix="/api/v1/samples", tags=["samples"])
 
 
+# 中文注释：封装 _ensure_asset_index 的内部步骤，让后端接口路由主流程保持清晰并隔离边界细节。
 def _ensure_asset_index(artifacts_dir: str, store: SQLiteStore) -> None:
     # First request after migration backfills the independent asset table from
     # existing report/case artifacts. Later task completion paths upsert only
@@ -18,6 +20,7 @@ def _ensure_asset_index(artifacts_dir: str, store: SQLiteStore) -> None:
         sync_sample_assets_from_runs(artifacts_dir, store)
 
 
+# 中文注释：处理 list_sample_asset_batches 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
 @router.get("/batches")
 def list_sample_asset_batches(
     request: Request,
@@ -61,6 +64,7 @@ def list_sample_asset_batches(
     }
 
 
+# 中文注释：处理 list_sample_assets 对应的接口请求，并把后端接口路由结果整理为前端可消费的数据。
 @router.get("")
 def list_sample_assets(
     request: Request,

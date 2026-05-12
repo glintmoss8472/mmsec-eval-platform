@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test runtime env 相关逻辑。
 from __future__ import annotations
 
 import os
@@ -7,6 +8,7 @@ from mmsec_eval.model_adapters.local_vlm_catalog import LOCAL_OPENAI_COMPAT_MODE
 from mmsec_eval.runtime import apply_config_env, apply_local_vlm_env_defaults
 
 
+# 中文注释：验证 test_apply_config_env_sets_common_model_and_adapter_settings 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_apply_config_env_sets_common_model_and_adapter_settings(monkeypatch):
     cfg = load_config("configs/mvp.yaml")
     monkeypatch.setattr(cfg.model, "http_endpoint", "http://127.0.0.1:9999/score")
@@ -29,6 +31,7 @@ def test_apply_config_env_sets_common_model_and_adapter_settings(monkeypatch):
     assert os.environ["MMSEC_LLM_ENDPOINT"] == "http://127.0.0.1:9998"
 
 
+# 中文注释：验证 test_apply_local_vlm_env_defaults_preserves_overrides_and_can_set_api_fields 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_apply_local_vlm_env_defaults_preserves_overrides_and_can_set_api_fields(monkeypatch):
     first = LOCAL_OPENAI_COMPAT_MODEL_SPECS[0]
     monkeypatch.setenv(first.endpoint_env, "http://127.0.0.1:19999/v1")

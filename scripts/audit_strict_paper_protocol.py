@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 audit strict paper protocol 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -44,15 +45,18 @@ TMM_TARGET_MODELS = ["ALBEF", "TCL", "X-VLM", "ViLT", "METER", "BLIP", "CLIP_ViT
 TMM_TASKS = ["VLR:flickr30k", "VLR:mscoco", "VG:refcoco+", "VE:snli-ve"]
 
 
+# 中文注释：封装 _now_tag 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _now_tag() -> str:
     return datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
 
 
+# 中文注释：封装 _write_json 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 中文注释：封装 _rel 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _rel(path: Path, root: Path) -> str:
     try:
         return path.resolve().relative_to(root.resolve()).as_posix()
@@ -60,10 +64,12 @@ def _rel(path: Path, root: Path) -> str:
         return str(path)
 
 
+# 中文注释：封装 _exists 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _exists(path: Path) -> bool:
     return path.exists()
 
 
+# 中文注释：封装 _file_status 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _file_status(root: Path, relative_path: str, *, required: bool = True) -> dict[str, Any]:
     path = root / relative_path
     return {
@@ -75,6 +81,7 @@ def _file_status(root: Path, relative_path: str, *, required: bool = True) -> di
     }
 
 
+# 中文注释：封装 _default_advclip_root 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _default_advclip_root(project_root: Path) -> Path:
     candidates = [
         project_root / "third_party" / "papers" / "AdvCLIP",
@@ -88,6 +95,7 @@ def _default_advclip_root(project_root: Path) -> Path:
     return candidates[0]
 
 
+# 中文注释：封装 _default_tmm_root 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _default_tmm_root(project_root: Path) -> Path:
     candidates = [
         project_root / "third_party" / "papers" / "TMM",
@@ -101,6 +109,7 @@ def _default_tmm_root(project_root: Path) -> Path:
     return candidates[0]
 
 
+# 中文注释：封装 _git_commit 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _git_commit(path: Path) -> str:
     try:
         out = subprocess.check_output(
@@ -113,6 +122,7 @@ def _git_commit(path: Path) -> str:
         return ""
 
 
+# 中文注释：封装 _python_compile_probe 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _python_compile_probe(files: list[Path]) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     for file in files:
@@ -136,16 +146,19 @@ def _python_compile_probe(files: list[Path]) -> list[dict[str, Any]]:
     return results
 
 
+# 中文注释：封装 _read_text_if_exists 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _read_text_if_exists(path: Path) -> str:
     if not path.exists():
         return ""
     return path.read_text(encoding="utf-8", errors="ignore")
 
 
+# 中文注释：封装 _contains 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _contains(path: Path, needle: str) -> bool:
     return needle in _read_text_if_exists(path)
 
 
+# 中文注释：封装 _advclip_code_and_dataset_status 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _advclip_code_and_dataset_status(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     code_files = [
         "advclip.py",
@@ -167,6 +180,7 @@ def _advclip_code_and_dataset_status(root: Path) -> tuple[list[dict[str, Any]], 
     return code_status, dataset_status
 
 
+# 中文注释：封装 _advclip_trained_artifacts 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _advclip_trained_artifacts(root: Path) -> list[dict[str, Any]]:
     trained_artifacts: list[dict[str, Any]] = []
     for victim in ADVCLIP_VICTIMS:
@@ -204,6 +218,7 @@ def _advclip_trained_artifacts(root: Path) -> list[dict[str, Any]]:
     return trained_artifacts
 
 
+# 中文注释：封装 _advclip_source_findings 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _advclip_source_findings(root: Path) -> list[str]:
     source_findings = []
     if _contains(root / "advclip.py", 'default="cuda:1"'):
@@ -222,6 +237,7 @@ def _advclip_source_findings(root: Path) -> list[str]:
     return source_findings
 
 
+# 中文注释：实现 audit_advclip 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 def audit_advclip(root: Path) -> dict[str, Any]:
     code_status, dataset_status = _advclip_code_and_dataset_status(root)
     trained_artifacts = _advclip_trained_artifacts(root)
@@ -264,6 +280,7 @@ def audit_advclip(root: Path) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _tmm_code_dataset_checkpoint_status 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _tmm_code_dataset_checkpoint_status(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     code_files = [
         "EvalTransferAttack.py",
@@ -305,6 +322,7 @@ def _tmm_code_dataset_checkpoint_status(root: Path) -> tuple[list[dict[str, Any]
     return code_status, dataset_status, checkpoint_status
 
 
+# 中文注释：封装 _tmm_source_findings 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _tmm_source_findings(root: Path) -> list[str]:
     source_findings = []
     eval_file = root / "EvalTransferAttack.py"
@@ -331,6 +349,7 @@ def _tmm_source_findings(root: Path) -> list[str]:
     return source_findings
 
 
+# 中文注释：实现 audit_tmm 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 def audit_tmm(root: Path) -> dict[str, Any]:
     code_status, dataset_status, checkpoint_status = _tmm_code_dataset_checkpoint_status(root)
     source_findings = _tmm_source_findings(root)
@@ -366,6 +385,7 @@ def audit_tmm(root: Path) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _advclip_runbook 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _advclip_runbook(root: Path) -> str:
     lines = [
         "#!/usr/bin/env bash",
@@ -410,6 +430,7 @@ def _advclip_runbook(root: Path) -> str:
     return "\n".join(lines)
 
 
+# 中文注释：封装 _tmm_runbook 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _tmm_runbook(root: Path) -> str:
     lines = [
         "#!/usr/bin/env bash",
@@ -441,6 +462,7 @@ def _tmm_runbook(root: Path) -> str:
     return "\n".join(lines)
 
 
+# 中文注释：封装 _write_report 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _write_report(out_dir: Path, payload: dict[str, Any]) -> None:
     lines = [
         "# Strict Paper Reproduction Audit",
@@ -492,6 +514,7 @@ def _write_report(out_dir: Path, payload: dict[str, Any]) -> None:
     (out_dir / "strict_paper_reproduction_audit.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Audit strict original-paper reproduction prerequisites for AdvCLIP and TMM.")
     parser.add_argument("--project-root", default=str(PROJECT_ROOT))

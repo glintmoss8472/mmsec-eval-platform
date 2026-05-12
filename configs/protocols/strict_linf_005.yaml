@@ -1,3 +1,4 @@
+# 文件说明：该文件属于实验配置，集中实现 strict linf 005 相关逻辑。
 seed: 20260502
 device_preference: "cuda"
 artifacts_dir: "artifacts"

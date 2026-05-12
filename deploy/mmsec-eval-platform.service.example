@@ -1,3 +1,4 @@
+# 文件说明：该文件属于部署模板，集中实现 mmsec eval platform.service 相关逻辑。
 [Unit]
 Description=mmsec-eval-platform API service
 After=network-online.target

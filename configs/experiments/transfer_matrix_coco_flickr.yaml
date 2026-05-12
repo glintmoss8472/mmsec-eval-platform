@@ -1,3 +1,4 @@
+# 文件说明：该文件属于实验配置，集中实现 transfer matrix coco flickr 相关逻辑。
 schema_version: 1
 experiment_id: "transfer_matrix_coco_flickr"
 title: "COCO 与 Flickr30K 多模型迁移矩阵"

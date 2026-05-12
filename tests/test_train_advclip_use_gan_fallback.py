@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test train advclip use gan fallback 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -11,6 +12,7 @@ from mmsec_eval.io.jsonl_io import read_jsonl
 from mmsec_eval.plugins.builtin import register_builtin_plugins
 
 
+# 中文注释：验证 test_train_advclip_use_gan 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_train_advclip_use_gan(tmp_path: Path) -> None:
     register_builtin_plugins()
 

@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 GlossaryPage 相关逻辑。
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -77,6 +78,7 @@ const CURATED_ENTRY_IDS = new Set([
   "dataset-mini-flickr",
 ]);
 
+/** 中文注释：实现 useActiveAnchor 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function useActiveAnchor() {
   const location = useLocation();
   const [activeAnchor, setActiveAnchor] = useState("");
@@ -98,16 +100,19 @@ function useActiveAnchor() {
   return activeAnchor;
 }
 
+/** 中文注释：实现 shortParagraphs 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function shortParagraphs(entry: GlossaryEntry) {
   return entry.detailSections
     .slice(0, 1)
     .flatMap((section) => section.paragraphs.slice(0, 2));
 }
 
+/** 中文注释：实现 shouldRenderFormula 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function shouldRenderFormula(entry: GlossaryEntry) {
   return entry.category === "metric" || entry.category === "parameter";
 }
 
+/** 中文注释：实现 GlossaryEntryCard 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function GlossaryEntryCard({ entry, active }: { entry: GlossaryEntry; active: boolean }) {
   const shortCopy = shortParagraphs(entry);
   const formulaBlocks = shouldRenderFormula(entry) ? entry.formulaBlocks ?? [] : [];

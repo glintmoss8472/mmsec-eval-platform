@@ -1,3 +1,4 @@
+# 文件说明：该文件属于AdvEDM 攻击模块，集中实现 attack 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -14,6 +15,7 @@ from mmsec_eval.plugins.base import AttackPlugin
 from mmsec_eval.types import AttackContext, AttackedSample, Sample
 
 
+# 中文注释：定义 _ADVEDMModeConfig 的结构化职责，作为AdvEDM 攻击模块中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class _ADVEDMModeConfig:
     variant: str
@@ -25,6 +27,7 @@ class _ADVEDMModeConfig:
     steps: int
 
 
+# 中文注释：封装 _mode_config 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _mode_config(cfg, *, mode: str, steps: int) -> _ADVEDMModeConfig:
     if mode == "A":
         return _ADVEDMModeConfig(
@@ -47,6 +50,7 @@ def _mode_config(cfg, *, mode: str, steps: int) -> _ADVEDMModeConfig:
     )
 
 
+# 中文注释：封装 _debug_artifacts 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _debug_artifacts(
     *,
     ctx: AttackContext,
@@ -70,6 +74,7 @@ def _debug_artifacts(
     )
 
 
+# 中文注释：封装 _make_advedm_sample 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _make_advedm_sample(sample: Sample, adv: np.ndarray, *, mode: str, variant: str, objective: str) -> Sample:
     adv_sample = Sample(
         sample_id=sample.sample_id,
@@ -85,6 +90,7 @@ def _make_advedm_sample(sample: Sample, adv: np.ndarray, *, mode: str, variant: 
     return adv_sample
 
 
+# 中文注释：封装 _attack_metadata 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _attack_metadata(
     *,
     mode_cfg: _ADVEDMModeConfig,
@@ -113,6 +119,7 @@ def _attack_metadata(
     }
 
 
+# 中文注释：定义 ADVEDMAttack 的结构化职责，作为AdvEDM 攻击模块中状态、配置或行为的边界。
 class ADVEDMAttack(AttackPlugin):
     """AdvEDM-inspired fine-grained attack with A/B variants.
 
@@ -120,6 +127,7 @@ class ADVEDMAttack(AttackPlugin):
     - Mode B -> AdvEDM-A (semantic addition)
     """
 
+    # 中文注释：实现 ADVEDMAttack.attack 的核心行为，维护AdvEDM 攻击模块在该对象上的调用契约。
     def attack(self, sample: Sample, ctx: AttackContext) -> AttackedSample:
         cfg = ctx.config.attack
         mode = str(cfg.mode).upper()
@@ -199,6 +207,7 @@ class ADVEDMAttack(AttackPlugin):
             ),
         )
 
+# 中文注释：封装 _write_debug_artifacts 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _write_debug_artifacts(
     sample_debug_dir: str,
     scores: np.ndarray,

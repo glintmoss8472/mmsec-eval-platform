@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端工程配置，集中实现 vite.config 相关逻辑。
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 

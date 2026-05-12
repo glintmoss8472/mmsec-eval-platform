@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端组件，集中实现 DismissiblePanel 相关逻辑。
 import type { ReactNode } from "react";
 
 import { useDismissible } from "../hooks/useDismissible";
@@ -10,6 +11,7 @@ type DismissiblePanelProps = {
   as?: "section" | "div" | "article";
 };
 
+/** 中文注释：实现 DismissiblePanel 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 export function DismissiblePanel({
   id,
   label,

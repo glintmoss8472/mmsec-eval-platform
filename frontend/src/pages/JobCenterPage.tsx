@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 JobCenterPage 相关逻辑。
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 
@@ -14,10 +15,12 @@ type StageView = {
   flow_message?: string;
 };
 
+/** 中文注释：实现 isRunning 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function isRunning(status?: string) {
   return status === "running" || status === "queued";
 }
 
+/** 中文注释：实现 etaLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function etaLabel(status?: string, seconds?: number) {
   if (status === "success") return "已完成";
   if (status === "failed" || status === "cancelled") return "已结束";
@@ -25,6 +28,7 @@ function etaLabel(status?: string, seconds?: number) {
   return `${Math.max(1, Math.round(seconds / 60))} 分钟`;
 }
 
+/** 中文注释：实现 parseOverride 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function parseOverride(raw?: string): Record<string, unknown> {
   if (!raw) return {};
   try {
@@ -35,10 +39,12 @@ function parseOverride(raw?: string): Record<string, unknown> {
   }
 }
 
+/** 中文注释：实现 nestedRecord 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function nestedRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null ? value as Record<string, unknown> : {};
 }
 
+/** 中文注释：实现 inferAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function inferAttack(job?: { config_path?: string; override_json?: string }) {
   const override = parseOverride(job?.override_json);
   const attack = nestedRecord(override.plugins).attack || nestedRecord(override.attack).name;
@@ -50,10 +56,12 @@ function inferAttack(job?: { config_path?: string; override_json?: string }) {
   return "";
 }
 
+/** 中文注释：实现 isSampleGenerationOnlyJob 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function isSampleGenerationOnlyJob(job?: { job_type?: string; override_json?: string }): boolean {
   return workflowType(job) === "sample_generation_only" || job?.job_type === "generate_sample_assets";
 }
 
+/** 中文注释：实现 inferModel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function inferModel(job?: { config_path?: string; job_type?: string; override_json?: string }) {
   if (isSampleGenerationOnlyJob(job)) return "";
   const override = parseOverride(job?.override_json);
@@ -69,12 +77,14 @@ function inferModel(job?: { config_path?: string; job_type?: string; override_js
   return "";
 }
 
+/** 中文注释：实现 inferCurrentVictim 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function inferCurrentVictim(message?: string): string {
   const text = String(message || "");
   const match = text.match(/(openai_[a-z0-9_]+|clip_hf|blip_itm|vilt_itm)/i);
   return match ? match[1] : "";
 }
 
+/** 中文注释：实现 inferSampleTotal 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function inferSampleTotal(
   job?: { override_json?: string },
   stages?: Array<{ message?: string }>,
@@ -89,6 +99,7 @@ function inferSampleTotal(
   return Number(dataset.max_items || runner.max_samples || 0) || 0;
 }
 
+/** 中文注释：实现 uiTaskName 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function uiTaskName(job?: { job_type?: string; override_json?: string }, model?: string, attack?: string): string {
   if (!job) return "暂无任务";
   const override = parseOverride(job.override_json);
@@ -101,12 +112,14 @@ function uiTaskName(job?: { job_type?: string; override_json?: string }, model?:
   return formatJobType(job.job_type || "run_eval");
 }
 
+/** 中文注释：实现 workflowType 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function workflowType(job?: { override_json?: string }): string {
   const override = parseOverride(job?.override_json);
   const extra = nestedRecord(override.extra);
   return String(extra.workflow_type || "");
 }
 
+/** 中文注释：实现 inferWorkflow 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function inferWorkflow(job?: { job_type?: string; override_json?: string }): string {
   if (isSampleGenerationOnlyJob(job)) return "待测评样本生成任务";
   const workflow = workflowType(job);
@@ -116,6 +129,7 @@ function inferWorkflow(job?: { job_type?: string; override_json?: string }): str
   return "自动化测评任务";
 }
 
+/** 中文注释：实现 metricTaskName 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function metricTaskName(value: string): string {
   const text = String(value || "").trim();
   const lower = text.toLowerCase();
@@ -127,6 +141,7 @@ function metricTaskName(value: string): string {
   return text || "暂无任务";
 }
 
+/** 中文注释：实现 statusDetailLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function statusDetailLabel(status?: string): string {
   if (status === "failed") return "失败原因：";
   if (status === "cancelled") return "取消原因：";
@@ -134,6 +149,7 @@ function statusDetailLabel(status?: string): string {
   return "当前正在执行：";
 }
 
+/** 中文注释：实现 statusDetailMessage 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function statusDetailMessage(
   status: string | undefined,
   currentStageMessage: string | undefined,
@@ -152,10 +168,12 @@ function statusDetailMessage(
   return formatBackendMessage(currentStageMessage || selectedJob?.error_message || "等待后端状态");
 }
 
+/** 中文注释：实现 findStageState 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function findStageState(stages: Array<{ stage_key?: string; state?: string; progress_percent?: number }>, key: string): string {
   return stages.find((stage) => stage.stage_key === key)?.state || "pending";
 }
 
+/** 中文注释：实现 phaseState 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function phaseState(
   stages: Array<{ stage_key?: string; state?: string; progress_percent?: number }>,
   keys: string[],
@@ -169,6 +187,7 @@ function phaseState(
   return fallback;
 }
 
+/** 中文注释：实现 phaseProgress 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function phaseProgress(stages: Array<{ stage_key?: string; progress_percent?: number }>, keys: string[], fallback = 0): number {
   const values = keys
     .map((key) => Number(stages.find((stage) => stage.stage_key === key)?.progress_percent))
@@ -177,6 +196,7 @@ function phaseProgress(stages: Array<{ stage_key?: string; progress_percent?: nu
   return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
 }
 
+/** 中文注释：实现 statusByJob 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function statusByJob(status?: string): string {
   if (status === "success") return "success";
   if (status === "failed") return "failed";
@@ -184,10 +204,12 @@ function statusByJob(status?: string): string {
   return "pending";
 }
 
+/** 中文注释：实现 isGenerationJob 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function isGenerationJob(jobType?: string): boolean {
   return ["run_vqa", "run_caption"].includes(String(jobType || ""));
 }
 
+/** 中文注释：实现 phaseProgressForState 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function phaseProgressForState(
   stages: Array<{ stage_key?: string; progress_percent?: number }>,
   keys: string[],
@@ -198,6 +220,7 @@ function phaseProgressForState(
   return phaseProgress(stages, keys, fallback);
 }
 
+/** 中文注释：实现 phaseStateWithFailure 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function phaseStateWithFailure(
   stages: Array<{ stage_key?: string; state?: string; progress_percent?: number }>,
   keys: string[],
@@ -214,6 +237,7 @@ function phaseStateWithFailure(
   return state;
 }
 
+/** 中文注释：实现 buildDisplayStages 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function buildDisplayStages(
   stages: Array<{ stage_key?: string; state?: string; progress_percent?: number }>,
   jobStatus: string | undefined,

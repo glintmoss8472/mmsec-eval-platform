@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test vlr metrics 相关逻辑。
 from __future__ import annotations
 
 import numpy as np
@@ -14,6 +15,7 @@ from mmsec_eval.retrieval.metrics import (
 from mmsec_eval.types import Sample
 
 
+# 中文注释：验证 test_vlr_metrics_perfect_retrieval 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_vlr_metrics_perfect_retrieval():
     # Two images, two captions each.
     img0 = np.zeros((4, 4, 3), dtype=np.float32)
@@ -52,6 +54,7 @@ def test_vlr_metrics_perfect_retrieval():
     assert metrics["mean_rank_tr"] == 1.0
 
 
+# 中文注释：封装 _bruteforce_recall_t2i 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _bruteforce_recall_t2i(sim_t2i: np.ndarray, gt_img_idx: np.ndarray, k: int) -> float:
     sim = np.asarray(sim_t2i, dtype=np.float32)
     gt = np.asarray(gt_img_idx, dtype=np.int64)
@@ -62,6 +65,7 @@ def _bruteforce_recall_t2i(sim_t2i: np.ndarray, gt_img_idx: np.ndarray, k: int) 
     return float(hit / max(1, sim.shape[0]))
 
 
+# 中文注释：封装 _bruteforce_recall_i2t 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _bruteforce_recall_i2t(sim_i2t: np.ndarray, gt_txt_idxs: list[list[int]], k: int) -> float:
     sim = np.asarray(sim_i2t, dtype=np.float32)
     hit = 0
@@ -72,6 +76,7 @@ def _bruteforce_recall_i2t(sim_i2t: np.ndarray, gt_txt_idxs: list[list[int]], k:
     return float(hit / max(1, sim.shape[0]))
 
 
+# 中文注释：验证 test_vlr_recall_matches_bruteforce 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_vlr_recall_matches_bruteforce():
     rng = np.random.default_rng(7)
     sim_t2i = rng.normal(size=(11, 7)).astype(np.float32)
@@ -92,6 +97,7 @@ def test_vlr_recall_matches_bruteforce():
         assert abs(got_i2t[k] - _bruteforce_recall_i2t(sim_i2t, gt_txt_idxs, k)) < 1e-9
 
 
+# 中文注释：验证 test_conditional_attack_metrics_only_count_clean_successes 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_conditional_attack_metrics_only_count_clean_successes():
     img0 = np.zeros((4, 4, 3), dtype=np.float32)
     img1 = np.ones((4, 4, 3), dtype=np.float32)
@@ -135,6 +141,7 @@ def test_conditional_attack_metrics_only_count_clean_successes():
     assert got["tr_rank_delta_mean"] > 0.0
 
 
+# 中文注释：验证 test_mean_rank_is_tie_aware_for_flat_scores 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_mean_rank_is_tie_aware_for_flat_scores():
     img0 = np.zeros((4, 4, 3), dtype=np.float32)
     img1 = np.ones((4, 4, 3), dtype=np.float32)

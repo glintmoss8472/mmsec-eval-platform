@@ -1,3 +1,4 @@
+# 文件说明：该文件属于后端业务服务，集中实现 system overview 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -22,6 +23,7 @@ from mmsec_eval.plugins.registry import list_plugins
 from mmsec_eval.runtime import torch_install_command
 
 
+# 中文注释：封装 _torch_info 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _torch_info() -> dict[str, Any]:
     try:
         import torch  # type: ignore
@@ -40,6 +42,7 @@ def _torch_info() -> dict[str, Any]:
         return {"installed": False, "error": str(e)}
 
 
+# 中文注释：封装 _git_value 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _git_value(repo: Path, args: list[str]) -> str:
     if not repo.exists():
         return ""
@@ -58,6 +61,7 @@ def _git_value(repo: Path, args: list[str]) -> str:
         return ""
 
 
+# 中文注释：封装 _repo_entry 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _repo_entry(project_root: Path, rel_path: str) -> dict[str, Any]:
     p = project_root / rel_path
     return {
@@ -69,6 +73,7 @@ def _repo_entry(project_root: Path, rel_path: str) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _deployment_version_info 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _deployment_version_info(project_root: Path) -> dict[str, str]:
     path = project_root / "deployment_version.json"
     data = read_json(path, {})
@@ -82,6 +87,7 @@ def _deployment_version_info(project_root: Path) -> dict[str, str]:
     }
 
 
+# 中文注释：封装 _source_docs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _source_docs(project_root: Path) -> dict[str, Any]:
     taskbook_extract = project_root / "artifacts" / "taskbook_reextract_20260214.txt"
     taskbook_extract_old = project_root / "artifacts" / "taskbook_extracted.txt"
@@ -109,6 +115,7 @@ def _source_docs(project_root: Path) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _runtime_info 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _runtime_info() -> dict[str, Any]:
     return {
         "current_device": os.getenv("MMSEC_RUNTIME_DEVICE", "cuda"),
@@ -117,6 +124,7 @@ def _runtime_info() -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _build_runtime_identity 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _build_runtime_identity() -> dict[str, Any]:
     runtime_context = str(os.getenv("MMSEC_RUNTIME_CONTEXT", "") or "").strip()
     runtime_profile = str(os.getenv("MMSEC_RUNTIME_PROFILE", "") or "").strip()
@@ -129,6 +137,7 @@ def _build_runtime_identity() -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _runtime_context 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _runtime_context(request: Request) -> tuple[Path, Path]:
     project_root = Path(__file__).resolve().parents[3]
     artifacts_dir = Path(getattr(request.app.state, "artifacts_dir", "artifacts")).resolve()
@@ -138,6 +147,7 @@ def _runtime_context(request: Request) -> tuple[Path, Path]:
 _ASR_METRIC_KEY_RE = re.compile(r"^(ir|tr)_asr@(\d+)$")
 
 
+# 中文注释：封装 _formal_metric_candidates 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _formal_metric_candidates(victim_compare: list[dict[str, Any]]) -> dict[int, list[tuple[str, float]]]:
     candidate_values: dict[int, list[tuple[str, float]]] = {}
     for item in victim_compare:
@@ -153,6 +163,7 @@ def _formal_metric_candidates(victim_compare: list[dict[str, Any]]) -> dict[int,
     return candidate_values
 
 
+# 中文注释：封装 _best_metric_k 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _best_metric_k(
     candidate_values: dict[int, list[tuple[str, float]]],
     target_value: float,
@@ -172,6 +183,7 @@ def _best_metric_k(
     return matched_k, matched_entries, best_gap
 
 
+# 中文注释：封装 _retrieval_direction_scope 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _retrieval_direction_scope(matched_entries: list[tuple[str, float]]) -> str:
     directions = sorted({direction for direction, _ in matched_entries})
     if directions == ["ir", "tr"]:
@@ -183,6 +195,7 @@ def _retrieval_direction_scope(matched_entries: list[tuple[str, float]]) -> str:
     return "受测检索方向聚合"
 
 
+# 中文注释：封装 _victim_aggregation_label 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _victim_aggregation_label(suite_row: dict[str, Any], run_row: dict[str, Any], victim_compare: list[dict[str, Any]]) -> str:
     victim_count = len([item for item in victim_compare if str(item.get("victim", "")).strip()])
     if victim_count <= 0:
@@ -196,6 +209,7 @@ def _victim_aggregation_label(suite_row: dict[str, Any], run_row: dict[str, Any]
     return f"{victim_count} 个受测模型平均" if victim_count > 0 else ""
 
 
+# 中文注释：封装 _sample_pair_count 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _sample_pair_count(suite_row: dict[str, Any]) -> int:
     sample_pair_count = int(suite_row.get("num_pairs", 0) or 0)
     if sample_pair_count <= 0:
@@ -206,6 +220,7 @@ def _sample_pair_count(suite_row: dict[str, Any]) -> int:
     return sample_pair_count
 
 
+# 中文注释：封装 _formal_metric_label_note 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _formal_metric_label_note(
     *,
     matched_k: int | None,
@@ -240,6 +255,7 @@ def _formal_metric_label_note(
     return metric_label, metric_note
 
 
+# 中文注释：封装 _derive_formal_row_metric_semantics 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _derive_formal_row_metric_semantics(suite_row: dict[str, Any], run_row: dict[str, Any]) -> dict[str, Any]:
     target_value = float(suite_row.get("asr_attack", run_row.get("asr_attack", run_row.get("asr", 0.0))) or 0.0)
     victim_compare = [item for item in list(suite_row.get("victim_compare", [])) if isinstance(item, dict)]
@@ -264,6 +280,7 @@ def _derive_formal_row_metric_semantics(suite_row: dict[str, Any], run_row: dict
     }
 
 
+# 中文注释：封装 _dataset_catalog 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _dataset_catalog() -> list[dict[str, str]]:
     return [
         {"key": "coco_subset", "name": "COCO val2017 完整验证子集", "tier": "benchmark"},
@@ -276,14 +293,17 @@ def _dataset_catalog() -> list[dict[str, str]]:
     ]
 
 
+# 中文注释：封装 _dataset_catalog_count 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _dataset_catalog_count() -> int:
     return len(_dataset_catalog())
 
 
+# 中文注释：封装 _dataset_catalog_map 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _dataset_catalog_map() -> dict[str, dict[str, str]]:
     return {str(item.get("key", "")).strip(): item for item in _dataset_catalog() if str(item.get("key", "")).strip()}
 
 
+# 中文注释：封装 _live_datasets 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _live_datasets(project_root: Path, store: Any) -> list[dict[str, Any]]:
     if store is None or not hasattr(store, "list_datasets"):
         return []
@@ -327,6 +347,7 @@ def _live_datasets(project_root: Path, store: Any) -> list[dict[str, Any]]:
     return live_rows
 
 
+# 中文注释：封装 _latest_completed_dir 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _latest_completed_dir(artifacts_dir: Path, prefix: str, required_file: str) -> Path | None:
     candidates: list[Path] = []
     for item in artifacts_dir.glob(f"{prefix}*"):
@@ -343,6 +364,7 @@ def _latest_completed_dir(artifacts_dir: Path, prefix: str, required_file: str) 
     return candidates[0]
 
 
+# 中文注释：封装 _canonical_paper_suite_analysis_path 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _canonical_paper_suite_analysis_path(project_root: Path) -> tuple[str, Path]:
     env_override = str(os.getenv("MMSEC_CANONICAL_PAPER_SUITE_ANALYSIS", "") or "").strip()
     if env_override:
@@ -353,10 +375,12 @@ def _canonical_paper_suite_analysis_path(project_root: Path) -> tuple[str, Path]
     )
 
 
+# 中文注释：封装 _archived_paper_suite_analysis_path 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _archived_paper_suite_analysis_path(project_root: Path) -> Path:
     return (project_root / "artifacts" / "server_snapshot_20260411" / "paper_suite_analysis.json").resolve()
 
 
+# 中文注释：封装 _portable_artifact_path 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _portable_artifact_path(project_root: Path, value: Any) -> str:
     text = str(value or "").strip()
     if not text:
@@ -371,6 +395,7 @@ def _portable_artifact_path(project_root: Path, value: Any) -> str:
     return normalized
 
 
+# 中文注释：封装 _latest_paper_suite_analysis 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _latest_paper_suite_analysis(project_root: Path, artifacts_dir: Path) -> tuple[Path, dict[str, Any]]:
     latest_dir = _latest_completed_dir(artifacts_dir, "paper_suite_", "paper_suite_analysis.json")
     if latest_dir is not None:
@@ -381,6 +406,7 @@ def _latest_paper_suite_analysis(project_root: Path, artifacts_dir: Path) -> tup
     return fallback, read_json(fallback, {})
 
 
+# 中文注释：封装 _primary_paper_suite_analysis 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _primary_paper_suite_analysis(project_root: Path, artifacts_dir: Path) -> tuple[Path, dict[str, Any], str]:
     canonical_kind, canonical_path = _canonical_paper_suite_analysis_path(project_root)
     if canonical_path.exists():
@@ -392,6 +418,7 @@ def _primary_paper_suite_analysis(project_root: Path, artifacts_dir: Path) -> tu
     return latest_path, latest_analysis, source_kind
 
 
+# 中文注释：封装 _canonical_paper_environment_reference_path 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _canonical_paper_environment_reference_path(project_root: Path) -> Path:
     env_override = str(os.getenv("MMSEC_PAPER_RESULT_ENV_REFERENCE", "") or "").strip()
     if env_override:
@@ -399,10 +426,12 @@ def _canonical_paper_environment_reference_path(project_root: Path) -> Path:
     return (project_root / "artifacts" / "paper_suite_20260418_final" / "environment_reference.json").resolve()
 
 
+# 中文注释：封装 _archived_paper_environment_reference_path 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _archived_paper_environment_reference_path(project_root: Path) -> Path:
     return (project_root / "artifacts" / "defense_evidence_pack_20260419" / "deployment_reference" / "system_overview.json").resolve()
 
 
+# 中文注释：封装 _paper_result_environment_reference 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _paper_result_environment_reference(project_root: Path) -> tuple[Path, dict[str, Any]]:
     canonical_path = _canonical_paper_environment_reference_path(project_root)
     canonical_data = read_json(canonical_path, {})
@@ -428,6 +457,7 @@ def _paper_result_environment_reference(project_root: Path) -> tuple[Path, dict[
     return fallback_path, {}
 
 
+# 中文注释：封装 _latest_model_validation_summary 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _latest_model_validation_summary(artifacts_dir: Path) -> tuple[Path | None, dict[str, Any]]:
     latest_dir = _latest_completed_dir(artifacts_dir, "model_validation_", "summary.json")
     if latest_dir is None:
@@ -437,6 +467,7 @@ def _latest_model_validation_summary(artifacts_dir: Path) -> tuple[Path | None, 
     return path, data if isinstance(data, dict) else {}
 
 
+# 中文注释：封装 _parse_json_object 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _parse_json_object(raw: Any) -> dict[str, Any]:
     if isinstance(raw, dict):
         return raw
@@ -450,6 +481,7 @@ def _parse_json_object(raw: Any) -> dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
+# 中文注释：封装 _all_jobs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _all_jobs(store: Any, page_size: int = 500) -> list[dict[str, Any]]:
     if store is None or not hasattr(store, "list_jobs"):
         return []
@@ -466,6 +498,7 @@ def _all_jobs(store: Any, page_size: int = 500) -> list[dict[str, Any]]:
     return rows
 
 
+# 中文注释：封装 _parse_scientific_validation_experiment 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _parse_scientific_validation_experiment(
     experiment_id: str,
     benchmark_attacks: list[str],
@@ -501,6 +534,7 @@ def _parse_scientific_validation_experiment(
     return None
 
 
+# 中文注释：封装 _scientific_validation_jobs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _scientific_validation_jobs(store: Any, validation_summary: dict[str, Any]) -> list[dict[str, Any]]:
     criterion = validation_summary.get("criterion", {})
     if not isinstance(criterion, dict):
@@ -536,6 +570,7 @@ def _scientific_validation_jobs(store: Any, validation_summary: dict[str, Any]) 
     return records
 
 
+# 中文注释：封装 _validation_snapshot_summary 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _validation_snapshot_summary(
     validation_path: Path | None,
     validation_summary: dict[str, Any],
@@ -561,6 +596,7 @@ def _validation_snapshot_summary(
     }
 
 
+# 中文注释：封装 _failing_primary_rows 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _failing_primary_rows(
     models: list[dict[str, Any]],
     validated_models: list[str],
@@ -632,6 +668,7 @@ def _failing_primary_rows(
     return blockers
 
 
+# 中文注释：封装 _scientific_quality_model_adapters 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _scientific_quality_model_adapters(validation_summary: dict[str, Any]) -> list[str]:
     items = validation_summary.get("scientific_quality_validated_models", [])
     if not isinstance(items, list):
@@ -639,6 +676,7 @@ def _scientific_quality_model_adapters(validation_summary: dict[str, Any]) -> li
     return [str(item).strip() for item in items if str(item).strip()]
 
 
+# 中文注释：封装 _model_coverage_summary 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _model_coverage_summary(
     models: list[dict[str, Any]],
     ready_models: list[dict[str, Any]],
@@ -691,6 +729,7 @@ def _model_coverage_summary(
     }
 
 
+# 中文注释：封装 _latest_runs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _latest_runs(artifacts_dir: Path, limit: int = 10) -> list[dict[str, Any]]:
     latest_runs_raw = discover_runs_from_artifacts(str(artifacts_dir))[:limit]
     latest_runs = []
@@ -723,6 +762,7 @@ def _latest_runs(artifacts_dir: Path, limit: int = 10) -> list[dict[str, Any]]:
     return latest_runs
 
 
+# 中文注释：封装 _formal_row_joint_execution 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _formal_row_joint_execution(row: dict[str, Any], summary_data: dict[str, Any] | None = None) -> dict[str, Any]:
     return build_formal_joint_execution(row, summary_data)
 
@@ -743,6 +783,7 @@ _ABLATION_VARIANT_ORDER = {
 }
 
 
+# 中文注释：封装 _detect_ablation_variant 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _detect_ablation_variant(*parts: str) -> str:
     joined = " ".join(part.lower() for part in parts if part).strip()
     if "no_text" in joined:
@@ -756,6 +797,7 @@ def _detect_ablation_variant(*parts: str) -> str:
     return "其他变体"
 
 
+# 中文注释：封装 _formal_suite_meta 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _formal_suite_meta(suite_name: str, *, analysis_row_id: str, benchmark_tag: str, experiment_id: str) -> dict[str, Any]:
     if suite_name == "E1_classic_coco":
         return {
@@ -788,6 +830,7 @@ def _formal_suite_meta(suite_name: str, *, analysis_row_id: str, benchmark_tag: 
     }
 
 
+# 中文注释：封装 _formal_row_artifact_paths 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _formal_row_artifact_paths(project_root: Path, suite_row: dict[str, Any]) -> dict[str, str]:
     summary_path = _portable_artifact_path(project_root, suite_row.get("summary_path", ""))
     report_path = _portable_artifact_path(project_root, suite_row.get("report_path", ""))
@@ -817,6 +860,7 @@ def _formal_row_artifact_paths(project_root: Path, suite_row: dict[str, Any]) ->
     }
 
 
+# 中文注释：封装 _formal_row_models 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _formal_row_models(suite_row: dict[str, Any], run_row: dict[str, Any]) -> tuple[str, list[str]]:
     surrogate_adapter = str(
         run_row.get("surrogate_model_adapter", run_row.get("model_adapter", ""))
@@ -831,6 +875,7 @@ def _formal_row_models(suite_row: dict[str, Any], run_row: dict[str, Any]) -> tu
     return surrogate_adapter, victim_model_adapters
 
 
+# 中文注释：封装 _formal_row_from_analysis 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _formal_row_from_analysis(
     project_root: Path,
     suite_row: dict[str, Any],
@@ -907,6 +952,7 @@ def _formal_row_from_analysis(
     return sort_key, formal_row
 
 
+# 中文注释：封装 _analysis_rows_to_formal_runs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _analysis_rows_to_formal_runs(
     project_root: Path,
     artifacts_dir: Path,
@@ -929,16 +975,19 @@ def _analysis_rows_to_formal_runs(
     return [row for _, row in ranked_rows[:limit]]
 
 
+# 中文注释：封装 _latest_formal_runs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _latest_formal_runs(project_root: Path, artifacts_dir: Path, limit: int = 6) -> list[dict[str, Any]]:
     _, analysis = _latest_paper_suite_analysis(project_root, artifacts_dir)
     return _analysis_rows_to_formal_runs(project_root, artifacts_dir, analysis, limit=limit)
 
 
+# 中文注释：封装 _primary_formal_runs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _primary_formal_runs(project_root: Path, artifacts_dir: Path, limit: int = 20) -> list[dict[str, Any]]:
     _, analysis, _ = _primary_paper_suite_analysis(project_root, artifacts_dir)
     return _analysis_rows_to_formal_runs(project_root, artifacts_dir, analysis, limit=limit)
 
 
+# 中文注释：封装 _split_formal_runs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _split_formal_runs(
     formal_rows: list[dict[str, Any]],
     *,
@@ -952,6 +1001,7 @@ def _split_formal_runs(
     return primary_rows, ablation_rows
 
 
+# 中文注释：封装 _sample_management_artifacts 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _sample_management_artifacts(artifacts_dir: Path) -> dict[str, int]:
     runs_dir = artifacts_dir / "runs"
     if not runs_dir.exists():
@@ -986,6 +1036,7 @@ def _sample_management_artifacts(artifacts_dir: Path) -> dict[str, int]:
     }
 
 
+# 中文注释：封装 _validated_model_adapters 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _validated_model_adapters(artifacts_dir: Path) -> list[str]:
     validation_path, validation = _latest_model_validation_summary(artifacts_dir)
     if validation_path is None:
@@ -996,14 +1047,17 @@ def _validated_model_adapters(artifacts_dir: Path) -> list[str]:
     return []
 
 
+# 中文注释：封装 _rows_by_suite 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _rows_by_suite(rows: list[dict[str, Any]], suite: str) -> list[dict[str, Any]]:
     return [row for row in rows if str(row.get("suite", "")) == suite]
 
 
+# 中文注释：封装 _safe_mean 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _safe_mean(values: list[float]) -> float:
     return float(sum(values) / len(values)) if values else 0.0
 
 
+# 中文注释：封装 _phase_asr_and_ranking_ok 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _phase_asr_and_ranking_ok(
     *,
     phase_key: str,
@@ -1055,6 +1109,7 @@ def _phase_asr_and_ranking_ok(
     return ok
 
 
+# 中文注释：封装 _missing_result_conformance_payload 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _missing_result_conformance_payload(analysis_path: Path, threshold_path: Path, validation_path: Path | None) -> dict[str, Any]:
     return {
         "analysis_path": str(analysis_path),
@@ -1077,10 +1132,12 @@ def _missing_result_conformance_payload(analysis_path: Path, threshold_path: Pat
     }
 
 
+# 中文注释：封装 _suite_attack_map 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _suite_attack_map(rows: list[dict[str, Any]], suite: str) -> dict[str, dict[str, Any]]:
     return {str(row.get("attack", "")): row for row in _rows_by_suite(rows, suite)}
 
 
+# 中文注释：封装 _e0_conformance 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _e0_conformance(rows: list[dict[str, Any]], thresholds: dict[str, Any], findings: list[str]) -> bool:
     e0_cfg = dict(thresholds.get("e0", {}))
     e0_rows = _rows_by_suite(rows, str(e0_cfg.get("suite", "")))
@@ -1092,6 +1149,7 @@ def _e0_conformance(rows: list[dict[str, Any]], thresholds: dict[str, Any], find
     return e0_ok
 
 
+# 中文注释：封装 _phase_conformance 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _phase_conformance(rows: list[dict[str, Any]], thresholds: dict[str, Any], phase_key: str, findings: list[str]) -> bool:
     cfg = dict(thresholds.get(phase_key, {}))
     return _phase_asr_and_ranking_ok(
@@ -1102,6 +1160,7 @@ def _phase_conformance(rows: list[dict[str, Any]], thresholds: dict[str, Any], p
     )
 
 
+# 中文注释：封装 _selected_e4_rows 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _selected_e4_rows(rows: list[dict[str, Any]], e4_cfg: dict[str, Any], findings: list[str]) -> tuple[bool, dict[str, dict[str, Any]]]:
     e4_rows = {str(row.get("id", "")): row for row in _rows_by_suite(rows, str(e4_cfg.get("suite", "")))}
     selected: dict[str, dict[str, Any]] = {}
@@ -1119,6 +1178,7 @@ def _selected_e4_rows(rows: list[dict[str, Any]], e4_cfg: dict[str, Any], findin
     return e4_ok, selected
 
 
+# 中文注释：封装 _e4_gain_ok 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _e4_gain_ok(
     selected: dict[str, dict[str, Any]],
     e4_cfg: dict[str, Any],
@@ -1132,6 +1192,7 @@ def _e4_gain_ok(
     return gain >= float(e4_cfg.get(threshold_key, 0.0) or 0.0)
 
 
+# 中文注释：封装 _e4_conformance 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _e4_conformance(rows: list[dict[str, Any]], thresholds: dict[str, Any], findings: list[str]) -> tuple[bool, bool, bool]:
     e4_cfg = dict(thresholds.get("e4", {}))
     e4_ok, selected = _selected_e4_rows(rows, e4_cfg, findings)
@@ -1164,6 +1225,7 @@ def _e4_conformance(rows: list[dict[str, Any]], thresholds: dict[str, Any], find
     return e4_ok, adaptive_ok, fixation_ok
 
 
+# 中文注释：封装 _defense_conformance 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _defense_conformance(rows: list[dict[str, Any]], thresholds: dict[str, Any], findings: list[str]) -> bool:
     defense_cfg = dict(thresholds.get("defense", {}))
     suites = {str(x) for x in list(defense_cfg.get("suites", []))}
@@ -1184,6 +1246,7 @@ def _defense_conformance(rows: list[dict[str, Any]], thresholds: dict[str, Any],
     return defense_ok
 
 
+# 中文注释：封装 _model_validation_conformance 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _model_validation_conformance(validation: dict[str, Any], thresholds: dict[str, Any], findings: list[str]) -> bool:
     cfg = dict(thresholds.get("model_validation", {}))
     validation_models = [str(item).strip() for item in list(validation.get("validated_models", [])) if str(item).strip()]
@@ -1211,6 +1274,7 @@ def _model_validation_conformance(validation: dict[str, Any], thresholds: dict[s
     return model_validation_ok
 
 
+# 中文注释：封装 _classic_conformance_conclusions 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _classic_conformance_conclusions() -> list[str]:
     classic_conclusions = [
         "经典三模型主实验满足紧凑验收口径下的排序与效应量门槛。",
@@ -1221,6 +1285,7 @@ def _classic_conformance_conclusions() -> list[str]:
     return classic_conclusions
 
 
+# 中文注释：封装 _result_conformance_payload 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _result_conformance_payload(
     *,
     analysis_path: Path,
@@ -1254,6 +1319,7 @@ def _result_conformance_payload(
     }
 
 
+# 中文注释：封装 _result_conformance_v2 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _result_conformance_v2(project_root: Path, artifacts_dir: Path) -> dict[str, Any]:
     analysis_path, analysis, _ = _primary_paper_suite_analysis(project_root, artifacts_dir)
     validation_path, validation = _latest_model_validation_summary(artifacts_dir)
@@ -1285,6 +1351,7 @@ def _result_conformance_v2(project_root: Path, artifacts_dir: Path) -> dict[str,
     )
 
 
+# 中文注释：封装 _system_overview_context 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _system_overview_context(request: Request) -> dict[str, Any]:
     project_root, artifacts_dir = _runtime_context(request)
     store = getattr(request.app.state, "store", None)
@@ -1347,6 +1414,7 @@ def _system_overview_context(request: Request) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _overview_build_identity 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _overview_build_identity(ctx: dict[str, Any]) -> dict[str, Any]:
     request = ctx["request"]
     runtime_identity = _build_runtime_identity()
@@ -1372,6 +1440,7 @@ def _overview_build_identity(ctx: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _overview_repositories 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _overview_repositories(project_root: Path) -> list[dict[str, Any]]:
     return [
         _repo_entry(project_root, "third_party/papers/AdvCLIP"),
@@ -1415,6 +1484,7 @@ _EXTERNAL_ATTACK_DISPLAY_NAMES: dict[str, str] = {
 }
 
 
+# 中文注释：封装 _resolve_project_path 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _resolve_project_path(project_root: Path, raw: Any) -> Path | None:
     text = str(raw or "").strip()
     if not text:
@@ -1425,6 +1495,7 @@ def _resolve_project_path(project_root: Path, raw: Any) -> Path | None:
     return path.resolve()
 
 
+# 中文注释：封装 _requirement_status 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _requirement_status(project_root: Path, label: str, required: bool, raw_path: Any) -> dict[str, Any]:
     path = _resolve_project_path(project_root, raw_path)
     if path is None:
@@ -1449,6 +1520,7 @@ def _requirement_status(project_root: Path, label: str, required: bool, raw_path
     }
 
 
+# 中文注释：封装 _target_status 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _target_status(project_root: Path, required: bool, attack_cfg: dict[str, Any]) -> dict[str, Any]:
     target_text = str(attack_cfg.get("target_text", "") or "").strip()
     target_image = str(attack_cfg.get("target_image", "") or "").strip()
@@ -1465,6 +1537,7 @@ def _target_status(project_root: Path, required: bool, attack_cfg: dict[str, Any
     return _requirement_status(project_root, "目标图/目标文本", required, target_image)
 
 
+# 中文注释：封装 _checkpoint_field_for_attack 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _checkpoint_field_for_attack(attack_id: str) -> str:
     if attack_id == "anyattack":
         return "decoder_path"
@@ -1473,6 +1546,7 @@ def _checkpoint_field_for_attack(attack_id: str) -> str:
     return "checkpoint_path"
 
 
+# 中文注释：封装 _external_attack_runtime_status 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _external_attack_runtime_status(project_root: Path) -> dict[str, Any]:
     status: dict[str, Any] = {}
     for attack_id, config_rel in _EXTERNAL_ATTACK_STATUS_CONFIGS.items():
@@ -1521,6 +1595,7 @@ def _external_attack_runtime_status(project_root: Path) -> dict[str, Any]:
     return status
 
 
+# 中文注释：封装 _system_overview_payload 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _system_overview_payload(ctx: dict[str, Any]) -> dict[str, Any]:
     project_root = ctx["project_root"]
     artifacts_dir = ctx["artifacts_dir"]
@@ -1590,14 +1665,17 @@ def _system_overview_payload(ctx: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# 中文注释：实现 build_system_overview 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def build_system_overview(request: Request) -> dict[str, Any]:
     return _system_overview_payload(_system_overview_context(request))
 
 
+# 中文注释：封装 _exists 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _exists(project_root: Path, rel: str) -> bool:
     return (project_root / rel).exists()
 
 
+# 中文注释：封装 _attack_catalog_entries 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _attack_catalog_entries(project_root: Path) -> dict[str, dict[str, str]]:
     path = project_root / "frontend" / "src" / "lib" / "attackCatalog.ts"
     if not path.exists():
@@ -1622,6 +1700,7 @@ def _attack_catalog_entries(project_root: Path) -> dict[str, dict[str, str]]:
     return records
 
 
+# 中文注释：封装 _artifact_candidate 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _artifact_candidate(project_root: Path, value: Any, fallback: Path) -> Path:
     raw = str(value or "").strip()
     if raw:
@@ -1633,12 +1712,14 @@ def _artifact_candidate(project_root: Path, value: Any, fallback: Path) -> Path:
     return fallback
 
 
+# 中文注释：封装 _has_metric_payload 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _has_metric_payload(summary_data: dict[str, Any]) -> bool:
     return any(isinstance(summary_data.get(key), dict) for key in ("risk", "vlr", "metric_series", "stage_metrics")) or bool(
         summary_data.get("victim_compare")
     ) or any(key in summary_data for key in ("asr_attack", "risk_score", "defense_gain"))
 
 
+# 中文注释：封装 _empty_formal_artifact_stats 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _empty_formal_artifact_stats() -> dict[str, Any]:
     return {
         "archived_row_evidence_runs": 0,
@@ -1659,6 +1740,7 @@ def _empty_formal_artifact_stats() -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _formal_artifact_paths 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _formal_artifact_paths(project_root: Path, row: dict[str, Any], run_path: Path) -> dict[str, Path]:
     archived_summary_path = _artifact_candidate(project_root, row.get("archived_summary_path", row.get("summary_path", "")), run_path / "row_evidence.json")
     archived_report_path = _artifact_candidate(project_root, row.get("archived_report_path", row.get("report_path", "")), run_path / "row_evidence.md")
@@ -1676,6 +1758,7 @@ def _formal_artifact_paths(project_root: Path, row: dict[str, Any], run_path: Pa
     }
 
 
+# 中文注释：封装 _record_formal_definition_stats 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _record_formal_definition_stats(stats: dict[str, Any], row: dict[str, Any], archived_summary_data: dict[str, Any]) -> None:
     attack_id = str(row.get("attack", "") or "").strip()
     joint_execution = _formal_row_joint_execution(row, archived_summary_data)
@@ -1689,6 +1772,7 @@ def _record_formal_definition_stats(stats: dict[str, Any], row: dict[str, Any], 
             stats["joint_definition_attacks"].add(attack_id)
 
 
+# 中文注释：封装 _has_three_stage_evidence 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _has_three_stage_evidence(summary_data: dict[str, Any]) -> bool:
     stage_metrics = summary_data.get("stage_metrics", {})
     if isinstance(stage_metrics, dict) and stage_metrics:
@@ -1703,6 +1787,7 @@ def _has_three_stage_evidence(summary_data: dict[str, Any]) -> bool:
     return {"clean", "attacked"}.issubset(status_keys) and bool({"defended_attack", "defended_clean"} & status_keys)
 
 
+# 中文注释：封装 _record_formal_report_stats 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _record_formal_report_stats(stats: dict[str, Any], paths: dict[str, Path]) -> None:
     if paths["formal_summary"].exists() and paths["formal_report"].exists():
         stats["formal_report_runs"] += 1
@@ -1720,6 +1805,7 @@ def _record_formal_report_stats(stats: dict[str, Any], paths: dict[str, Path]) -
             stats["portable_formal_metric_ready_runs"] += 1
 
 
+# 中文注释：封装 _record_formal_artifact_row 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _record_formal_artifact_row(project_root: Path, stats: dict[str, Any], row: dict[str, Any]) -> None:
     run_path = Path(str(row.get("path", "") or "")).resolve()
     attack_id = str(row.get("attack", "") or "").strip()
@@ -1742,6 +1828,7 @@ def _record_formal_artifact_row(project_root: Path, stats: dict[str, Any], row: 
     _record_formal_report_stats(stats, paths)
 
 
+# 中文注释：封装 _formal_artifact_stats_payload 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _formal_artifact_stats_payload(stats: dict[str, Any]) -> dict[str, Any]:
     return {
         "archived_row_evidence_runs": stats["archived_row_evidence_runs"],
@@ -1762,6 +1849,7 @@ def _formal_artifact_stats_payload(stats: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _official_formal_artifacts_summary 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _official_formal_artifacts_summary(project_root: Path, artifacts_dir: Path) -> dict[str, Any]:
     stats = _empty_formal_artifact_stats()
     for row in _primary_formal_runs(project_root, artifacts_dir, limit=50):
@@ -1771,6 +1859,7 @@ def _official_formal_artifacts_summary(project_root: Path, artifacts_dir: Path) 
     return _formal_artifact_stats_payload(stats)
 
 
+# 中文注释：封装 _observed_execution_summary 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _observed_execution_summary(artifacts_dir: Path) -> dict[str, Any]:
     image_only_execution_report_runs = 0
     joint_execution_report_runs = 0
@@ -1809,6 +1898,7 @@ def _observed_execution_summary(artifacts_dir: Path) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _catalog_values 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _catalog_values(project_root: Path, rel_path: str, field_name: str) -> set[str]:
     path = project_root / rel_path
     if not path.exists():
@@ -1817,6 +1907,7 @@ def _catalog_values(project_root: Path, rel_path: str, field_name: str) -> set[s
     return {match.group(1).strip() for match in re.finditer(rf'{field_name}\s*:\s*"([^"]+)"', text) if match.group(1).strip()}
 
 
+# 中文注释：封装 _validation_matrix_ready 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _validation_matrix_ready(project_root: Path, artifacts_dir: Path) -> tuple[bool, int]:
     _, summary = _latest_model_validation_summary(artifacts_dir)
     if not isinstance(summary, dict):
@@ -1842,6 +1933,7 @@ def _validation_matrix_ready(project_root: Path, artifacts_dir: Path) -> tuple[b
     ), validated
 
 
+# 中文注释：封装 _core_routes_ready 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _core_routes_ready(project_root: Path) -> bool:
     app_path = project_root / "frontend" / "src" / "App.tsx"
     if not app_path.exists():
@@ -1861,11 +1953,13 @@ def _core_routes_ready(project_root: Path) -> bool:
     return all(snippet in text for snippet in required_snippets)
 
 
+# 中文注释：封装 _frontend_ready 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _frontend_ready(project_root: Path) -> bool:
     build_info = _frontend_build_info(project_root)
     return bool(build_info.get("index_exists", False) and build_info.get("dist_fresh", False))
 
 
+# 中文注释：封装 _frontend_build_info 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _frontend_build_info(project_root: Path) -> dict[str, Any]:
     frontend_root = project_root / "frontend"
     src_dir = frontend_root / "src"
@@ -1895,6 +1989,7 @@ def _frontend_build_info(project_root: Path) -> dict[str, Any]:
     inputs_latest_mtime = max(input_candidates, default=0.0)
     dist_fresh = bool(index_mtime >= inputs_latest_mtime) if inputs_latest_mtime else True
 
+    # 中文注释：封装 _fmt 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
     def _fmt(ts: float) -> str:
         return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat() if ts > 0 else ""
 
@@ -1907,6 +2002,7 @@ def _frontend_build_info(project_root: Path) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _taskbook_context 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _taskbook_context(project_root: Path, artifacts_dir: Path) -> dict[str, Any]:
     runtime_attacks = {str(item).strip() for item in list_plugins("attack") if str(item).strip()}
     runtime_models = {
@@ -1947,6 +2043,7 @@ def _taskbook_context(project_root: Path, artifacts_dir: Path) -> dict[str, Any]
     }
 
 
+# 中文注释：封装 _taskbook_req_1 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _taskbook_req_1(ctx: dict[str, Any]) -> dict[str, str]:
     formal_artifacts = ctx["formal_artifacts"]
     observed_execution = ctx["observed_execution"]
@@ -1980,6 +2077,7 @@ def _taskbook_req_1(ctx: dict[str, Any]) -> dict[str, str]:
     }
 
 
+# 中文注释：封装 _taskbook_req_2 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _taskbook_req_2(ctx: dict[str, Any]) -> dict[str, str]:
     formal_artifacts = ctx["formal_artifacts"]
     formal_run_count = int(ctx["formal_run_count"])
@@ -1996,6 +2094,7 @@ def _taskbook_req_2(ctx: dict[str, Any]) -> dict[str, str]:
     }
 
 
+# 中文注释：封装 _taskbook_req_3 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _taskbook_req_3(ctx: dict[str, Any]) -> dict[str, str]:
     formal_artifacts = ctx["formal_artifacts"]
     viz_ready = formal_artifacts["formal_report_runs"] > 0 and formal_artifacts["formal_metric_ready_runs"] > 0
@@ -2012,6 +2111,7 @@ def _taskbook_req_3(ctx: dict[str, Any]) -> dict[str, str]:
     }
 
 
+# 中文注释：封装 _taskbook_req_4 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _taskbook_req_4(ctx: dict[str, Any]) -> dict[str, str]:
     formal_artifacts = ctx["formal_artifacts"]
 
@@ -2040,6 +2140,7 @@ def _taskbook_req_4(ctx: dict[str, Any]) -> dict[str, str]:
     }
 
 
+# 中文注释：封装 _taskbook_req_5 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _taskbook_req_5(ctx: dict[str, Any], *, core_api_ready: bool) -> dict[str, str]:
     formal_artifacts = ctx["formal_artifacts"]
     formal_run_count = int(ctx["formal_run_count"])
@@ -2065,6 +2166,7 @@ def _taskbook_req_5(ctx: dict[str, Any], *, core_api_ready: bool) -> dict[str, s
     }
 
 
+# 中文注释：封装 _taskbook_items 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _taskbook_items(project_root: Path, artifacts_dir: Path, *, core_api_ready: bool = False) -> list[dict[str, str]]:
     ctx = _taskbook_context(project_root, artifacts_dir)
     return [
@@ -2076,11 +2178,13 @@ def _taskbook_items(project_root: Path, artifacts_dir: Path, *, core_api_ready: 
     ]
 
 
+# 中文注释：封装 _paper_coverage 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _paper_coverage(project_root: Path) -> list[dict[str, Any]]:
     advclip_repo = _repo_entry(project_root, "third_party/papers/AdvCLIP")
     tmm_repo = _repo_entry(project_root, "third_party/papers/TMM")
     advedm_repo = _repo_entry(project_root, "third_party/papers/AdvEDM_demo")
 
+    # 中文注释：实现 status 的核心流程，支撑后端业务服务中的业务语义和异常边界。
     def status(files: list[str]) -> str:
         have = sum(1 for x in files if _exists(project_root, x))
         if have == len(files):
@@ -2132,6 +2236,7 @@ def _paper_coverage(project_root: Path) -> list[dict[str, Any]]:
     ]
 
 
+# 中文注释：封装 _registered_api_routes 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _registered_api_routes(request: Request) -> set[str]:
     routes: set[str] = set()
     for route in getattr(request.app, "routes", []):
@@ -2141,6 +2246,7 @@ def _registered_api_routes(request: Request) -> set[str]:
     return routes
 
 
+# 中文注释：封装 _core_api_routes_ready 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _core_api_routes_ready(request: Request) -> bool:
     required = {
         "/api/v1/health",
@@ -2152,6 +2258,7 @@ def _core_api_routes_ready(request: Request) -> bool:
     return required.issubset(_registered_api_routes(request))
 
 
+# 中文注释：封装 _backend_interfaces 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _backend_interfaces(project_root: Path, request: Request) -> list[dict[str, str]]:
     registered = _registered_api_routes(request)
     required = [
@@ -2176,6 +2283,7 @@ def _backend_interfaces(project_root: Path, request: Request) -> list[dict[str, 
     return out
 
 
+# 中文注释：封装 _ui_pages 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _ui_pages(project_root: Path) -> list[dict[str, Any]]:
     expected = [
         ("/", "frontend/src/pages/DashboardPage.tsx"),
@@ -2190,6 +2298,7 @@ def _ui_pages(project_root: Path) -> list[dict[str, Any]]:
     return [{"route": route, "page_file": page_file, "exists": _exists(project_root, page_file)} for route, page_file in expected]
 
 
+# 中文注释：封装 _project_stage 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _project_stage(project_root: Path) -> dict[str, Any]:
     # P0: scripts only
     p0 = any(
@@ -2244,6 +2353,7 @@ def _project_stage(project_root: Path) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _engineering_views 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _engineering_views(project_root: Path, request: Request) -> dict[str, Any]:
     return {
         "project_stage": _project_stage(project_root),
@@ -2252,6 +2362,7 @@ def _engineering_views(project_root: Path, request: Request) -> dict[str, Any]:
     }
 
 
+# 中文注释：实现 build_system_compliance 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def build_system_compliance(request: Request) -> dict[str, Any]:
     project_root, artifacts_dir = _runtime_context(request)
     return {

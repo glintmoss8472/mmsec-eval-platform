@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 cleanup failed jobs 相关逻辑。
 Param(
   [string]$DbPath = "artifacts/app.db"
 )
@@ -40,6 +41,7 @@ print(json.dumps({"before": before, "after": after, "removed": len(bad_ids)}, en
 '@
 
 Set-Content -Path $tmpPy -Value $py -Encoding UTF8
+# 中文注释：实现 try 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 try {
   .\.venv313\Scripts\python.exe $tmpPy
 } finally {

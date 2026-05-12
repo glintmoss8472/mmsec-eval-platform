@@ -1,3 +1,4 @@
+# 文件说明：该文件属于评测运行器，集中实现 eval runner 相关逻辑。
 from __future__ import annotations
 
 import logging
@@ -31,15 +32,18 @@ from mmsec_eval.viz.plots import plot_asr_bar, plot_attack_comparison, plot_metr
 LOG = logging.getLogger(__name__)
 
 
+# 中文注释：封装 _emit_progress 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _emit_progress(progress: Callable[[str, str, float | None, str], None] | None, stage_key: str, state: str, progress_percent: float | None, message: str) -> None:
     if progress is not None:
         progress(stage_key, state, progress_percent, message)
 
 
+# 中文注释：封装 _safe_mean 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _safe_mean(values: list[float]) -> float:
     return mean(values) if values else 0.0
 
 
+# 中文注释：封装 _text_diff_score 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _text_diff_score(clean: str, adv: str) -> float:
     a = set((clean or "").lower().split())
     b = set((adv or "").lower().split())
@@ -51,6 +55,7 @@ def _text_diff_score(clean: str, adv: str) -> float:
     return float(1.0 - similarity)
 
 
+# 中文注释：封装 _embedding_shift 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _embedding_shift(clean: np.ndarray | None, adv: np.ndarray | None) -> float:
     if clean is None or adv is None:
         return 0.0
@@ -62,6 +67,7 @@ def _embedding_shift(clean: np.ndarray | None, adv: np.ndarray | None) -> float:
     return float(np.linalg.norm(c[:n] - a[:n], ord=2))
 
 
+# 中文注释：封装 _cot_shift 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _cot_shift(clean_trace: dict[str, Any], adv_trace: dict[str, Any]) -> float:
     c = str(clean_trace.get("final_action", "")).strip().lower()
     a = str(adv_trace.get("final_action", "")).strip().lower()
@@ -70,12 +76,14 @@ def _cot_shift(clean_trace: dict[str, Any], adv_trace: dict[str, Any]) -> float:
     return 0.0 if c == a else 1.0
 
 
+# 中文注释：封装 _mode_key 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _mode_key(row: dict[str, Any]) -> str:
     name = str(row.get("attack_name") or row.get("attack") or "unknown")
     mode = str(row.get("attack_mode") or "A")
     return f"{name}:{mode}"
 
 
+# 中文注释：封装 _recovery_success 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _recovery_success(
     *,
     adv_text_diff: float,
@@ -89,6 +97,7 @@ def _recovery_success(
     return 1.0 if ok else 0.0
 
 
+# 中文注释：封装 _build_mode_stats 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _build_mode_stats(rows: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
     grouped: dict[str, list[float]] = {}
     for row in rows:
@@ -100,6 +109,7 @@ def _build_mode_stats(rows: list[dict[str, Any]]) -> dict[str, dict[str, float]]
     return out
 
 
+# 中文注释：封装 _model_tag 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _model_tag(cfg: AppConfig) -> str:
     if cfg.plugins.model_adapter == "clip_hf":
         return f"clip_hf:{cfg.model.clip_model_name}"
@@ -108,6 +118,7 @@ def _model_tag(cfg: AppConfig) -> str:
     return cfg.plugins.model_adapter
 
 
+# 中文注释：封装 _reproduction_fidelity 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _reproduction_fidelity() -> list[dict[str, str]]:
     return [
         {
@@ -128,6 +139,7 @@ def _reproduction_fidelity() -> list[dict[str, str]]:
     ]
 
 
+# 中文注释：封装 _write_attack_debug 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _write_attack_debug(sample_debug_dir: Path, record: EvalRecord, cfg: AppConfig) -> str:
     sample_debug_dir.mkdir(parents=True, exist_ok=True)
     payload = {
@@ -155,6 +167,7 @@ def _write_attack_debug(sample_debug_dir: Path, record: EvalRecord, cfg: AppConf
     return str(out)
 
 
+# 中文注释：封装 _benchmark_summary 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _benchmark_summary(cfg: AppConfig, summary: dict[str, Any], rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "benchmark": True,
@@ -175,6 +188,7 @@ def _benchmark_summary(cfg: AppConfig, summary: dict[str, Any], rows: list[dict[
     }
 
 
+# 中文注释：封装 _create_sample_store 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _create_sample_store(cfg: AppConfig, run_dir: str) -> SampleStoreManager | None:
     if not cfg.sample_store.enabled:
         return None
@@ -187,6 +201,7 @@ def _create_sample_store(cfg: AppConfig, run_dir: str) -> SampleStoreManager | N
     )
 
 
+# 中文注释：封装 _build_attack_record 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _build_attack_record(sample: Any, *, cfg: AppConfig, model: Any, attack: Any, metric: Any, judge: Any, run_dir: str, sample_debug_dir: Path) -> tuple[EvalRecord, dict[str, Any]]:
     pred_clean = model.predict(sample)
     attacked = attack.attack(
@@ -216,6 +231,7 @@ def _build_attack_record(sample: Any, *, cfg: AppConfig, model: Any, attack: Any
     return record, {"cot_clean": cot_clean}
 
 
+# 中文注释：封装 _apply_attacked_defense 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _apply_attacked_defense(
     record: EvalRecord,
     *,
@@ -281,6 +297,7 @@ def _apply_attacked_defense(
     return info
 
 
+# 中文注释：封装 _defense_eval_record 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _defense_eval_record(record: EvalRecord, *, defended_sample: Any, pred_defended: Any) -> EvalRecord:
     clean_img = np.asarray(record.sample.image, dtype=np.float32)
     def_img = np.asarray(defended_sample.image, dtype=np.float32)
@@ -308,6 +325,7 @@ def _defense_eval_record(record: EvalRecord, *, defended_sample: Any, pred_defen
     return record_def
 
 
+# 中文注释：封装 _merge_defense_diagnostics 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _merge_defense_diagnostics(record: EvalRecord, record_def: EvalRecord, pred_defended: Any, cot_defended: dict[str, Any], def_metrics: dict[str, float]) -> None:
     record.diagnostics["defended_text_diff_score"] = float(record_def.diagnostics["text_diff_score"])
     record.diagnostics["defended_embedding_shift"] = float(record_def.diagnostics["embedding_shift"])
@@ -317,6 +335,7 @@ def _merge_defense_diagnostics(record: EvalRecord, record_def: EvalRecord, pred_
     record.metrics.update({f"defended_{k}": float(v) for k, v in def_metrics.items() if isinstance(v, (int, float))})
 
 
+# 中文注释：封装 _apply_clean_defense 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _apply_clean_defense(
     record: EvalRecord,
     *,
@@ -346,6 +365,7 @@ def _apply_clean_defense(
     return dict(defended_clean.artifact_refs), float(clean_utility_text), float(clean_utility_emb)
 
 
+# 中文注释：封装 _pairwise_stats 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _pairwise_stats(record: EvalRecord, defense_info: dict[str, Any], clean_utility: tuple[float | None, float | None], defense: Any | None) -> dict[str, Any]:
     success_attack = 1.0 if bool(record.judge and record.judge.success) else 0.0
     success_defended = None
@@ -366,6 +386,7 @@ def _pairwise_stats(record: EvalRecord, defense_info: dict[str, Any], clean_util
     }
 
 
+# 中文注释：封装 _append_pairwise_stats 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _append_pairwise_stats(stats: dict[str, Any], lists: dict[str, list[float]]) -> None:
     lists["success_attack"].append(float(stats["success_attack"]))
     if stats["success_defended"] is not None:
@@ -383,6 +404,7 @@ def _append_pairwise_stats(stats: dict[str, Any], lists: dict[str, list[float]])
         lists["clean_utility_embedding_shift"].append(float(stats["clean_utility_embedding_shift"]))
 
 
+# 中文注释：封装 _persist_pairwise_artifacts 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _persist_pairwise_artifacts(record: EvalRecord, *, cfg: AppConfig, sample_debug_dir: Path, store: SampleStoreManager | None, defense_info: dict[str, Any]) -> dict[str, str]:
     refs: dict[str, str] = {}
     pred_defended = defense_info["pred_defended"]
@@ -402,10 +424,12 @@ def _persist_pairwise_artifacts(record: EvalRecord, *, cfg: AppConfig, sample_de
     return refs
 
 
+# 中文注释：封装 _pairwise_attack_success 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _pairwise_attack_success(record: EvalRecord) -> float:
     return 1.0 if bool(record.judge and record.judge.success) else 0.0
 
 
+# 中文注释：封装 _pairwise_result_row 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _pairwise_result_row(record: EvalRecord, *, cfg: AppConfig, defense: Any | None, defense_info: dict[str, Any], refs: dict[str, str]) -> dict[str, Any]:
     pred_defended = defense_info["pred_defended"]
     j_defended_success = float(defense_info["j_defended_success"])
@@ -440,6 +464,7 @@ def _pairwise_result_row(record: EvalRecord, *, cfg: AppConfig, defense: Any | N
     }
 
 
+# 中文注释：封装 _run_pairwise_sample 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _run_pairwise_sample(
     sample: Any,
     *,
@@ -501,6 +526,7 @@ def _run_pairwise_sample(
         raise RuntimeError(f"sample failed: {sample.sample_id}: {exc}") from exc
 
 
+# 中文注释：封装 _pairwise_aggregates 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _pairwise_aggregates(cfg: AppConfig, stat_lists: dict[str, list[float]]) -> dict[str, Any]:
     success_attack_list = stat_lists["success_attack"]
     success_defended_list = stat_lists["success_defended"]
@@ -534,6 +560,7 @@ def _pairwise_aggregates(cfg: AppConfig, stat_lists: dict[str, list[float]]) -> 
     }
 
 
+# 中文注释：封装 _pairwise_risk_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _pairwise_risk_payload(cfg: AppConfig, *, asr_attack: float, semantic_score: float, cost_score: float, transfer_rate: float, stability_score: float) -> dict[str, Any]:
     if bool(cfg.risk.enabled):
         return compute_risk_score(
@@ -557,6 +584,7 @@ def _pairwise_risk_payload(cfg: AppConfig, *, asr_attack: float, semantic_score:
     }
 
 
+# 中文注释：封装 _pairwise_summary_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _pairwise_summary_payload(cfg: AppConfig, run_id: str, rows: list[dict[str, Any]], stat_lists: dict[str, list[float]], aggregates: dict[str, Any], defense: Any | None) -> dict[str, Any]:
     return {
         "run_id": run_id,
@@ -589,6 +617,7 @@ def _pairwise_summary_payload(cfg: AppConfig, run_id: str, rows: list[dict[str, 
     }
 
 
+# 中文注释：封装 _pairwise_report_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _pairwise_report_payload(summary: dict[str, Any], rows: list[dict[str, Any]], stat_lists: dict[str, list[float]], aggregates: dict[str, Any]) -> dict[str, Any]:
     risk_payload = aggregates["risk_payload"]
     return {
@@ -630,6 +659,7 @@ def _pairwise_report_payload(summary: dict[str, Any], rows: list[dict[str, Any]]
     }
 
 
+# 中文注释：封装 _write_pairwise_plots 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _write_pairwise_plots(cfg: AppConfig, run_dir: str, rows: list[dict[str, Any]], stat_lists: dict[str, list[float]], aggregates: dict[str, Any], defense: Any | None) -> None:
     if not (cfg.runner.save_plots and rows):
         return
@@ -648,6 +678,7 @@ def _write_pairwise_plots(cfg: AppConfig, run_dir: str, rows: list[dict[str, Any
         )
 
 
+# 中文注释：封装 _finish_pairwise_run 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _finish_pairwise_run(
     *,
     cfg: AppConfig,
@@ -690,6 +721,7 @@ def _finish_pairwise_run(
     )
 
 
+# 中文注释：串联 run 的主流程，集中处理评测运行器的初始化、执行和退出条件。
 def run(cfg: AppConfig, benchmark_mode: bool = False, progress: Callable[[str, str, float | None, str], None] | None = None) -> RunArtifacts:
     set_seed(cfg.seed)
     run_id = new_run_id()

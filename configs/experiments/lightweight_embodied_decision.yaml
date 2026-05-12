@@ -1,3 +1,4 @@
+# 文件说明：该文件属于实验配置，集中实现 lightweight embodied decision 相关逻辑。
 schema_version: 1
 experiment_id: "lightweight_embodied_decision"
 title: "轻量具身决策闭环"

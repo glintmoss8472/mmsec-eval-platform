@@ -1,3 +1,4 @@
+# 文件说明：该文件属于报告可视化层，集中实现 render report 相关逻辑。
 from __future__ import annotations
 
 import html
@@ -6,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 
+# 中文注释：封装 _summary_block 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _summary_block(summary: dict[str, Any]) -> str:
     items = "".join(
         f"<div class='kpi'><b>{html.escape(str(k))}</b>: {html.escape(str(v))}</div>"
@@ -15,6 +17,7 @@ def _summary_block(summary: dict[str, Any]) -> str:
     return f"<h2>Summary</h2><div>{items}</div><pre>{pretty}</pre>"
 
 
+# 中文注释：封装 _rows_table 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _rows_table(rows: list[dict[str, Any]], n: int = 20) -> str:
     head = rows[:n]
     if not head:
@@ -27,6 +30,7 @@ def _rows_table(rows: list[dict[str, Any]], n: int = 20) -> str:
     return "<table><thead><tr>" + th + "</tr></thead><tbody>" + "".join(tr) + "</tbody></table>"
 
 
+# 中文注释：封装 _retrieval_k_values 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _retrieval_k_values(summary: dict[str, Any]) -> list[int]:
     ks = summary.get("retrieval_k", [1, 5, 10])
     ks2 = [int(x) for x in ks if int(x) > 0]
@@ -35,7 +39,9 @@ def _retrieval_k_values(summary: dict[str, Any]) -> list[int]:
     return ks2
 
 
+# 中文注释：封装 _vlr_victim_table 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _vlr_victim_table(victims: dict[str, Any], ks2: list[int]) -> str:
+    # 中文注释：封装 _stage_mean 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
     def _stage_mean(stage: dict[str, Any], k: int) -> float:
         ir = float(stage.get(f"ir_r@{k}", 0.0))
         trr = float(stage.get(f"tr_r@{k}", 0.0))
@@ -77,6 +83,7 @@ def _vlr_victim_table(victims: dict[str, Any], ks2: list[int]) -> str:
     return "<table><thead><tr>" + th + "</tr></thead><tbody>" + "".join(tr) + "</tbody></table>"
 
 
+# 中文注释：封装 _vlr_failure_cases 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _vlr_failure_cases(rows: list[dict[str, Any]]) -> str:
     fail_rows = [r for r in rows if str(r.get("query_type", "")) == "t2i" and not bool(r.get("judge_success", True))]
     fail_rows = fail_rows[:10]
@@ -101,6 +108,7 @@ def _vlr_failure_cases(rows: list[dict[str, Any]]) -> str:
     return "<h3>典型失败案例（text-to-image top five failures）</h3><table><thead>" + fail_head + "</thead><tbody>" + fail_body + "</tbody></table>"
 
 
+# 中文注释：封装 _semantic_preservation_table 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _semantic_preservation_table(summary: dict[str, Any]) -> str:
     semantic = summary.get("semantic_preservation", {})
     if not isinstance(semantic, dict) or not semantic:
@@ -117,6 +125,7 @@ def _semantic_preservation_table(summary: dict[str, Any]) -> str:
     )
 
 
+# 中文注释：封装 _object_decision_proxy_table 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _object_decision_proxy_table(summary: dict[str, Any]) -> str:
     object_proxy = summary.get("object_decision_proxy", {})
     if not isinstance(object_proxy, dict) or not object_proxy.get("available"):
@@ -134,6 +143,7 @@ def _object_decision_proxy_table(summary: dict[str, Any]) -> str:
     )
 
 
+# 中文注释：封装 _vlr_block 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _vlr_block(summary: dict[str, Any], rows: list[dict[str, Any]]) -> str:
     if str(summary.get("task_kind", "")).lower() != "vlr":
         return ""
@@ -150,6 +160,7 @@ def _vlr_block(summary: dict[str, Any], rows: list[dict[str, Any]]) -> str:
     )
 
 
+# 中文注释：封装 _plots_block 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _plots_block(run_dir: str) -> str:
     imgs = []
     names = [
@@ -179,6 +190,7 @@ def _plots_block(run_dir: str) -> str:
     return "<h2>Plots</h2>" + "".join(imgs)
 
 
+# 中文注释：封装 _mode_table 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _mode_table(rows: list[dict[str, Any]]) -> str:
     grouped: dict[tuple[str, str], list[float]] = {}
     for row in rows:
@@ -199,6 +211,7 @@ def _mode_table(rows: list[dict[str, Any]]) -> str:
     return "".join(lines)
 
 
+# 中文注释：封装 _safe_rel_path 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _safe_rel_path(path: str, run_dir: str) -> str:
     try:
         p = Path(path)
@@ -207,6 +220,7 @@ def _safe_rel_path(path: str, run_dir: str) -> str:
         return path.replace("\\", "/")
 
 
+# 中文注释：封装 _sample_panel 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _sample_panel(rows: list[dict[str, Any]], run_dir: str, n: int = 6) -> str:
     head = rows[:n]
     if not head:
@@ -242,6 +256,7 @@ def _sample_panel(rows: list[dict[str, Any]], run_dir: str, n: int = 6) -> str:
     return "<h2>Clean/Adv Sample Panel</h2>" + "".join(cards)
 
 
+# 中文注释：封装 _defense_block 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _defense_block(summary: dict[str, Any], rows: list[dict[str, Any]]) -> str:
     if not bool(summary.get("defense_enabled", False)):
         return ""
@@ -266,6 +281,7 @@ def _defense_block(summary: dict[str, Any], rows: list[dict[str, Any]]) -> str:
     recovered = recovered[:5]
     failed = failed[:5]
 
+    # 中文注释：封装 _mk_case_table 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
     def _mk_case_table(title: str, case_rows: list[dict[str, Any]]) -> str:
         if not case_rows:
             return f"<h3>{html.escape(title)}</h3><p>暂无样本（none）。</p>"
@@ -287,6 +303,7 @@ def _defense_block(summary: dict[str, Any], rows: list[dict[str, Any]]) -> str:
     return head + _mk_case_table("典型恢复案例（top recovered cases）", recovered) + _mk_case_table("典型失败案例（top failed cases）", failed)
 
 
+# 中文注释：封装 _reproduction_card 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _reproduction_card(summary: dict[str, Any]) -> str:
     fidelity = summary.get("reproduction_fidelity", {})
     if not isinstance(fidelity, dict) or not fidelity:
@@ -298,6 +315,7 @@ def _reproduction_card(summary: dict[str, Any]) -> str:
     return "<h2>Reproduction Fidelity</h2><table><thead><tr><th>module</th><th>status</th></tr></thead><tbody>" + rows + "</tbody></table>"
 
 
+# 中文注释：封装 _risk_block 的内部步骤，让报告可视化层主流程保持清晰并隔离边界细节。
 def _risk_block(summary: dict[str, Any]) -> str:
     score = float(summary.get("risk_score", 0.0) or 0.0)
     level = str(summary.get("risk_level", ""))
@@ -343,6 +361,7 @@ def _risk_block(summary: dict[str, Any]) -> str:
     )
 
 
+# 中文注释：实现 render_report_html 的核心流程，支撑报告可视化层中的业务语义和异常边界。
 def render_report_html(summary: dict[str, Any], rows: list[dict[str, Any]], run_dir: str) -> str:
     tpl = Path("assets/templates/report_template.html")
     if tpl.exists():

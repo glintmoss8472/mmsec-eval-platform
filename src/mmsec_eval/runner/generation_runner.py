@@ -1,3 +1,4 @@
+# 文件说明：该文件属于评测运行器，集中实现 generation runner 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -30,15 +31,18 @@ from mmsec_eval.utils.seed import set_seed
 LOG = logging.getLogger(__name__)
 
 
+# 中文注释：封装 _emit_progress 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _emit_progress(progress: Callable[[str, str, float | None, str], None] | None, stage_key: str, state: str, progress_percent: float | None, message: str) -> None:
     if progress is not None:
         progress(stage_key, state, progress_percent, message)
 
 
+# 中文注释：封装 _safe_mean 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _safe_mean(values: list[float]) -> float:
     return mean(values) if values else 0.0
 
 
+# 中文注释：封装 _resolve_path 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _resolve_path(value: object, *, base_dir: Path) -> Path:
     raw = str(value or "").strip()
     if not raw:
@@ -52,11 +56,13 @@ def _resolve_path(value: object, *, base_dir: Path) -> Path:
     return Path.cwd() / path
 
 
+# 中文注释：封装 _load_image 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _load_image(path: Path) -> np.ndarray:
     img = Image.open(path).convert("RGB")
     return np.asarray(img, dtype=np.float32) / 255.0
 
 
+# 中文注释：封装 _list 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _list(value: object) -> list[str]:
     if isinstance(value, list):
         return [str(item).strip() for item in value if str(item).strip()]
@@ -64,10 +70,12 @@ def _list(value: object) -> list[str]:
     return [text] if text else []
 
 
+# 中文注释：封装 _case_id 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _case_id(row: dict[str, Any], idx: int) -> str:
     return str(row.get("id") or row.get("sample_id") or row.get("case_id") or f"gen-{idx:04d}")
 
 
+# 中文注释：封装 _case_image_path 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _case_image_path(row: dict[str, Any], *, cases_dir: Path) -> Path:
     return _resolve_path(
         row.get("image")
@@ -78,6 +86,7 @@ def _case_image_path(row: dict[str, Any], *, cases_dir: Path) -> Path:
     )
 
 
+# 中文注释：封装 _sample_from_case 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _sample_from_case(row: dict[str, Any], idx: int, *, image: np.ndarray, image_path: Path, stage: str) -> Sample:
     metadata = dict(row)
     metadata["source"] = str(image_path)
@@ -96,12 +105,14 @@ def _sample_from_case(row: dict[str, Any], idx: int, *, image: np.ndarray, image
     return Sample(sample_id=_case_id(row, idx), image=np.asarray(image, dtype=np.float32), text=text, target_text=target, metadata=metadata)
 
 
+# 中文注释：封装 _stage_sample 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _stage_sample(sample: Sample, stage: str) -> Sample:
     metadata = dict(sample.metadata)
     metadata["generation_stage"] = stage
     return Sample(sample_id=sample.sample_id, image=np.asarray(sample.image, dtype=np.float32), text=sample.text, target_text=sample.target_text, metadata=metadata)
 
 
+# 中文注释：封装 _trace_debug_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _trace_debug_payload(row: dict[str, Any], attack_name: str, trace: list[Any]) -> dict[str, Any]:
     return {
         "sample_id": str(row.get("sample_id") or row.get("id") or ""),
@@ -119,6 +130,7 @@ def _trace_debug_payload(row: dict[str, Any], attack_name: str, trace: list[Any]
     }
 
 
+# 中文注释：封装 _generate_vqa 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _generate_vqa(model: Any, sample: Sample, row: dict[str, Any], cfg: AppConfig) -> ModelOutput:
     question = str(row.get("question") or sample.text or "").strip()
     if not question:
@@ -126,10 +138,12 @@ def _generate_vqa(model: Any, sample: Sample, row: dict[str, Any], cfg: AppConfi
     return model.generate_answer(sample, question, prompt=str(cfg.task.vqa_prompt), max_tokens=64)
 
 
+# 中文注释：封装 _generate_caption 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _generate_caption(model: Any, sample: Sample, cfg: AppConfig) -> ModelOutput:
     return model.generate_caption(sample, prompt=str(cfg.task.caption_prompt), max_tokens=96)
 
 
+# 中文注释：封装 _probe_present 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _probe_present(model: Any, sample: Sample, object_name: str, aliases: list[str], caption_text: str, cfg: AppConfig) -> bool:
     if bool(cfg.task.object_probe_enabled) and object_name:
         try:
@@ -142,6 +156,7 @@ def _probe_present(model: Any, sample: Sample, object_name: str, aliases: list[s
     return object_present(caption_text, object_name, aliases)
 
 
+# 中文注释：封装 _vqa_metrics 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _vqa_metrics(row: dict[str, Any], clean: ModelOutput, attacked: ModelOutput, defended: ModelOutput | None) -> dict[str, Any]:
     aliases = _list(row.get("answer_aliases") or row.get("answers") or row.get("acceptable_answers"))
     answer = str(row.get("answer") or row.get("ground_truth") or row.get("label") or (aliases[0] if aliases else "")).strip()
@@ -161,6 +176,7 @@ def _vqa_metrics(row: dict[str, Any], clean: ModelOutput, attacked: ModelOutput,
     }
 
 
+# 中文注释：封装 _caption_metrics 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _caption_metrics(row: dict[str, Any], model: Any, clean_sample: Sample, attacked_sample: Sample, defended_sample: Sample | None, clean: ModelOutput, attacked: ModelOutput, defended: ModelOutput | None, cfg: AppConfig) -> dict[str, Any]:
     target = str(row.get("target_object") or row.get("added_object") or clean_sample.target_text or "").strip()
     aliases = _list(row.get("target_aliases"))
@@ -214,6 +230,7 @@ def _caption_metrics(row: dict[str, Any], model: Any, clean_sample: Sample, atta
     }
 
 
+# 中文注释：封装 _stage_output_scores 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _stage_output_scores(task_kind: str, stage_metrics: dict[str, Any]) -> dict[str, float]:
     if task_kind == "vqa":
         return {
@@ -234,6 +251,7 @@ def _stage_output_scores(task_kind: str, stage_metrics: dict[str, Any]) -> dict[
     return {"clean": 1.0, "adv": 1.0 if attacked_present == clean_present else 0.0, "defended": 1.0 if defended_present == clean_present else 0.0}
 
 
+# 中文注释：封装 _case_bundle 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _case_bundle(
     *,
     cfg: AppConfig,
@@ -310,6 +328,7 @@ def _case_bundle(
     return bundle
 
 
+# 中文注释：封装 _sample_delta_metrics 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _sample_delta_metrics(clean: Sample, attacked: Sample) -> dict[str, float]:
     delta = np.asarray(attacked.image, dtype=np.float32) - np.asarray(clean.image, dtype=np.float32)
     flat = delta.reshape(-1)
@@ -320,6 +339,7 @@ def _sample_delta_metrics(clean: Sample, attacked: Sample) -> dict[str, float]:
     }
 
 
+# 中文注释：封装 _risk_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _risk_payload(cfg: AppConfig, *, asr: float, semantic: float, avg_l2: float, avg_linf: float, stability: float) -> dict[str, Any]:
     if not bool(cfg.risk.enabled):
         return {"risk_score": 0.0, "risk_level": "disabled", "risk_scenario": str(cfg.task.kind), "risk_breakdown": {}, "risk_weights": {}, "risk_recommendations": []}
@@ -336,6 +356,7 @@ def _risk_payload(cfg: AppConfig, *, asr: float, semantic: float, avg_l2: float,
     )
 
 
+# 中文注释：封装 _load_generation_rows 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _load_generation_rows(cfg: AppConfig, progress: Callable[[str, str, float | None, str], None] | None) -> tuple[Path, Path, list[dict[str, Any]]]:
     cases_path = Path(str(cfg.task.cases_jsonl))
     cases_dir = cases_path.parent if cases_path.parent.exists() else Path.cwd()
@@ -345,6 +366,7 @@ def _load_generation_rows(cfg: AppConfig, progress: Callable[[str, str, float | 
     return cases_path, cases_dir, rows[:max_samples] if max_samples > 0 else rows
 
 
+# 中文注释：封装 _generation_components 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _generation_components(cfg: AppConfig) -> tuple[Any, Any, Any, Any, str]:
     gen_model = create("model_adapter", cfg.plugins.model_adapter)
     surrogate_name = str(cfg.runner.surrogate_model_adapter or "clip_hf")
@@ -354,6 +376,7 @@ def _generation_components(cfg: AppConfig) -> tuple[Any, Any, Any, Any, str]:
     return gen_model, surrogate, attack, defense, surrogate_name
 
 
+# 中文注释：封装 _attack_and_defend 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _attack_and_defend(
     cfg: AppConfig,
     clean_sample: Sample,
@@ -378,10 +401,12 @@ def _attack_and_defend(
     return attacked, attacked_sample, _stage_sample(defended.sample, "defended")
 
 
+# 中文注释：封装 _staged_lifecycle_enabled 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _staged_lifecycle_enabled(cfg: AppConfig) -> bool:
     return bool(getattr(cfg.runner, "staged_model_lifecycle", True))
 
 
+# 中文注释：封装 _release_local_vlm_for_attack 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _release_local_vlm_for_attack(cfg: AppConfig, progress: Callable[[str, str, float | None, str], None] | None) -> None:
     if not _staged_lifecycle_enabled(cfg) or not bool(getattr(cfg.runner, "stop_local_vlm_before_attack", True)):
         return
@@ -390,6 +415,7 @@ def _release_local_vlm_for_attack(cfg: AppConfig, progress: Callable[[str, str, 
     empty_cuda_cache()
 
 
+# 中文注释：封装 _prepare_generation_model_for_evaluation 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _prepare_generation_model_for_evaluation(cfg: AppConfig, adapters: list[str], progress: Callable[[str, str, float | None, str], None] | None) -> None:
     if not _staged_lifecycle_enabled(cfg):
         return
@@ -401,6 +427,7 @@ def _prepare_generation_model_for_evaluation(cfg: AppConfig, adapters: list[str]
     _emit_progress(progress, "model_preflight", "success", 58, "本地 VLM 已就绪，开始评测攻击图。")
 
 
+# 中文注释：封装 _generate_outputs 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _generate_outputs(cfg: AppConfig, row: dict[str, Any], gen_model: Any, clean_sample: Sample, attacked_sample: Sample, defended_sample: Sample | None) -> tuple[ModelOutput, ModelOutput, ModelOutput | None, dict[str, Any], float]:
     if str(cfg.task.kind) == "vqa":
         clean_out = _generate_vqa(gen_model, clean_sample, row, cfg)
@@ -415,6 +442,7 @@ def _generate_outputs(cfg: AppConfig, row: dict[str, Any], gen_model: Any, clean
     return clean_out, attacked_out, defended_out, metrics, float(metrics.get("semantic_preservation_rate", 0.0))
 
 
+# 中文注释：封装 _artifact_refs 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _artifact_refs(case_dir: Path, sample_debug_dir: Path, cfg: AppConfig, clean_sample: Sample, attacked_sample: Sample, defended_sample: Sample | None, attacked: Any) -> dict[str, str]:
     refs = {"clean_image": save_image_png(str(case_dir / "clean.png"), clean_sample.image), "adv_image": save_image_png(str(case_dir / "adv.png"), attacked_sample.image)}
     if defended_sample is not None:
@@ -429,6 +457,7 @@ def _artifact_refs(case_dir: Path, sample_debug_dir: Path, cfg: AppConfig, clean
     return refs
 
 
+# 中文注释：封装 _case_result_rows 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _case_result_rows(sid: str, cfg: AppConfig, row: dict[str, Any], case_dir: Path, outputs: tuple[ModelOutput, ModelOutput, ModelOutput | None], metrics: dict[str, Any], refs: dict[str, str], perturbation: dict[str, float]) -> tuple[dict[str, Any], dict[str, Any]]:
     clean_out, attacked_out, defended_out = outputs
     result_row = {
@@ -457,6 +486,7 @@ def _case_result_rows(sid: str, cfg: AppConfig, row: dict[str, Any], case_dir: P
     return result_row, index_row
 
 
+# 中文注释：封装 _run_one_generation_case 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _run_one_generation_case(ctx: dict[str, Any], idx: int, row: dict[str, Any]) -> dict[str, Any]:
     cfg: AppConfig = ctx["cfg"]
     sid = _case_id(row, idx)
@@ -476,6 +506,7 @@ def _run_one_generation_case(ctx: dict[str, Any], idx: int, row: dict[str, Any])
     return {"result": result_row, "index": index_row, "l2": perturbation["l2"], "linf": perturbation["linf"], "semantic": semantic, "success": metrics.get("attack_success", False), "recovered": metrics.get("defense_recovered", False)}
 
 
+# 中文注释：封装 _generation_metrics 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _generation_metrics(task_kind: str, results: list[dict[str, Any]], asr_attack: float, semantic_score: float, recovered_values: list[float]) -> dict[str, float]:
     if task_kind == "vqa":
         return {
@@ -495,6 +526,7 @@ def _generation_metrics(task_kind: str, results: list[dict[str, Any]], asr_attac
     }
 
 
+# 中文注释：封装 _summary_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _summary_payload(cfg: AppConfig, surrogate_name: str, defense: Any, results: list[dict[str, Any]], values: dict[str, list[float]]) -> tuple[dict[str, Any], dict[str, Any]]:
     asr_attack = _safe_mean(values["success"])
     asr_defended = _safe_mean(values["defended_success"])
@@ -531,6 +563,7 @@ def _summary_payload(cfg: AppConfig, surrogate_name: str, defense: Any, results:
     return summary, risk_payload
 
 
+# 中文注释：封装 _report_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _report_payload(cfg: AppConfig, cases_path: Path, summary: dict[str, Any], risk_payload: dict[str, Any], results: list[dict[str, Any]], values: dict[str, list[float]]) -> dict[str, Any]:
     gen_metrics = dict(summary.get("generation_metrics", {}))
     return {
@@ -547,6 +580,7 @@ def _report_payload(cfg: AppConfig, cases_path: Path, summary: dict[str, Any], r
     }
 
 
+# 中文注释：串联 run 的主流程，集中处理评测运行器的初始化、执行和退出条件。
 def run(cfg: AppConfig, progress: Callable[[str, str, float | None, str], None] | None = None) -> RunArtifacts:
     if str(cfg.task.kind) not in {"vqa", "caption"}:
         raise ValueError("generation runner requires task.kind='vqa' or 'caption'")

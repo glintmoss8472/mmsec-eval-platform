@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 prepare coco2014 generation 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -16,6 +17,7 @@ VQA_Q_URL = "https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Val_msco
 VQA_A_URL = "https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Annotations_Val_mscoco.zip"
 
 
+# 中文注释：封装 _download 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _download(url: str, target: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     with urllib.request.urlopen(url, timeout=180) as response, target.open("wb") as handle:
@@ -26,6 +28,7 @@ def _download(url: str, target: Path) -> None:
             handle.write(chunk)
 
 
+# 中文注释：封装 _ensure_zip 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _ensure_zip(path: Path, url: str, *, allow_download: bool) -> Path:
     if path.exists() and path.stat().st_size > 0:
         return path
@@ -36,6 +39,7 @@ def _ensure_zip(path: Path, url: str, *, allow_download: bool) -> Path:
     return path
 
 
+# 中文注释：封装 _extract_member 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _extract_member(zip_path: Path, member: str, target: Path) -> Path:
     if target.exists() and target.stat().st_size > 0:
         return target
@@ -50,15 +54,18 @@ def _extract_member(zip_path: Path, member: str, target: Path) -> Path:
     return target
 
 
+# 中文注释：封装 _load_json 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 中文注释：封装 _ensure_annotations 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _ensure_annotations(root: Path, *, allow_download: bool) -> dict[str, Path]:
     archives = root / "archives"
     ann_dir = root / "annotations"
     ann_dir.mkdir(parents=True, exist_ok=True)
 
+    # 中文注释：实现 ensure_json 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
     def ensure_json(target: Path, zip_name: str, url: str, member: str) -> Path:
         if target.exists() and target.stat().st_size > 0:
             return target
@@ -93,14 +100,17 @@ def _ensure_annotations(root: Path, *, allow_download: bool) -> dict[str, Path]:
     }
 
 
+# 中文注释：封装 _image_name 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _image_name(image_id: int) -> str:
     return f"COCO_val2014_{image_id:012d}.jpg"
 
 
+# 中文注释：封装 _row_image_ref 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _row_image_ref(image_id: int) -> str:
     return f"../val2014/{_image_name(image_id)}"
 
 
+# 中文注释：封装 _ensure_images 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _ensure_images(root: Path, image_ids: set[int], *, allow_download: bool) -> None:
     if not image_ids:
         return
@@ -121,6 +131,7 @@ def _ensure_images(root: Path, image_ids: set[int], *, allow_download: bool) -> 
             _extract_member(zip_path, member, image_dir / file_name)
 
 
+# 中文注释：封装 _answer_aliases 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _answer_aliases(annotation: dict[str, Any]) -> list[str]:
     answers = [str(item.get("answer", "")).strip() for item in annotation.get("answers", []) if isinstance(item, dict)]
     aliases = [answer for answer, _ in Counter(answer for answer in answers if answer).most_common()]
@@ -130,6 +141,7 @@ def _answer_aliases(annotation: dict[str, Any]) -> list[str]:
     return aliases[:8]
 
 
+# 中文注释：封装 _build_vqa_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _build_vqa_rows(paths: dict[str, Path], *, max_items: int) -> tuple[list[dict[str, Any]], set[int]]:
     questions = _load_json(paths["vqa_questions"]).get("questions", [])
     annotations = {
@@ -168,6 +180,7 @@ def _build_vqa_rows(paths: dict[str, Path], *, max_items: int) -> tuple[list[dic
     return rows, image_ids
 
 
+# 中文注释：封装 _caption_maps 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _caption_maps(captions_payload: dict[str, Any]) -> tuple[dict[int, str], dict[int, list[str]]]:
     image_names = {
         int(item["id"]): str(item.get("file_name", ""))
@@ -184,6 +197,7 @@ def _caption_maps(captions_payload: dict[str, Any]) -> tuple[dict[int, str], dic
     return image_names, captions
 
 
+# 中文注释：封装 _build_caption_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _build_caption_rows(paths: dict[str, Path], *, categories: set[str], max_items: int, min_area: float) -> tuple[list[dict[str, Any]], set[int]]:
     captions_payload = _load_json(paths["captions"])
     image_names, captions = _caption_maps(captions_payload)
@@ -233,11 +247,13 @@ def _build_caption_rows(paths: dict[str, Path], *, categories: set[str], max_ite
     return rows, image_ids
 
 
+# 中文注释：封装 _write_jsonl 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Prepare COCO2014/VQA-v2 JSONL files for generation-style evaluation.")
     parser.add_argument("--root", default="data/coco2014")

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于指标计算层，集中实现 generation 相关逻辑。
 from __future__ import annotations
 
 import re
@@ -21,6 +22,7 @@ _NUM_WORDS = {
 }
 
 
+# 中文注释：实现 normalize_answer 的核心流程，支撑指标计算层中的业务语义和异常边界。
 def normalize_answer(text: object) -> str:
     value = str(text or "").strip().lower()
     value = re.sub(r"[\n\r\t]+", " ", value)
@@ -34,6 +36,7 @@ def normalize_answer(text: object) -> str:
     return " ".join(tokens).strip()
 
 
+# 中文注释：实现 answer_matches 的核心流程，支撑指标计算层中的业务语义和异常边界。
 def answer_matches(candidate: object, answer: object, aliases: Iterable[object] = ()) -> bool:
     cand = normalize_answer(candidate)
     if not cand:
@@ -43,6 +46,7 @@ def answer_matches(candidate: object, answer: object, aliases: Iterable[object] 
     return any(cand == item or item in cand for item in accepted)
 
 
+# 中文注释：实现 yes_no_value 的核心流程，支撑指标计算层中的业务语义和异常边界。
 def yes_no_value(text: object) -> bool | None:
     norm = normalize_answer(text)
     if not norm:
@@ -55,10 +59,12 @@ def yes_no_value(text: object) -> bool | None:
     return None
 
 
+# 中文注释：实现 token_set 的核心流程，支撑指标计算层中的业务语义和异常边界。
 def token_set(text: object) -> set[str]:
     return {tok for tok in normalize_answer(text).split() if tok}
 
 
+# 中文注释：实现 text_similarity 的核心流程，支撑指标计算层中的业务语义和异常边界。
 def text_similarity(a: object, b: object) -> float:
     sa = normalize_answer(a)
     sb = normalize_answer(b)
@@ -69,6 +75,7 @@ def text_similarity(a: object, b: object) -> float:
     return float(SequenceMatcher(a=sa, b=sb).ratio())
 
 
+# 中文注释：实现 object_present 的核心流程，支撑指标计算层中的业务语义和异常边界。
 def object_present(text: object, object_name: object, aliases: Iterable[object] = ()) -> bool:
     haystack = f" {normalize_answer(text)} "
     candidates = [normalize_answer(object_name), *[normalize_answer(item) for item in aliases]]
@@ -80,6 +87,7 @@ def object_present(text: object, object_name: object, aliases: Iterable[object] 
     return False
 
 
+# 中文注释：实现 object_jaccard 的核心流程，支撑指标计算层中的业务语义和异常边界。
 def object_jaccard(clean_objects: Iterable[object], attacked_objects: Iterable[object]) -> float:
     clean = {normalize_answer(item) for item in clean_objects if normalize_answer(item)}
     attacked = {normalize_answer(item) for item in attacked_objects if normalize_answer(item)}

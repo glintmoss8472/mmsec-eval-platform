@@ -1,3 +1,4 @@
+# 文件说明：该文件属于外部攻击脚本，集中实现 anyattack demo one 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -7,6 +8,7 @@ import sys
 from pathlib import Path
 
 
+# 中文注释：串联 main 的主流程，集中处理外部攻击脚本的初始化、执行和退出条件。
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run official AnyAttack demo.py for one image pair.")
     parser.add_argument("--repo_dir", required=True)

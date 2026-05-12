@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 prepare flickr30k 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -21,10 +22,12 @@ FLICKR30K_GITHUB_PARTS = [
 ]
 
 
+# 中文注释：封装 _truthy 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _truthy(value: str) -> bool:
     return str(value).strip().lower() not in {"0", "false", "no", "off", ""}
 
 
+# 中文注释：封装 _read_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _read_rows(src: Path) -> list[dict[str, Any]]:
     suffix = src.suffix.lower()
     if suffix == ".jsonl":
@@ -80,6 +83,7 @@ def _read_rows(src: Path) -> list[dict[str, Any]]:
     return _read_token_text(src.read_text(encoding="utf-8", errors="ignore"))
 
 
+# 中文注释：封装 _read_token_text 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _read_token_text(content: str) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for idx, line in enumerate(content.splitlines()):
@@ -95,6 +99,7 @@ def _read_token_text(content: str) -> list[dict[str, Any]]:
     return rows
 
 
+# 中文注释：封装 _read_caption_blob 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _read_caption_blob(name: str, content: str) -> list[dict[str, Any]]:
     first_line = next((line.strip() for line in content.splitlines() if line.strip()), "")
     suffix = Path(name).suffix.lower()
@@ -112,6 +117,7 @@ def _read_caption_blob(name: str, content: str) -> list[dict[str, Any]]:
     return _read_token_text(content)
 
 
+# 中文注释：封装 _pick 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _pick(row: dict[str, Any], *keys: str) -> str:
     for key in keys:
         if key in row and row[key] is not None:
@@ -121,6 +127,7 @@ def _pick(row: dict[str, Any], *keys: str) -> str:
     return ""
 
 
+# 中文注释：封装 _looks_like_placeholder_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _looks_like_placeholder_rows(rows: list[dict[str, Any]]) -> bool:
     if not rows:
         return False
@@ -131,12 +138,14 @@ def _looks_like_placeholder_rows(rows: list[dict[str, Any]]) -> bool:
     return all(("placeholder sample" in text) or text.startswith("demo caption ") for text in captions if text)
 
 
+# 中文注释：封装 _allow_synthetic_fallback 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _allow_synthetic_fallback(raw: str | None = None) -> bool:
     if raw is None:
         raw = os.getenv("MMSEC_ALLOW_PLACEHOLDER_DATA", "0")
     return _truthy(str(raw))
 
 
+# 中文注释：封装 _request_get 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _request_get(url: str, *, timeout: int = 45, stream: bool = False) -> requests.Response:
     session = requests.Session()
     session.trust_env = False
@@ -145,6 +154,7 @@ def _request_get(url: str, *, timeout: int = 45, stream: bool = False) -> reques
     return response
 
 
+# 中文注释：封装 _placeholder 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _placeholder(image_path: Path, caption: str, idx: int) -> None:
     image_path.parent.mkdir(parents=True, exist_ok=True)
     width = 224
@@ -162,6 +172,7 @@ def _placeholder(image_path: Path, caption: str, idx: int) -> None:
     image.save(image_path)
 
 
+# 中文注释：封装 _resolve_existing_image 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _resolve_existing_image(dataset_root: Path, image_dir: Path, raw_image: str) -> str:
     raw = str(raw_image or "").strip().replace("\\", "/")
     if not raw:
@@ -179,6 +190,7 @@ def _resolve_existing_image(dataset_root: Path, image_dir: Path, raw_image: str)
     return ""
 
 
+# 中文注释：封装 _write_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _write_rows(dataset_root: Path, image_dir: Path, out_path: Path, rows: list[dict[str, Any]], *, synthesize_missing: bool) -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     norm: list[dict[str, Any]] = []
@@ -204,6 +216,7 @@ def _write_rows(dataset_root: Path, image_dir: Path, out_path: Path, rows: list[
     return len(norm)
 
 
+# 中文注释：封装 _limit_rows_by_unique_images 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _limit_rows_by_unique_images(rows: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
     if limit <= 0:
         return rows
@@ -220,6 +233,7 @@ def _limit_rows_by_unique_images(rows: list[dict[str, Any]], limit: int) -> list
     return kept
 
 
+# 中文注释：封装 _try_hf_download 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _try_hf_download(dataset_root: Path, image_dir: Path, out_path: Path, limit: int) -> int:
     try:
         from datasets import load_dataset  # type: ignore
@@ -283,6 +297,7 @@ def _try_hf_download(dataset_root: Path, image_dir: Path, out_path: Path, limit:
     return 0
 
 
+# 中文注释：封装 _download_flickr30k_release 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _download_flickr30k_release(dataset_root: Path) -> tuple[Path, Path] | None:
     cache_dir = dataset_root / ".download_cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -310,6 +325,7 @@ def _download_flickr30k_release(dataset_root: Path) -> tuple[Path, Path] | None:
     return archive_path, cache_dir
 
 
+# 中文注释：封装 _extract_flickr30k_release 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _extract_flickr30k_release(dataset_root: Path, image_dir: Path, limit: int) -> list[dict[str, Any]]:
     download = _download_flickr30k_release(dataset_root)
     if not download:
@@ -360,6 +376,7 @@ def _extract_flickr30k_release(dataset_root: Path, image_dir: Path, limit: int) 
     return extracted_rows
 
 
+# 中文注释：封装 _download_token_file 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _download_token_file(dataset_root: Path, download_url: str) -> Path | None:
     urls = [download_url] if download_url else []
     urls.append("https://raw.githubusercontent.com/BryanPlummer/flickr30k_entities/master/results_20130124.token")
@@ -373,6 +390,7 @@ def _download_token_file(dataset_root: Path, download_url: str) -> Path | None:
     return None
 
 
+# 中文注释：封装 _seed_demo_rows 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _seed_demo_rows(image_dir: Path, out_path: Path, count: int) -> int:
     rows: list[dict[str, Any]] = []
     for idx in range(max(16, count or 64)):
@@ -383,6 +401,7 @@ def _seed_demo_rows(image_dir: Path, out_path: Path, count: int) -> int:
     return _write_rows(out_path.parent, image_dir, out_path, rows, synthesize_missing=False)
 
 
+# 中文注释：封装 _parse_args 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("-Root", dest="root", default="data/flickr30k")
@@ -397,6 +416,7 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+# 中文注释：封装 _prepare_paths 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _prepare_paths(args: argparse.Namespace) -> tuple[Path, Path, Path]:
     cwd = Path.cwd()
     dataset_root = Path(args.root)
@@ -409,6 +429,7 @@ def _prepare_paths(args: argparse.Namespace) -> tuple[Path, Path, Path]:
     return dataset_root, image_dir, out_path
 
 
+# 中文注释：封装 _local_candidates 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _local_candidates(dataset_root: Path, captions_source: str) -> list[Path]:
     captions_source = str(captions_source or "").strip()
     local_candidates = [
@@ -430,6 +451,7 @@ def _local_candidates(dataset_root: Path, captions_source: str) -> list[Path]:
     return local_candidates
 
 
+# 中文注释：封装 _try_local_sources 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _try_local_sources(dataset_root: Path, image_dir: Path, out_path: Path, candidates: list[Path], allow_synthetic_fallback: bool) -> int:
     for candidate in candidates:
         if candidate.exists():
@@ -449,6 +471,7 @@ def _try_local_sources(dataset_root: Path, image_dir: Path, out_path: Path, cand
     return -1
 
 
+# 中文注释：封装 _try_remote_sources 的内部步骤，让运维与实验脚本主流程保持清晰并隔离边界细节。
 def _try_remote_sources(args: argparse.Namespace, dataset_root: Path, image_dir: Path, out_path: Path, allow_synthetic_fallback: bool) -> int:
     if not args.skip_download and _truthy(args.auto_download):
         release_rows = _extract_flickr30k_release(dataset_root, image_dir, args.max_items)
@@ -481,6 +504,7 @@ def _try_remote_sources(args: argparse.Namespace, dataset_root: Path, image_dir:
     return -1
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> int:
     args = _parse_args()
     dataset_root, image_dir, out_path = _prepare_paths(args)

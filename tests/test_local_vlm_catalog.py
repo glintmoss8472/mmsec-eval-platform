@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test local vlm catalog 相关逻辑。
 from __future__ import annotations
 
 import re
@@ -19,6 +20,7 @@ from mmsec_eval.plugins.builtin import register_builtin_plugins
 from mmsec_eval.plugins.registry import list_plugins
 
 
+# 中文注释：验证 test_local_vlm_catalog_drives_runtime_registration_and_scripts 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_local_vlm_catalog_drives_runtime_registration_and_scripts() -> None:
     assert len(LOCAL_OPENAI_COMPAT_MODEL_SPECS) == 7
     assert LOCAL_OPENAI_COMPAT_ADAPTERS == tuple(spec.adapter for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS)
@@ -48,6 +50,7 @@ def test_local_vlm_catalog_drives_runtime_registration_and_scripts() -> None:
     assert set(LOCAL_OPENAI_COMPAT_ADAPTERS).issubset(registered)
 
 
+# 中文注释：验证 test_local_vlm_catalog_is_visible_in_frontend_model_catalog 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_local_vlm_catalog_is_visible_in_frontend_model_catalog() -> None:
     frontend_catalog = Path("frontend/src/lib/modelCatalog.ts").read_text(encoding="utf-8-sig")
     frontend_adapters = set(re.findall(r'adapter:\s*"([^"]+)"', frontend_catalog))
@@ -55,6 +58,7 @@ def test_local_vlm_catalog_is_visible_in_frontend_model_catalog() -> None:
     assert set(LOCAL_OPENAI_COMPAT_ADAPTERS).issubset(frontend_adapters)
 
 
+# 中文注释：验证 test_openai_bench_configs_match_current_local_vlm_catalog 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_openai_bench_configs_match_current_local_vlm_catalog() -> None:
     config_by_adapter = {
         "openai_qwen3_vl": Path("configs/bench/bootstrap_qwen3_vl_openai.yaml"),

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于项目工程，集中实现 builtin 相关逻辑。
 from __future__ import annotations
 
 from mmsec_eval.attacks.advedm.attack import ADVEDMAttack
@@ -41,6 +42,7 @@ from mmsec_eval.model_adapters.vilt_itm_adapter import ViltITMAdapter
 from mmsec_eval.plugins.registry import register
 
 
+# 中文注释：封装 _register_openai_compatible_adapters 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _register_openai_compatible_adapters() -> None:
     for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS:
         register(
@@ -50,6 +52,7 @@ def _register_openai_compatible_adapters() -> None:
         )
 
 
+# 中文注释：实现 register_builtin_plugins 的核心流程，支撑项目工程中的业务语义和异常边界。
 def register_builtin_plugins() -> None:
     register("model_adapter", "clip_hf", lambda: ClipHFAdapter())
     register("model_adapter", "blip_itm", lambda: BlipITMAdapter())

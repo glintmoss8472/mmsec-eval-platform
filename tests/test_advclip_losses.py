@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test advclip losses 相关逻辑。
 from __future__ import annotations
 
 import torch
@@ -5,6 +6,7 @@ import torch
 from mmsec_eval.attacks.advclip.losses import topology_deviation_ce
 
 
+# 中文注释：验证 test_topology_deviation_small_when_clean_equals_adv 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_topology_deviation_small_when_clean_equals_adv():
     torch.manual_seed(0)
     clean = torch.randn(16, 32, dtype=torch.float32)
@@ -17,6 +19,7 @@ def test_topology_deviation_small_when_clean_equals_adv():
     assert float(l_same.item()) < float(l_shuf.item())
 
 
+# 中文注释：验证 test_topology_deviation_supports_different_k 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_topology_deviation_supports_different_k():
     torch.manual_seed(1)
     clean = torch.randn(10, 24, dtype=torch.float32)

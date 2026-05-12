@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 文件说明：该文件属于运维与实验脚本，集中实现 install attack toolkit 相关逻辑。
 set -euo pipefail
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"

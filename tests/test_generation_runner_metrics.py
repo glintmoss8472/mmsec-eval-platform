@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test generation runner metrics 相关逻辑。
 from __future__ import annotations
 
 import numpy as np
@@ -7,15 +8,19 @@ from mmsec_eval.runner.generation_runner import _caption_metrics, _case_bundle
 from mmsec_eval.types import ModelOutput, Sample
 
 
+# 中文注释：定义 NoProbeModel 的结构化职责，作为自动化测试中状态、配置或行为的边界。
 class NoProbeModel:
+    # 中文注释：实现 NoProbeModel.object_probe 的核心行为，维护自动化测试在该对象上的调用契约。
     def object_probe(self, *args, **kwargs):
         raise AttributeError("object probe unavailable")
 
 
+# 中文注释：封装 _sample 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _sample(sample_id: str) -> Sample:
     return Sample(sample_id=sample_id, image=np.zeros((8, 8, 3), dtype=np.float32), text="")
 
 
+# 中文注释：验证 test_caption_spr_is_neutral_when_no_clean_non_target_objects_present 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_caption_spr_is_neutral_when_no_clean_non_target_objects_present():
     cfg = AppConfig()
     cfg.task.object_probe_enabled = True
@@ -43,6 +48,7 @@ def test_caption_spr_is_neutral_when_no_clean_non_target_objects_present():
     assert metrics["object_jaccard"] == 1.0
 
 
+# 中文注释：验证 test_vqa_case_bundle_scores_each_stage_by_answer_correctness 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_vqa_case_bundle_scores_each_stage_by_answer_correctness() -> None:
     cfg = AppConfig()
     cfg.task.kind = "vqa"
@@ -76,6 +82,7 @@ def test_vqa_case_bundle_scores_each_stage_by_answer_correctness() -> None:
     assert bundle["outputs"]["defended"]["score"] == 1.0
 
 
+# 中文注释：验证 test_caption_case_bundle_scores_target_state_relative_to_clean 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_caption_case_bundle_scores_target_state_relative_to_clean() -> None:
     cfg = AppConfig()
     cfg.task.kind = "caption"
@@ -107,6 +114,7 @@ def test_caption_case_bundle_scores_target_state_relative_to_clean() -> None:
     assert bundle["outputs"]["defended"]["score"] == 1.0
 
 
+# 中文注释：验证 test_vqa_answer_change_uses_normalized_text 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_vqa_answer_change_uses_normalized_text() -> None:
     from mmsec_eval.runner.generation_runner import _vqa_metrics
 

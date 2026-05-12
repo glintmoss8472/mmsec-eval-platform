@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test api runs null compat 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -5,6 +6,7 @@ from pathlib import Path
 from api_test_utils import make_client
 
 
+# 中文注释：验证 test_runs_list_tolerates_null_cache_fields 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_runs_list_tolerates_null_cache_fields(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         store = client.app.state.store
@@ -56,6 +58,7 @@ def test_runs_list_tolerates_null_cache_fields(tmp_path: Path, monkeypatch):
         assert row["risk_scenario"] == "general"
 
 
+# 中文注释：验证 test_runs_list_merges_cache_and_artifact_only_runs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_runs_list_merges_cache_and_artifact_only_runs(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         store = client.app.state.store
@@ -109,6 +112,7 @@ def test_runs_list_merges_cache_and_artifact_only_runs(tmp_path: Path, monkeypat
         assert "r_artifact_only" in run_ids
 
 
+# 中文注释：验证 test_run_analytics_groups_model_risk_across_all_filtered_runs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_run_analytics_groups_model_risk_across_all_filtered_runs(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         for idx, asr in enumerate((0.2, 0.6, 0.8), start=1):
@@ -136,6 +140,7 @@ def test_run_analytics_groups_model_risk_across_all_filtered_runs(tmp_path: Path
         assert group["low_risk_count"] == 2
 
 
+# 中文注释：验证 test_runs_list_hides_advclip_training_runs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_runs_list_hides_advclip_training_runs(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         train_dir = tmp_path / "artifacts" / "runs" / "r_train"
@@ -160,6 +165,7 @@ def test_runs_list_hides_advclip_training_runs(tmp_path: Path, monkeypatch):
         assert "r_train" not in run_ids
 
 
+# 中文注释：验证 test_generated_only_runs_do_not_enter_evaluation_indexes 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_generated_only_runs_do_not_enter_evaluation_indexes(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         generated_dir = tmp_path / "artifacts" / "runs" / "r_generated_only"
@@ -238,6 +244,7 @@ def test_generated_only_runs_do_not_enter_evaluation_indexes(tmp_path: Path, mon
             assert detail_resp.status_code == 404
 
 
+# 中文注释：验证 test_fake_model_runs_do_not_enter_any_run_indexes 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_fake_model_runs_do_not_enter_any_run_indexes(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         for run_id, model_adapter, sample_id in (
@@ -315,6 +322,7 @@ def test_fake_model_runs_do_not_enter_any_run_indexes(tmp_path: Path, monkeypatc
                 assert detail_resp.status_code == 404
 
 
+# 中文注释：验证 test_artifact_run_created_at_uses_iso_timestamp_from_run_id 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_artifact_run_created_at_uses_iso_timestamp_from_run_id(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         run_id = "20260502_071613_559213"
@@ -332,6 +340,7 @@ def test_artifact_run_created_at_uses_iso_timestamp_from_run_id(tmp_path: Path, 
         assert row["created_at"].startswith("2026-05-02T07:16:13")
 
 
+# 中文注释：验证 test_runs_list_exposes_vlr_dashboard_metrics 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_runs_list_exposes_vlr_dashboard_metrics(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         run_id = "r_vlr_metrics"
@@ -373,6 +382,7 @@ def test_runs_list_exposes_vlr_dashboard_metrics(tmp_path: Path, monkeypatch):
         assert row["rank_delta_mean"] == 2.0625
 
 
+# 中文注释：验证 test_runs_list_exposes_generation_dashboard_metrics 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_runs_list_exposes_generation_dashboard_metrics(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         run_id = "r_generation_metrics"

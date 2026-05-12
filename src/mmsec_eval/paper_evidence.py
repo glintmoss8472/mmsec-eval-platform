@@ -1,3 +1,4 @@
+# 文件说明：该文件属于项目工程，集中实现 paper evidence 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -21,6 +22,7 @@ INFERRED_JOINT_NOTE = "原始 summary.attack_debug 未保留在当前归档包�
 OBSERVED_JOINT_NOTE = "联合执行标记直接来自冻结的 summary.attack_debug 字段。"
 
 
+# 中文注释：实现 parse_optional_bool 的核心流程，支撑项目工程中的业务语义和异常边界。
 def parse_optional_bool(value: Any) -> bool | None:
     if isinstance(value, bool):
         return value
@@ -34,6 +36,7 @@ def parse_optional_bool(value: Any) -> bool | None:
     return None
 
 
+# 中文注释：实现 parse_optional_float 的核心流程，支撑项目工程中的业务语义和异常边界。
 def parse_optional_float(value: Any) -> float | None:
     try:
         if value is None or value == "":
@@ -43,6 +46,7 @@ def parse_optional_float(value: Any) -> float | None:
         return None
 
 
+# 中文注释：实现 contains_no_text_marker 的核心流程，支撑项目工程中的业务语义和异常边界。
 def contains_no_text_marker(*parts: Any) -> bool:
     for part in parts:
         text = str(part or "").strip().lower()
@@ -53,10 +57,12 @@ def contains_no_text_marker(*parts: Any) -> bool:
     return False
 
 
+# 中文注释：实现 marker_json 的核心流程，支撑项目工程中的业务语义和异常边界。
 def marker_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False) if isinstance(value, dict) else ""
 
 
+# 中文注释：封装 _finalize_joint_payload 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _finalize_joint_payload(
     *,
     image_branch_enabled: bool | None,
@@ -81,6 +87,7 @@ def _finalize_joint_payload(
     }
 
 
+# 中文注释：实现 build_row_joint_execution 的核心流程，支撑项目工程中的业务语义和异常边界。
 def build_row_joint_execution(row: dict[str, Any]) -> dict[str, Any]:
     attack = str(row.get("attack", "") or "").strip()
     eval_scope = str(row.get("eval_scope", "") or "").strip().lower()
@@ -141,6 +148,7 @@ def build_row_joint_execution(row: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+# 中文注释：实现 build_summary_joint_execution 的核心流程，支撑项目工程中的业务语义和异常边界。
 def build_summary_joint_execution(
     row: dict[str, Any],
     summary: dict[str, Any],
@@ -191,6 +199,7 @@ def build_summary_joint_execution(
     )
 
 
+# 中文注释：封装 _joint_payload_from_summary 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _joint_payload_from_summary(summary_data: dict[str, Any] | None) -> dict[str, Any]:
     payload: dict[str, Any] = {}
     if isinstance(summary_data, dict):
@@ -214,6 +223,7 @@ def _joint_payload_from_summary(summary_data: dict[str, Any] | None) -> dict[str
     return payload
 
 
+# 中文注释：封装 _formal_branch_flags 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _formal_branch_flags(
     row: dict[str, Any],
     payload: dict[str, Any],
@@ -246,6 +256,7 @@ def _formal_branch_flags(
     return image_branch_enabled, text_branch_enabled, text_changed_ratio, text_edit_applied
 
 
+# 中文注释：封装 _formal_evidence_text 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _formal_evidence_text(row: dict[str, Any], payload: dict[str, Any]) -> tuple[str, str, str]:
     evidence_source = str(payload.get("joint_execution_evidence_source", row.get("joint_execution_evidence_source", "")) or "").strip()
     if not evidence_source:
@@ -257,6 +268,7 @@ def _formal_evidence_text(row: dict[str, Any], payload: dict[str, Any]) -> tuple
     return evidence_source, evidence_basis, note or INFERRED_JOINT_NOTE
 
 
+# 中文注释：实现 build_formal_joint_execution 的核心流程，支撑项目工程中的业务语义和异常边界。
 def build_formal_joint_execution(row: dict[str, Any], summary_data: dict[str, Any] | None = None) -> dict[str, Any]:
     payload = _joint_payload_from_summary(summary_data)
     attack = str(row.get("attack", "") or "").strip()

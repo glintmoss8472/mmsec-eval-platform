@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test artifacts manifest 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -6,6 +7,7 @@ from pathlib import Path
 from scripts.build_artifacts_manifest import build_manifest
 
 
+# 中文注释：验证 test_artifacts_manifest_links_run_files 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_artifacts_manifest_links_run_files(tmp_path: Path):
     run_dir = tmp_path / "artifacts" / "runs" / "run_001"
     run_dir.mkdir(parents=True)

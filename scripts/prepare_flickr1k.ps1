@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 prepare flickr1k 相关逻辑。
 Param(
   [string]$Root = "data/flickr1k",
   [string]$SourceRoot = "data/flickr30k",

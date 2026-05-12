@@ -1,3 +1,4 @@
+# 文件说明：该文件属于后端业务服务，集中实现 asset evaluator 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -19,10 +20,12 @@ from mmsec_eval.risk.scoring import compute_risk_score, normalize_inverse
 from mmsec_eval.types import ModelOutput, Sample
 
 
+# 中文注释：封装 _text 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _text(value: object) -> str:
     return str(value or "").strip()
 
 
+# 中文注释：封装 _num 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _num(value: object, default: float = 0.0) -> float:
     try:
         return float(value if value is not None else default)
@@ -30,10 +33,12 @@ def _num(value: object, default: float = 0.0) -> float:
         return float(default)
 
 
+# 中文注释：封装 _record 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _record(value: object) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
+# 中文注释：封装 _list 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _list(value: object) -> list[str]:
     if isinstance(value, list):
         return [_text(item) for item in value if _text(item)]
@@ -41,6 +46,7 @@ def _list(value: object) -> list[str]:
     return [text] if text else []
 
 
+# 中文注释：封装 _safe_case_id 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _safe_case_id(raw: str, index: int, used: set[str]) -> str:
     token = "".join(ch if ch.isalnum() or ch in {"-", "_", "."} else "_" for ch in raw.strip())[:100] or f"asset-{index:03d}"
     candidate = token
@@ -52,6 +58,7 @@ def _safe_case_id(raw: str, index: int, used: set[str]) -> str:
     return candidate
 
 
+# 中文注释：封装 _resolve_ref 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _resolve_ref(project_root: Path, ref: str) -> Path | None:
     text = _text(ref)
     if not text:
@@ -65,6 +72,7 @@ def _resolve_ref(project_root: Path, ref: str) -> Path | None:
     return candidate if candidate.exists() else None
 
 
+# 中文注释：封装 _copy_ref 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _copy_ref(project_root: Path, ref: str, dest: Path) -> str:
     src = _resolve_ref(project_root, ref)
     if src is None or not src.is_file():
@@ -74,10 +82,12 @@ def _copy_ref(project_root: Path, ref: str, dest: Path) -> str:
     return dest.as_posix()
 
 
+# 中文注释：封装 _load_image 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _load_image(path: Path) -> np.ndarray:
     return np.asarray(Image.open(path).convert("RGB"), dtype=np.float32) / 255.0
 
 
+# 中文注释：封装 _source_bundle 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _source_bundle(project_root: Path, asset: dict[str, Any]) -> dict[str, Any]:
     path = project_root / "artifacts" / "runs" / _text(asset.get("run_id")) / "cases" / _text(asset.get("sample_id")) / "case_bundle.json"
     if not path.exists():
@@ -89,6 +99,7 @@ def _source_bundle(project_root: Path, asset: dict[str, Any]) -> dict[str, Any]:
         return {}
 
 
+# 中文注释：封装 _risk_level 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _risk_level(score: float) -> str:
     if score >= 0.8:
         return "critical"
@@ -101,34 +112,41 @@ def _risk_level(score: float) -> str:
     return "very_low"
 
 
+# 中文注释：封装 _write_json 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _write_json(path: Path, data: dict[str, Any]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 中文注释：封装 _write_jsonl 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
 
 
+# 中文注释：封装 _rank_desc 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _rank_desc(values: np.ndarray, target: int) -> int:
     order = np.argsort(-np.asarray(values, dtype=np.float32), kind="mergesort")
     hit = np.where(order == int(target))[0]
     return int(hit[0]) + 1 if hit.size else int(len(order) + 1)
 
 
+# 中文注释：封装 _recall_at 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _recall_at(ranks: list[int], k: int) -> float:
     return float(sum(1 for rank in ranks if int(rank) <= int(k)) / len(ranks)) if ranks else 0.0
 
 
+# 中文注释：封装 _mean_rank 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _mean_rank(ranks: list[int]) -> float:
     return float(mean([float(rank) for rank in ranks])) if ranks else 0.0
 
 
+# 中文注释：封装 _score_matrix 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _score_matrix(adapter: Any, images: list[np.ndarray], texts: list[str]) -> np.ndarray:
     pairs = [(images[i], texts[j]) for i in range(len(images)) for j in range(len(texts))]
     scores = adapter.score_pairs(pairs, batch_size=8)
     return np.asarray(scores, dtype=np.float32).reshape(len(images), len(texts))
 
 
+# 中文注释：封装 _vlr_stage_metrics 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _vlr_stage_metrics(ir_ranks: list[int], tr_ranks: list[int]) -> dict[str, float]:
     return {
         "ir_r@1": _recall_at(ir_ranks, 1),
@@ -140,6 +158,7 @@ def _vlr_stage_metrics(ir_ranks: list[int], tr_ranks: list[int]) -> dict[str, fl
     }
 
 
+# 中文注释：封装 _conditional_asr 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _conditional_asr(clean_ranks: list[int], attacked_ranks: list[int]) -> float:
     eligible = [idx for idx, rank in enumerate(clean_ranks) if int(rank) <= 1]
     if not eligible:
@@ -147,21 +166,25 @@ def _conditional_asr(clean_ranks: list[int], attacked_ranks: list[int]) -> float
     return float(sum(1 for idx in eligible if int(attacked_ranks[idx]) > 1) / len(eligible))
 
 
+# 中文注释：封装 _asset_task 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _asset_task(entries: list[dict[str, Any]]) -> str:
     tasks = sorted({_text(entry.get("task_kind")) for entry in entries if _text(entry.get("task_kind"))})
     return tasks[0] if len(tasks) == 1 else "asset_mixed"
 
 
+# 中文注释：封装 _dataset_name 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _dataset_name(entries: list[dict[str, Any]]) -> str:
     datasets = sorted({_text(entry.get("benchmark_tag") or entry.get("dataset_name")) for entry in entries if _text(entry.get("benchmark_tag") or entry.get("dataset_name"))})
     return datasets[0] if len(datasets) == 1 else "sample_asset_library"
 
 
+# 中文注释：封装 _attack_name 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _attack_name(entries: list[dict[str, Any]]) -> str:
     attacks = sorted({_text(entry.get("attack")) for entry in entries if _text(entry.get("attack"))})
     return attacks[0] if len(attacks) == 1 else "asset_mixed"
 
 
+# 中文注释：封装 _source_row 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _source_row(entry: dict[str, Any]) -> dict[str, Any]:
     bundle = _record(entry.get("source_bundle"))
     sample = _record(bundle.get("sample"))
@@ -178,6 +201,7 @@ def _source_row(entry: dict[str, Any]) -> dict[str, Any]:
     return row
 
 
+# 中文注释：封装 _make_sample 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _make_sample(entry: dict[str, Any], *, image: np.ndarray, stage: str) -> Sample:
     bundle = _record(entry.get("source_bundle"))
     sample = _record(bundle.get("sample"))
@@ -199,6 +223,7 @@ def _make_sample(entry: dict[str, Any], *, image: np.ndarray, stage: str) -> Sam
     )
 
 
+# 中文注释：封装 _vqa_metrics 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _vqa_metrics(row: dict[str, Any], clean: ModelOutput, attacked: ModelOutput) -> dict[str, Any]:
     aliases = _list(row.get("answer_aliases") or row.get("answers") or row.get("acceptable_answers"))
     answer = _text(row.get("answer") or row.get("ground_truth") or row.get("label") or (aliases[0] if aliases else ""))
@@ -217,6 +242,7 @@ def _vqa_metrics(row: dict[str, Any], clean: ModelOutput, attacked: ModelOutput)
     }
 
 
+# 中文注释：封装 _caption_metrics 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _caption_metrics(row: dict[str, Any], clean_sample: Sample, attacked_sample: Sample, clean: ModelOutput, attacked: ModelOutput) -> dict[str, Any]:
     target = _text(row.get("target_object") or row.get("added_object") or clean_sample.target_text)
     aliases = _list(row.get("target_aliases"))
@@ -251,6 +277,7 @@ def _caption_metrics(row: dict[str, Any], clean_sample: Sample, attacked_sample:
     }
 
 
+# 中文注释：封装 _risk_payload_for_task 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _risk_payload_for_task(task_kind: str, *, asr: float, semantic: float, avg_l2: float, avg_linf: float, transfer: float = 0.0) -> dict[str, Any]:
     scenario = "retrieval" if task_kind == "vlr" else "qa" if task_kind == "vqa" else "caption"
     return compute_risk_score(
@@ -266,6 +293,7 @@ def _risk_payload_for_task(task_kind: str, *, asr: float, semantic: float, avg_l
     )
 
 
+# 中文注释：封装 _evaluate_vlr 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _evaluate_vlr(entries: list[dict[str, Any]], victim_adapters: list[str], progress: Callable[[str, str, float | None, str], None]) -> dict[str, Any]:
     texts = [_text(entry.get("text")) for entry in entries]
     clean_images = [np.asarray(entry["clean_image"], dtype=np.float32) for entry in entries]
@@ -336,6 +364,7 @@ def _evaluate_vlr(entries: list[dict[str, Any]], victim_adapters: list[str], pro
     return {"asr_attack": asr_attack, "victims": victim_metrics, "victim_compare": victim_compare, "per_case": per_case}
 
 
+# 中文注释：封装 _evaluate_generation 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _evaluate_generation(entries: list[dict[str, Any]], victim_adapters: list[str], task_kind: str, progress: Callable[[str, str, float | None, str], None]) -> dict[str, Any]:
     victim_name = victim_adapters[0]
     progress("victim_evaluation", "running", 58, f"正在用受测模型 {victim_name} 重新生成 clean/adv 输出。")
@@ -399,6 +428,7 @@ def _evaluate_generation(entries: list[dict[str, Any]], victim_adapters: list[st
     return {"asr_attack": asr_attack, "per_case": per_case, "generation_metrics": generation_metrics, "semantic": float(mean(semantic_values)) if semantic_values else 0.0}
 
 
+# 中文注释：封装 _prepare_entries 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _prepare_entries(project_root: Path, cases_root: Path, assets: list[dict[str, Any]]) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     used_case_ids: set[str] = set()
@@ -443,6 +473,7 @@ def _prepare_entries(project_root: Path, cases_root: Path, assets: list[dict[str
     return entries
 
 
+# 中文注释：实现 run_asset_evaluation 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def run_asset_evaluation(
     *,
     store: SQLiteStore,

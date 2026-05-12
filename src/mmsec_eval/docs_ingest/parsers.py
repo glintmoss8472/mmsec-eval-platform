@@ -1,3 +1,4 @@
+# 文件说明：该文件属于资料摄取层，集中实现 parsers 相关逻辑。
 from __future__ import annotations
 
 import subprocess
@@ -5,6 +6,7 @@ import tempfile
 from pathlib import Path
 
 
+# 中文注释：实现 parse_pdf 的核心流程，支撑资料摄取层中的业务语义和异常边界。
 def parse_pdf(path: str, max_pages: int = 5) -> str:
     pdf_path = Path(path)
     if not pdf_path.exists():
@@ -27,6 +29,7 @@ def parse_pdf(path: str, max_pages: int = 5) -> str:
     return out
 
 
+# 中文注释：封装 _parse_doc_via_word_com 的内部步骤，让资料摄取层主流程保持清晰并隔离边界细节。
 def _parse_doc_via_word_com(path: str) -> str:
     doc_path = Path(path)
     temp_txt = Path(tempfile.gettempdir()) / f"mmsec_{doc_path.stem}_word.txt"
@@ -61,6 +64,7 @@ try {{
     return ""
 
 
+# 中文注释：实现 parse_doc 的核心流程，支撑资料摄取层中的业务语义和异常边界。
 def parse_doc(path: str) -> str:
     p = Path(path)
     if not p.exists():
@@ -88,6 +92,7 @@ def parse_doc(path: str) -> str:
     raise RuntimeError(f"failed to parse .doc via Word COM: {p}")
 
 
+# 中文注释：实现 parse_text 的核心流程，支撑资料摄取层中的业务语义和异常边界。
 def parse_text(path: str) -> str:
     p = Path(path)
     if not p.exists():

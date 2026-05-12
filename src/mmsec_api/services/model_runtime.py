@@ -1,3 +1,4 @@
+# 文件说明：该文件属于后端业务服务，集中实现 model runtime 相关逻辑。
 from __future__ import annotations
 
 import os
@@ -16,6 +17,7 @@ from mmsec_eval.model_adapters.hf_local import hf_model_ready
 from mmsec_eval.model_adapters.local_vlm_catalog import LOCAL_OPENAI_COMPAT_ADAPTERS, LOCAL_OPENAI_COMPAT_MODEL_SPECS, LocalVLMModelSpec
 
 
+# 中文注释：定义 ModelRuntimeSpec 的结构化职责，作为后端业务服务中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class ModelRuntimeSpec:
     adapter: str
@@ -32,6 +34,7 @@ class ModelRuntimeSpec:
     launch_log: str | None = None
 
 
+# 中文注释：封装 _local_vlm_runtime_spec 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _local_vlm_runtime_spec(spec: LocalVLMModelSpec) -> ModelRuntimeSpec:
     return ModelRuntimeSpec(
         adapter=spec.adapter,
@@ -48,6 +51,7 @@ def _local_vlm_runtime_spec(spec: LocalVLMModelSpec) -> ModelRuntimeSpec:
     )
 
 
+# 中文注释：封装 _local_vlm_runtime_specs 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _local_vlm_runtime_specs() -> tuple[ModelRuntimeSpec, ...]:
     return tuple(_local_vlm_runtime_spec(spec) for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS)
 
@@ -107,6 +111,7 @@ GENERATION_MODEL_ADAPTERS = {
 }
 
 
+# 中文注释：实现 task_capabilities_for_adapter 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def task_capabilities_for_adapter(adapter: str, *, formal: bool = True) -> list[str]:
     adapter_id = str(adapter or "").strip()
     if not adapter_id:
@@ -121,31 +126,37 @@ def task_capabilities_for_adapter(adapter: str, *, formal: bool = True) -> list[
     return capabilities
 
 
+# 中文注释：实现 model_supports_task 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def model_supports_task(adapter: str, task_kind: str, *, formal: bool = True) -> bool:
     return str(task_kind or "").strip() in task_capabilities_for_adapter(adapter, formal=formal)
 
 
+# 中文注释：实现 task_capability_note 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def task_capability_note(adapter: str) -> str:
     if str(adapter or "").strip() == "fixture_vlm":
         return "内置演示模型只用于开发 smoke，不参与真实测评任务选择。"
     return ""
 
 
+# 中文注释：封装 _loopback_base_url 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _loopback_base_url(url: str) -> bool:
     host = str(urlparse(str(url or "")).hostname or "").strip().lower()
     return host in {"127.0.0.1", "localhost"}
 
 
+# 中文注释：封装 _model_name 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _model_name(spec: ModelRuntimeSpec) -> str:
     return str(os.getenv(spec.model_name_env, spec.model_name_default)).strip() or spec.model_name_default
 
 
+# 中文注释：封装 _endpoint 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _endpoint(spec: ModelRuntimeSpec) -> str:
     if not spec.endpoint_env:
         return ""
     return str(os.getenv(spec.endpoint_env, spec.endpoint_default or "")).strip()
 
 
+# 中文注释：封装 _probe_openai_service 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _probe_openai_service(base_url: str) -> tuple[str, str]:
     root = str(base_url or "").rstrip("/")
     if not root:
@@ -173,10 +184,12 @@ def _probe_openai_service(base_url: str) -> tuple[str, str]:
     return "unavailable", last_error or root
 
 
+# 中文注释：封装 _local_only 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _local_only() -> bool:
     return str(os.getenv("MMSEC_HF_LOCAL_ONLY", "1")).strip().lower() not in {"0", "false", "no"}
 
 
+# 中文注释：封装 _preflight_timeout_seconds 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _preflight_timeout_seconds(default: int = 1200) -> int:
     raw = str(os.getenv("MMSEC_MODEL_PREFLIGHT_TIMEOUT_SECONDS", str(default)) or "").strip()
     try:
@@ -185,6 +198,7 @@ def _preflight_timeout_seconds(default: int = 1200) -> int:
         return int(default)
 
 
+# 中文注释：封装 _launch_script_preflight 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _launch_script_preflight(spec: ModelRuntimeSpec, *, project_root: Path) -> tuple[str, str]:
     script_path = project_root / str(spec.launch_script or "")
     if not spec.launch_script or not script_path.exists():
@@ -210,12 +224,14 @@ def _launch_script_preflight(spec: ModelRuntimeSpec, *, project_root: Path) -> t
     return "launch_blocked", detail or "launch preflight failed"
 
 
+# 中文注释：封装 _launch_log_path 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _launch_log_path(spec: ModelRuntimeSpec, *, project_root: Path) -> Path | None:
     if not spec.launch_log:
         return None
     return project_root / "logs" / "model_servers" / spec.launch_log
 
 
+# 中文注释：封装 _launch_log_tail 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _launch_log_tail(spec: ModelRuntimeSpec, *, project_root: Path, lines: int = 30) -> str:
     log_path = _launch_log_path(spec, project_root=project_root)
     if log_path is None or not log_path.exists():
@@ -227,12 +243,14 @@ def _launch_log_tail(spec: ModelRuntimeSpec, *, project_root: Path, lines: int =
     return "\n".join(content[-max(1, int(lines)):]).strip()
 
 
+# 中文注释：封装 _pid_alive 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _pid_alive(pid: int) -> bool:
     if pid <= 0:
         return False
     return Path(f"/proc/{pid}").exists()
 
 
+# 中文注释：封装 _model_health 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _model_health(spec: ModelRuntimeSpec, *, project_root: Path | None = None) -> dict[str, Any]:
     last_checked_at = utc_now_iso()
     model_name = _model_name(spec)
@@ -276,10 +294,12 @@ def _model_health(spec: ModelRuntimeSpec, *, project_root: Path | None = None) -
     }
 
 
+# 中文注释：实现 list_main_models 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def list_main_models(*, project_root: Path | None = None) -> list[dict[str, Any]]:
     return [_model_health(spec, project_root=project_root) for spec in MAIN_MODEL_SPECS]
 
 
+# 中文注释：实现 build_adapter_env 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def build_adapter_env(models: list[dict[str, Any]]) -> dict[str, dict[str, str]]:
     out: dict[str, dict[str, str]] = {}
     for item in models:
@@ -292,6 +312,7 @@ def build_adapter_env(models: list[dict[str, Any]]) -> dict[str, dict[str, str]]
     return out
 
 
+# 中文注释：实现 ensure_models_ready 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def ensure_models_ready(
     adapters: list[str],
     *,

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test external attacks 相关逻辑。
 from __future__ import annotations
 
 import sys
@@ -11,6 +12,7 @@ from mmsec_eval.config.schema import AppConfig
 from mmsec_eval.types import AttackContext, Sample
 
 
+# 中文注释：封装 _sample 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _sample() -> Sample:
     image = np.zeros((32, 32, 3), dtype=np.float32)
     image[:, :16, 0] = 0.8
@@ -18,11 +20,13 @@ def _sample() -> Sample:
     return Sample(sample_id="s1", image=image, text="red and green blocks", target_text="target caption")
 
 
+# 中文注释：封装 _ctx 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _ctx(tmp_path: Path, cfg: AppConfig | None = None) -> AttackContext:
     cfg = cfg or AppConfig()
     return AttackContext(config=cfg, model_adapter=None, run_dir=str(tmp_path), sample_debug_dir=str(tmp_path / "debug"))
 
 
+# 中文注释：验证 test_vqa_visual_corruption_outputs_required_metadata 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_vqa_visual_corruption_outputs_required_metadata(tmp_path: Path) -> None:
     repo = tmp_path / "VQA-Visual-Robustness-Benchmark"
     repo.mkdir()
@@ -68,6 +72,7 @@ def test_vqa_visual_corruption_outputs_required_metadata(tmp_path: Path) -> None
     assert Path(trace["output_image"]).exists()
 
 
+# 中文注释：验证 test_vqa_visual_corruption_missing_official_repo_raises 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_vqa_visual_corruption_missing_official_repo_raises(tmp_path: Path) -> None:
     cfg = AppConfig()
     cfg.attack.repo_dir = str(tmp_path / "missing_vqa_repo")
@@ -77,6 +82,7 @@ def test_vqa_visual_corruption_missing_official_repo_raises(tmp_path: Path) -> N
         VQAVisualCorruptionAttack().attack(_sample(), _ctx(tmp_path, cfg))
 
 
+# 中文注释：验证 test_external_attack_missing_repo_raises_instead_of_returning_unavailable 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_external_attack_missing_repo_raises_instead_of_returning_unavailable(tmp_path: Path) -> None:
     cfg = AppConfig()
     cfg.attack.repo_dir = str(tmp_path / "missing_repo")
@@ -87,6 +93,7 @@ def test_external_attack_missing_repo_raises_instead_of_returning_unavailable(tm
         FOAAttack().attack(_sample(), _ctx(tmp_path, cfg))
 
 
+# 中文注释：验证 test_external_attack_mock_success_output_image 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_external_attack_mock_success_output_image(tmp_path: Path) -> None:
     repo = tmp_path / "mock_foa"
     repo.mkdir()
@@ -116,6 +123,7 @@ def test_external_attack_mock_success_output_image(tmp_path: Path) -> None:
     assert Path(trace["output_image"]).exists()
 
 
+# 中文注释：验证 test_xtransfer_official_zoo_repo_adapter_mock_success 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_xtransfer_official_zoo_repo_adapter_mock_success(tmp_path: Path) -> None:
     repo = tmp_path / "XTransferBench"
     zoo_dir = repo / "src" / "XTransferBench" / "zoo"
@@ -147,6 +155,7 @@ def test_xtransfer_official_zoo_repo_adapter_mock_success(tmp_path: Path) -> Non
     assert attacked.perturbation_linf > 0
 
 
+# 中文注释：验证 test_xtransfer_local_uap_path_applies_perturbation 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_xtransfer_local_uap_path_applies_perturbation(tmp_path: Path) -> None:
     uap_path = tmp_path / "uap.npy"
     np.save(uap_path, np.full((32, 32, 3), 0.01, dtype=np.float32))
@@ -163,6 +172,7 @@ def test_xtransfer_local_uap_path_applies_perturbation(tmp_path: Path) -> None:
     assert attacked.perturbation_linf <= 0.0201
 
 
+# 中文注释：验证 test_mpc_attack_requires_target_image_even_with_target_text 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_mpc_attack_requires_target_image_even_with_target_text(tmp_path: Path) -> None:
     repo = tmp_path / "MPCAttack"
     repo.mkdir()

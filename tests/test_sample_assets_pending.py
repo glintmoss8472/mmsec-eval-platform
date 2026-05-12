@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test sample assets pending 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -5,6 +6,7 @@ from pathlib import Path
 from api_test_utils import make_client
 
 
+# 中文注释：封装 _asset 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _asset(run_id: str, *, status: str, artifact_status: str, created_at: str) -> dict[str, object]:
     return {
         "asset_id": f"{run_id}::38",
@@ -35,6 +37,7 @@ def _asset(run_id: str, *, status: str, artifact_status: str, created_at: str) -
     }
 
 
+# 中文注释：验证 test_pending_sample_batches_are_visible_but_not_report_linked 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_pending_sample_batches_are_visible_but_not_report_linked(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         store = client.app.state.store
@@ -90,6 +93,7 @@ def test_pending_sample_batches_are_visible_but_not_report_linked(tmp_path: Path
         assert pending_assets[0]["case_url"] == ""
 
 
+# 中文注释：验证 test_fake_model_sample_assets_are_not_imported_or_listed 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_fake_model_sample_assets_are_not_imported_or_listed(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         store = client.app.state.store

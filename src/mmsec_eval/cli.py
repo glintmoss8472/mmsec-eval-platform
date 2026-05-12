@@ -1,3 +1,4 @@
+# 文件说明：该文件属于项目工程，集中实现 cli 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -19,6 +20,7 @@ from mmsec_eval.plugins.builtin import register_builtin_plugins
 from mmsec_eval.runtime import apply_config_env
 
 
+# 中文注释：串联 main 的主流程，集中处理项目工程的初始化、执行和退出条件。
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="mmsec_eval")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -59,6 +61,7 @@ def main(argv: list[str] | None = None) -> int:
     return 1
 
 
+# 中文注释：封装 _echo 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _echo(msg: str) -> None:
     try:
         print(msg)
@@ -67,6 +70,7 @@ def _echo(msg: str) -> None:
         sys.stdout.buffer.write((msg + "\n").encode(enc, errors="replace"))
 
 
+# 中文注释：实现 cmd_ingest_docs 的核心流程，支撑项目工程中的业务语义和异常边界。
 def cmd_ingest_docs(config_path: str) -> int:
     register_builtin_plugins()
     cfg = load_config(config_path)
@@ -119,10 +123,12 @@ def cmd_ingest_docs(config_path: str) -> int:
     return 0
 
 
+# 中文注释：封装 _apply_runtime_env 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _apply_runtime_env(cfg) -> None:
     apply_config_env(cfg)
 
 
+# 中文注释：封装 _run_eval_internal 的内部步骤，让项目工程主流程保持清晰并隔离边界细节。
 def _run_eval_internal(
     config_path: str,
     sweep_override: dict[str, Any] | None = None,
@@ -140,6 +146,7 @@ def _run_eval_internal(
     return cfg, artifacts
 
 
+# 中文注释：实现 cmd_run_eval 的核心流程，支撑项目工程中的业务语义和异常边界。
 def cmd_run_eval(config_path: str, sweep_override: dict[str, Any] | None = None) -> int:
     register_builtin_plugins()
     cfg, artifacts = _run_eval_internal(config_path, sweep_override=sweep_override, benchmark_mode=False)
@@ -155,6 +162,7 @@ def cmd_run_eval(config_path: str, sweep_override: dict[str, Any] | None = None)
     return 0
 
 
+# 中文注释：实现 cmd_run_vlr 的核心流程，支撑项目工程中的业务语义和异常边界。
 def cmd_run_vlr(config_path: str) -> int:
     register_builtin_plugins()
     from mmsec_eval.runner.retrieval_runner import run as run_vlr
@@ -175,6 +183,7 @@ def cmd_run_vlr(config_path: str) -> int:
     return 0
 
 
+# 中文注释：实现 cmd_train_advclip 的核心流程，支撑项目工程中的业务语义和异常边界。
 def cmd_train_advclip(config_path: str) -> int:
     """Train an AdvCLIP universal patch and save it into the run directory."""
     register_builtin_plugins()
@@ -197,6 +206,7 @@ def cmd_train_advclip(config_path: str) -> int:
     return 0
 
 
+# 中文注释：实现 cmd_run_benchmark 的核心流程，支撑项目工程中的业务语义和异常边界。
 def cmd_run_benchmark(config_path: str) -> int:
     register_builtin_plugins()
     cfg, artifacts = _run_eval_internal(config_path, sweep_override=None, benchmark_mode=True)
@@ -209,6 +219,7 @@ def cmd_run_benchmark(config_path: str) -> int:
     return 0
 
 
+# 中文注释：实现 cmd_run_sweep 的核心流程，支撑项目工程中的业务语义和异常边界。
 def cmd_run_sweep(config_path: str, sweep_path: str = "") -> int:
     register_builtin_plugins()
     base_cfg = load_config(config_path)

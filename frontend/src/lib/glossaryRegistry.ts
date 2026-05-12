@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端业务工具，集中实现 glossaryRegistry 相关逻辑。
 import { attackCatalog } from "./attackCatalog";
 import { datasetCatalog } from "./datasetCatalog";
 import { recommendedModels } from "./modelCatalog";
@@ -52,6 +53,7 @@ export interface GlossaryEntry {
   relatedIds?: string[];
 }
 
+/** 中文注释：实现 makeEntry 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 function makeEntry(
   prefix: string,
   slug: string,
@@ -1202,6 +1204,7 @@ const progressStageEntries: GlossaryEntry[] = [
   }),
 ];
 
+/** 中文注释：实现 isCurrentTopicEntry 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 function isCurrentTopicEntry(entry: GlossaryEntry): boolean {
   const raw = JSON.stringify(entry).toLowerCase();
   const blocked = ["\u9632\u5fa1", "\u653b\u9632", "defense", "defended"];
@@ -1211,15 +1214,18 @@ function isCurrentTopicEntry(entry: GlossaryEntry): boolean {
 export const glossaryEntries: GlossaryEntry[] = [...staticEntries, ...attackEntries, ...modelEntries, ...datasetEntries, ...progressStageEntries].filter(isCurrentTopicEntry);
 export const glossaryEntryMap = new Map(glossaryEntries.map((item) => [item.id, item]));
 
+/** 中文注释：实现 getGlossaryEntry 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 export function getGlossaryEntry(id: string) {
   return glossaryEntryMap.get(id);
 }
 
+/** 中文注释：实现 glossaryHref 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 export function glossaryHref(id: string) {
   const entry = glossaryEntryMap.get(id);
   return entry ? `/glossary#${entry.anchor}` : "/glossary";
 }
 
+/** 中文注释：实现 glossarySearchText 的核心流程，支撑前端业务工具中的业务语义和异常边界。 */
 export function glossarySearchText(entry: GlossaryEntry) {
   const detail = entry.detailSections.flatMap((item) => item.paragraphs).join(" ");
   const formulas = (entry.formulaBlocks ?? []).flatMap((item) => [item.title, item.latex, ...item.explanation]).join(" ");

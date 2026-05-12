@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# 文件说明：该文件属于运维与实验脚本，集中实现 upload local vlm assets 相关逻辑。
 from __future__ import annotations
 
 import argparse
@@ -24,6 +25,7 @@ DEFAULT_REMOTE_ROOT = os.getenv("MMSEC_UPLOAD_REMOTE_ROOT", "/HARD-DATA/bks/aat-
 DEFAULT_MODEL_NAMES = ",".join(LOCAL_OPENAI_COMPAT_LOCAL_DIRS)
 
 
+# 中文注释：定义 UploadTarget 的结构化职责，作为运维与实验脚本中状态、配置或行为的边界。
 @dataclass(frozen=True)
 class UploadTarget:
     name: str
@@ -31,6 +33,7 @@ class UploadTarget:
     remote_dir: str
 
 
+# 中文注释：实现 parse_args 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Upload local offline VLM assets to the server.")
     parser.add_argument("--host", default=os.getenv("MMSEC_UPLOAD_HOST", ""))
@@ -47,6 +50,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+# 中文注释：实现 ensure_remote_dir 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 def ensure_remote_dir(sftp: paramiko.SFTPClient, remote_dir: str) -> None:
     parts = []
     current = remote_dir
@@ -60,6 +64,7 @@ def ensure_remote_dir(sftp: paramiko.SFTPClient, remote_dir: str) -> None:
             sftp.mkdir(directory)
 
 
+# 中文注释：实现 remote_file_size 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 def remote_file_size(sftp: paramiko.SFTPClient, remote_path: str) -> int | None:
     try:
         return sftp.stat(remote_path).st_size
@@ -67,6 +72,7 @@ def remote_file_size(sftp: paramiko.SFTPClient, remote_path: str) -> int | None:
         return None
 
 
+# 中文注释：实现 iter_files 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 def iter_files(root: Path) -> list[Path]:
     files: list[Path] = []
     for path in root.rglob("*"):
@@ -81,6 +87,7 @@ def iter_files(root: Path) -> list[Path]:
     return sorted(files)
 
 
+# 中文注释：实现 build_targets 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 def build_targets(local_root: Path, remote_root: str, names: list[str]) -> list[UploadTarget]:
     targets: list[UploadTarget] = []
     for name in names:
@@ -93,6 +100,7 @@ def build_targets(local_root: Path, remote_root: str, names: list[str]) -> list[
     return targets
 
 
+# 中文注释：实现 upload_tree 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 def upload_tree(sftp: paramiko.SFTPClient, target: UploadTarget) -> tuple[int, int]:
     ensure_remote_dir(sftp, target.remote_dir)
     uploaded = 0
@@ -116,6 +124,7 @@ def upload_tree(sftp: paramiko.SFTPClient, target: UploadTarget) -> tuple[int, i
     return uploaded, skipped
 
 
+# 中文注释：串联 main 的主流程，集中处理运维与实验脚本的初始化、执行和退出条件。
 def main() -> int:
     args = parse_args()
     missing_connection = [name for name in ("host", "username", "password") if not str(getattr(args, name) or "").strip()]

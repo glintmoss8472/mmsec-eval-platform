@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 api test utils 相关逻辑。
 from __future__ import annotations
 
 import importlib
@@ -11,6 +12,7 @@ pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient
 
 
+# 中文注释：实现 make_client 的核心流程，支撑自动化测试中的业务语义和异常边界。
 def make_client(tmp_path: Path, monkeypatch, *, skip_model_preflight: bool = False) -> TestClient:
     art = tmp_path / "artifacts"
     monkeypatch.setenv("MMSEC_ARTIFACTS_DIR", str(art))
@@ -25,6 +27,7 @@ def make_client(tmp_path: Path, monkeypatch, *, skip_model_preflight: bool = Fal
     return TestClient(api_main.app)
 
 
+# 中文注释：实现 wait_job_done 的核心流程，支撑自动化测试中的业务语义和异常边界。
 def wait_job_done(client: TestClient, job_id: str, timeout_s: float = 240.0) -> str:
     deadline = time.time() + float(timeout_s)
     status = "queued"
@@ -38,6 +41,7 @@ def wait_job_done(client: TestClient, job_id: str, timeout_s: float = 240.0) -> 
     return status
 
 
+# 中文注释：实现 write_toy_eval_cfg 的核心流程，支撑自动化测试中的业务语义和异常边界。
 def write_toy_eval_cfg(
     path: Path,
     *,

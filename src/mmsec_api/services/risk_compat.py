@@ -1,3 +1,4 @@
+# 文件说明：该文件属于后端业务服务，集中实现 risk compat 相关逻辑。
 from __future__ import annotations
 
 from typing import Any, Mapping
@@ -45,14 +46,17 @@ COMPAT_RISK_COMPONENTS: tuple[dict[str, str], ...] = (
 )
 
 
+# 中文注释：封装 _record 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _record(value: object) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
+# 中文注释：封装 _clamp01 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _clamp01(value: float) -> float:
     return max(0.0, min(1.0, float(value)))
 
 
+# 中文注释：封装 _float_or_none 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _float_or_none(value: object) -> float | None:
     try:
         if value is None or value == "":
@@ -62,6 +66,7 @@ def _float_or_none(value: object) -> float | None:
         return None
 
 
+# 中文注释：封装 _first_float 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _first_float(*values: object) -> float | None:
     for value in values:
         parsed = _float_or_none(value)
@@ -70,6 +75,7 @@ def _first_float(*values: object) -> float | None:
     return None
 
 
+# 中文注释：封装 _mean 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _mean(values: list[float | None]) -> float | None:
     valid = [value for value in values if value is not None]
     if not valid:
@@ -77,6 +83,7 @@ def _mean(values: list[float | None]) -> float | None:
     return sum(valid) / len(valid)
 
 
+# 中文注释：封装 _victim_payloads 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _victim_payloads(summary: Mapping[str, Any]) -> list[dict[str, Any]]:
     victims = summary.get("victims")
     if isinstance(victims, dict):
@@ -84,6 +91,7 @@ def _victim_payloads(summary: Mapping[str, Any]) -> list[dict[str, Any]]:
     return []
 
 
+# 中文注释：封装 _stage_metric 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _stage_metric(payloads: list[dict[str, Any]], stage: str, keys: tuple[str, ...]) -> float | None:
     values: list[float | None] = []
     for payload in payloads:
@@ -97,6 +105,7 @@ def _stage_metric(payloads: list[dict[str, Any]], stage: str, keys: tuple[str, .
     return _mean(values)
 
 
+# 中文注释：封装 _conditional_metric 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _conditional_metric(payloads: list[dict[str, Any]], keys: tuple[str, ...]) -> float | None:
     values: list[float | None] = []
     for payload in payloads:
@@ -110,6 +119,7 @@ def _conditional_metric(payloads: list[dict[str, Any]], keys: tuple[str, ...]) -
     return _mean(values)
 
 
+# 中文注释：封装 _source_breakdown 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _source_breakdown(summary: Mapping[str, Any]) -> dict[str, float]:
     raw = _record(summary.get("risk_breakdown"))
     if not raw:
@@ -122,6 +132,7 @@ def _source_breakdown(summary: Mapping[str, Any]) -> dict[str, float]:
     return out
 
 
+# 中文注释：封装 _level_from_score 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _level_from_score(score: float) -> str:
     value = _clamp01(score)
     if value >= 0.80:
@@ -135,10 +146,12 @@ def _level_from_score(score: float) -> str:
     return "minimal"
 
 
+# 中文注释：封装 _weighted_score 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _weighted_score(values: Mapping[str, float]) -> float:
     return _clamp01(sum(float(values.get(key, 0.0)) * weight for key, weight in COMPAT_RISK_WEIGHTS.items()))
 
 
+# 中文注释：封装 _audit_rows 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _audit_rows(values: Mapping[str, float]) -> list[dict[str, object]]:
     specs = {item["key"]: item for item in COMPAT_RISK_COMPONENTS}
     rows: list[dict[str, object]] = []
@@ -161,6 +174,7 @@ def _audit_rows(values: Mapping[str, float]) -> list[dict[str, object]]:
     return rows
 
 
+# 中文注释：封装 _risk_observations 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _risk_observations(level: str, values: Mapping[str, float]) -> list[str]:
     observations: list[str] = []
     if float(values.get("task_damage", 0.0)) >= 0.6:
@@ -178,6 +192,7 @@ def _risk_observations(level: str, values: Mapping[str, float]) -> list[str]:
     return ["当前风险需要复核：结合分任务指标和样本复盘确认风险来源。"]
 
 
+# 中文注释：封装 _low_cost_from_summary 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _low_cost_from_summary(summary: Mapping[str, Any], row: Mapping[str, Any], source_breakdown: Mapping[str, float]) -> float:
     source_cost = _float_or_none(source_breakdown.get("cost"))
     if source_cost is not None:
@@ -195,6 +210,7 @@ def _low_cost_from_summary(summary: Mapping[str, Any], row: Mapping[str, Any], s
     return _clamp01((l2_cost + linf_cost) / 2.0)
 
 
+# 中文注释：封装 _semantic_base 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _semantic_base(summary: Mapping[str, Any], generation: Mapping[str, Any], source_breakdown: Mapping[str, float]) -> float:
     nested = _record(summary.get("semantic_preservation")).get("combined_semantic_preservation")
     value = _first_float(
@@ -206,6 +222,7 @@ def _semantic_base(summary: Mapping[str, Any], generation: Mapping[str, Any], so
     return _clamp01(value if value is not None else 0.0)
 
 
+# 中文注释：封装 _vlr_metrics 的内部步骤，让后端业务服务主流程保持清晰并隔离边界细节。
 def _vlr_metrics(summary: Mapping[str, Any], row: Mapping[str, Any]) -> dict[str, float]:
     payloads = _victim_payloads(summary)
     clean_r1 = _first_float(
@@ -269,6 +286,7 @@ def _vlr_metrics(summary: Mapping[str, Any], row: Mapping[str, Any]) -> dict[str
     }
 
 
+# 中文注释：实现 derive_compatible_risk 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def derive_compatible_risk(summary: Mapping[str, Any] | None, row: Mapping[str, Any] | None = None) -> dict[str, object]:
     source = _record(summary)
     row_data = _record(row)
@@ -331,12 +349,14 @@ def derive_compatible_risk(summary: Mapping[str, Any] | None, row: Mapping[str, 
     }
 
 
+# 中文注释：实现 apply_compatible_risk 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def apply_compatible_risk(summary: Mapping[str, Any] | None, row: Mapping[str, Any] | None = None) -> dict[str, Any]:
     out = dict(_record(summary))
     out.update(derive_compatible_risk(out, row))
     return out
 
 
+# 中文注释：实现 apply_compatible_report_data 的核心流程，支撑后端业务服务中的业务语义和异常边界。
 def apply_compatible_report_data(report_data: Mapping[str, Any] | None) -> dict[str, Any]:
     out = dict(_record(report_data))
     summary = _record(out.get("summary")) or out

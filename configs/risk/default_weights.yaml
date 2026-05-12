@@ -1,3 +1,4 @@
+# 文件说明：该文件属于实验配置，集中实现 default weights 相关逻辑。
 schema_version: 1
 purpose: "多模态对抗安全测评风险评分默认权重"
 components:

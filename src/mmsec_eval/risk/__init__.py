@@ -1,3 +1,4 @@
+# 文件说明：该文件属于风险评分层，集中实现 init 相关逻辑。
 from __future__ import annotations
 
 from mmsec_eval.risk.components import component_catalog, component_keys

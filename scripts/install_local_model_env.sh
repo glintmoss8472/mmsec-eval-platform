@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 文件说明：该文件属于运维与实验脚本，集中实现 install local model env 相关逻辑。
 set -euo pipefail
 
 STACK_ROOT="${STACK_ROOT:-/HARD-DATA/bks/aat-model-stack}"

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于评测运行器，集中实现 retrieval runner 相关逻辑。
 from __future__ import annotations
 
 import logging
@@ -48,15 +49,18 @@ from mmsec_eval.viz.plots import plot_defense_recovery_curve, plot_grouped_bar, 
 LOG = logging.getLogger(__name__)
 
 
+# 中文注释：封装 _emit_progress 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _emit_progress(progress: Callable[[str, str, float | None, str], None] | None, stage_key: str, state: str, progress_percent: float | None, message: str) -> None:
     if progress is not None:
         progress(stage_key, state, progress_percent, message)
 
 
+# 中文注释：封装 _safe_mean 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _safe_mean(values: list[float]) -> float:
     return mean(values) if values else 0.0
 
 
+# 中文注释：封装 _score_matrix_diagnostics 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _score_matrix_diagnostics(sim: np.ndarray) -> dict[str, Any]:
     arr = np.asarray(sim, dtype=np.float32)
     if arr.size == 0:
@@ -104,6 +108,7 @@ def _score_matrix_diagnostics(sim: np.ndarray) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _victim_stage_asr_at_1 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _victim_stage_asr_at_1(metrics: dict[str, Any]) -> float:
     return 0.5 * (
         float(metrics.get("ir_asr@1", 0.0) or 0.0)
@@ -111,6 +116,7 @@ def _victim_stage_asr_at_1(metrics: dict[str, Any]) -> float:
     )
 
 
+# 中文注释：封装 _victim_conditional_asr_at_1 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _victim_conditional_asr_at_1(metrics: dict[str, Any]) -> float:
     return 0.5 * (
         float(metrics.get("ir_cond_asr@1", 0.0) or 0.0)
@@ -118,6 +124,7 @@ def _victim_conditional_asr_at_1(metrics: dict[str, Any]) -> float:
     )
 
 
+# 中文注释：封装 _metric_quality_report 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _metric_quality_report(victim_metrics: dict[str, Any], victim_names: list[str]) -> dict[str, Any]:
     flags: list[dict[str, Any]] = []
     for victim_name in victim_names:
@@ -179,6 +186,7 @@ def _metric_quality_report(victim_metrics: dict[str, Any], victim_names: list[st
     }
 
 
+# 中文注释：封装 _victim_transfer_score 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _victim_transfer_score(
     victim_metrics: dict[str, dict[str, Any]],
     victim_names: list[str],
@@ -200,12 +208,14 @@ def _victim_transfer_score(
     return float(hit_count / len(victim_asrs)), victim_asrs
 
 
+# 中文注释：封装 _sanitize_dir_name 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _sanitize_dir_name(name: str) -> str:
     # Keep it filesystem-safe and short.
     x = re.sub(r"[^a-zA-Z0-9._-]+", "_", str(name))
     return x[:120] if len(x) > 120 else x
 
 
+# 中文注释：封装 _select_victim_names 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _select_victim_names(cfg: AppConfig) -> tuple[str, list[str]]:
     surrogate = str(cfg.runner.surrogate_model_adapter or cfg.plugins.model_adapter)
     victims = list(cfg.runner.victim_model_adapters or [])
@@ -214,6 +224,7 @@ def _select_victim_names(cfg: AppConfig) -> tuple[str, list[str]]:
     return surrogate, [str(x) for x in victims]
 
 
+# 中文注释：封装 _index_downsample 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _index_downsample(index: VLRIndex, max_pairs: int, seed: int) -> VLRIndex:
     if max_pairs <= 0:
         return index
@@ -280,6 +291,7 @@ def _index_downsample(index: VLRIndex, max_pairs: int, seed: int) -> VLRIndex:
     )
 
 
+# 中文注释：封装 _encode_images 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _encode_images(adapter: Any, images: list[np.ndarray], *, batch_size: int = 16) -> np.ndarray:
     if hasattr(adapter, "encode_images_batch"):
         try:
@@ -298,6 +310,7 @@ def _encode_images(adapter: Any, images: list[np.ndarray], *, batch_size: int = 
     )
 
 
+# 中文注释：封装 _encode_texts 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _encode_texts(adapter: Any, texts: list[str], *, batch_size: int = 32) -> np.ndarray:
     if hasattr(adapter, "encode_texts_batch"):
         try:
@@ -316,16 +329,19 @@ def _encode_texts(adapter: Any, texts: list[str], *, batch_size: int = 32) -> np
     )
 
 
+# 中文注释：封装 _supports_dual_stream 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _supports_dual_stream(adapter: Any) -> bool:
     has_image_encoder = hasattr(adapter, "encode_images_batch") or hasattr(adapter, "encode_image")
     has_text_encoder = hasattr(adapter, "encode_texts_batch") or hasattr(adapter, "encode_text")
     return bool(has_image_encoder and has_text_encoder)
 
 
+# 中文注释：封装 _uses_pairwise_scoring 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _uses_pairwise_scoring(adapter: Any) -> bool:
     return bool(hasattr(adapter, "score_pairs") and not _supports_dual_stream(adapter))
 
 
+# 中文注释：封装 _text_similarity_ratio 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _text_similarity_ratio(clean_texts: list[str], attacked_texts: list[str]) -> float | None:
     pairs = list(zip(clean_texts, attacked_texts))
     if not pairs:
@@ -334,6 +350,7 @@ def _text_similarity_ratio(clean_texts: list[str], attacked_texts: list[str]) ->
     return float(_safe_mean([float(x) for x in vals]))
 
 
+# 中文注释：封装 _paired_cosine_mean 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _paired_cosine_mean(a: np.ndarray, b: np.ndarray) -> float | None:
     x = np.asarray(a, dtype=np.float32)
     y = np.asarray(b, dtype=np.float32)
@@ -345,6 +362,7 @@ def _paired_cosine_mean(a: np.ndarray, b: np.ndarray) -> float | None:
     return float(np.clip(np.mean(vals), -1.0, 1.0))
 
 
+# 中文注释：封装 _semantic_preservation 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _semantic_preservation(
     *,
     surrogate_adapter: Any,
@@ -394,6 +412,7 @@ def _semantic_preservation(
     return payload
 
 
+# 中文注释：封装 _score_two_prompts 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _score_two_prompts(adapter: Any, image: np.ndarray, present_prompt: str, absent_prompt: str) -> tuple[float, float] | None:
     try:
         if _supports_dual_stream(adapter):
@@ -413,6 +432,7 @@ def _score_two_prompts(adapter: Any, image: np.ndarray, present_prompt: str, abs
     return None
 
 
+# 中文注释：封装 _score_image_text 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _score_image_text(adapter: Any, image: np.ndarray, text: str) -> float | None:
     try:
         if _supports_dual_stream(adapter):
@@ -429,6 +449,7 @@ def _score_image_text(adapter: Any, image: np.ndarray, text: str) -> float | Non
     return None
 
 
+# 中文注释：封装 _object_proxy_rows 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _object_proxy_rows(clean_samples: list[Sample], attacked_samples: list[Sample], max_cases: int) -> list[tuple[Sample, Sample, str]]:
     attacked_by_id = {str(s.sample_id): s for s in attacked_samples}
     rows: list[tuple[Sample, Sample, str]] = []
@@ -442,10 +463,12 @@ def _object_proxy_rows(clean_samples: list[Sample], attacked_samples: list[Sampl
     return rows
 
 
+# 中文注释：封装 _object_proxy_empty 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _object_proxy_empty(reason: str, note: str) -> dict[str, Any]:
     return {"available": False, "reason": reason, "note": note}
 
 
+# 中文注释：封装 _object_decision_proxy 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _object_decision_proxy(
     *,
     adapter: Any,
@@ -518,6 +541,7 @@ def _object_decision_proxy(
     }
 
 
+# 中文注释：封装 _score_matrix 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _score_matrix(
     adapter: Any,
     index: VLRIndex,
@@ -570,6 +594,7 @@ def _score_matrix(
     )
 
 
+# 中文注释：封装 _should_parallelize_victims 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _should_parallelize_victims(victim_names: list[str]) -> bool:
     names = [str(x) for x in victim_names]
     if len(names) <= 1:
@@ -577,6 +602,7 @@ def _should_parallelize_victims(victim_names: list[str]) -> bool:
     return all(name.startswith("openai_") for name in names)
 
 
+# 中文注释：封装 _evaluate_victim_stage 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _evaluate_victim_stage(
     *,
     victims: dict[str, Any],
@@ -598,6 +624,7 @@ def _evaluate_victim_stage(
     total_units = max(1, sum(int(x) for x in victim_units.values()))
     completed_units = 0
 
+    # 中文注释：封装 _emit_stage_progress 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
     def _emit_stage_progress(victim_name: str, done_units: int, total_for_victim: int) -> None:
         if progress is None:
             return
@@ -613,6 +640,7 @@ def _evaluate_victim_stage(
             message = f"{progress_message}：{victim_name}。"
         _emit_progress(progress, "victim_evaluation", "running", pct, message)
 
+    # 中文注释：封装 _work 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
     def _work(victim_name: str) -> tuple[str, np.ndarray, dict[str, Any]]:
         adapter = victims[victim_name]
         total_for_victim = int(victim_units.get(victim_name, 1))
@@ -654,6 +682,7 @@ def _evaluate_victim_stage(
     return sims, metrics_by_victim
 
 
+# 中文注释：封装 _pca_project_2d 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _pca_project_2d(vectors: np.ndarray) -> np.ndarray:
     x = np.asarray(vectors, dtype=np.float32)
     if x.ndim != 2 or x.shape[0] == 0:
@@ -672,6 +701,7 @@ def _pca_project_2d(vectors: np.ndarray) -> np.ndarray:
     return z[:, :2].astype(np.float32)
 
 
+# 中文注释：封装 _sample_ids 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _sample_ids(n: int, max_n: int) -> list[int]:
     n = int(max(0, n))
     m = int(max(1, max_n))
@@ -680,6 +710,7 @@ def _sample_ids(n: int, max_n: int) -> list[int]:
     return np.linspace(0, n - 1, num=m, dtype=np.int64).tolist()
 
 
+# 中文注释：封装 _debug_artifacts_enabled 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _debug_artifacts_enabled(cfg: AppConfig) -> bool:
     return bool(
         bool(getattr(cfg.sample_store, "enabled", False))
@@ -688,6 +719,7 @@ def _debug_artifacts_enabled(cfg: AppConfig) -> bool:
     )
 
 
+# 中文注释：封装 _build_feature_projection 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _build_feature_projection(
     *,
     surrogate_adapter: Any,
@@ -703,6 +735,7 @@ def _build_feature_projection(
     rows: list[dict[str, Any]] = []
     vectors: list[np.ndarray] = []
 
+    # 中文注释：封装 _append_stage 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
     def _append_stage(stage: str, idx: VLRIndex) -> None:
         if idx is None:
             return
@@ -768,6 +801,7 @@ def _build_feature_projection(
         return {"available": False, "reason": str(e), "points": []}
 
 
+# 中文注释：封装 _attack_scope_samples 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _attack_scope_samples(
     *,
     cfg: AppConfig,
@@ -826,10 +860,12 @@ def _attack_scope_samples(
     return attacked_samples, _attack_scope_debug(scope, need_img, need_txt, adv_images, adv_texts, adv_image_info, l2_values, linf_values, text_changed_flags)
 
 
+# 中文注释：封装 _sample_image_key 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _sample_image_key(sample: Sample) -> str:
     return str(sample.metadata.get("source_image") or sample.metadata.get("image_id") or sample.sample_id)
 
 
+# 中文注释：封装 _scope_image_maps 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _scope_image_maps(clean_samples: list[Sample]) -> tuple[dict[str, Sample], dict[str, np.ndarray]]:
     image_to_anchor: dict[str, Sample] = {}
     image_to_clean: dict[str, np.ndarray] = {}
@@ -841,6 +877,7 @@ def _scope_image_maps(clean_samples: list[Sample]) -> tuple[dict[str, Sample], d
     return image_to_anchor, image_to_clean
 
 
+# 中文注释：封装 _record_scope_image 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _record_scope_image(
     image_id: str,
     attacked: Any,
@@ -869,6 +906,7 @@ def _record_scope_image(
         linf_values.append(float(attacked.perturbation_linf))
 
 
+# 中文注释：封装 _attack_unique_images 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _attack_unique_images(
     *,
     cfg: AppConfig,
@@ -904,6 +942,7 @@ def _attack_unique_images(
     return adv_images, adv_image_info, l2_values, linf_values
 
 
+# 中文注释：封装 _attack_scope_texts 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _attack_scope_texts(
     *,
     cfg: AppConfig,
@@ -928,6 +967,7 @@ def _attack_scope_texts(
     return adv_texts, text_changed_flags
 
 
+# 中文注释：封装 _assemble_attacked_scope_samples 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _assemble_attacked_scope_samples(
     *,
     cfg: AppConfig,
@@ -955,6 +995,7 @@ def _assemble_attacked_scope_samples(
     return attacked_samples
 
 
+# 中文注释：封装 _scope_sample_metadata 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _scope_sample_metadata(cfg: AppConfig, sample: Sample, scope: str, need_img: bool, image_id: str, adv_image_info: dict[str, dict[str, Any]]) -> dict[str, Any]:
     meta = dict(sample.metadata)
     meta.update({"attack_scope": scope, "attack_name": str(getattr(cfg.plugins, "attack", "attack")), "attack_mode": str(getattr(cfg.attack, "mode", "A"))})
@@ -967,6 +1008,7 @@ def _scope_sample_metadata(cfg: AppConfig, sample: Sample, scope: str, need_img:
     return meta
 
 
+# 中文注释：封装 _attack_scope_debug 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _attack_scope_debug(
     scope: str,
     need_img: bool,
@@ -995,6 +1037,7 @@ def _attack_scope_debug(
     }
 
 
+# 中文注释：封装 _defend_samples 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _defend_samples(
     *,
     cfg: AppConfig,
@@ -1044,6 +1087,7 @@ def _defend_samples(
     }
 
 
+# 中文注释：封装 _stage_error_values 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _stage_error_values(victim_metrics: dict[str, Any], victim_names: list[str], stage: str) -> list[float]:
     values: list[float] = []
     for victim_name in victim_names:
@@ -1054,6 +1098,7 @@ def _stage_error_values(victim_metrics: dict[str, Any], victim_names: list[str],
     return values
 
 
+# 中文注释：封装 _conditional_asr_values 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _conditional_asr_values(victim_metrics: dict[str, Any], victim_names: list[str]) -> list[float]:
     values: list[float] = []
     for victim_name in victim_names:
@@ -1064,6 +1109,7 @@ def _conditional_asr_values(victim_metrics: dict[str, Any], victim_names: list[s
     return values
 
 
+# 中文注释：封装 _rank_delta_summary 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _rank_delta_summary(victim_metrics: dict[str, Any], victim_names: list[str]) -> tuple[list[float], float]:
     rank_deltas: list[float] = []
     worst_victim_asr = 0.0
@@ -1083,6 +1129,7 @@ def _rank_delta_summary(victim_metrics: dict[str, Any], victim_names: list[str])
     return rank_deltas, float(worst_victim_asr)
 
 
+# 中文注释：封装 _summarize_attack_outcomes 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _summarize_attack_outcomes(
     *,
     victim_metrics: dict[str, Any],
@@ -1138,6 +1185,7 @@ def _summarize_attack_outcomes(
     }
 
 
+# 中文注释：封装 _load_vlr_samples_and_index 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _load_vlr_samples_and_index(cfg: AppConfig, progress: Callable[[str, str, float | None, str], None] | None) -> tuple[list[Sample], VLRIndex]:
     _emit_progress(progress, "dataset_loading", "running", 32, "正在装载数据集并构建检索索引。")
     dataset = load_dataset(cfg)
@@ -1155,6 +1203,7 @@ def _load_vlr_samples_and_index(cfg: AppConfig, progress: Callable[[str, str, fl
     return clean_samples_subset, clean_index
 
 
+# 中文注释：封装 _evaluate_clean_vlr_stage 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _evaluate_clean_vlr_stage(
     *,
     victims: dict[str, Any],
@@ -1187,10 +1236,12 @@ def _evaluate_clean_vlr_stage(
     return clean_sims, victim_metrics, results_rows, victim_status
 
 
+# 中文注释：封装 _staged_lifecycle_enabled 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _staged_lifecycle_enabled(cfg: AppConfig) -> bool:
     return bool(getattr(cfg.runner, "staged_model_lifecycle", True))
 
 
+# 中文注释：封装 _release_local_vlm_for_vlr_attack 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _release_local_vlm_for_vlr_attack(cfg: AppConfig, progress: Callable[[str, str, float | None, str], None] | None) -> None:
     if not _staged_lifecycle_enabled(cfg) or not bool(getattr(cfg.runner, "stop_local_vlm_before_attack", True)):
         return
@@ -1199,6 +1250,7 @@ def _release_local_vlm_for_vlr_attack(cfg: AppConfig, progress: Callable[[str, s
     empty_cuda_cache()
 
 
+# 中文注释：封装 _prepare_vlr_local_victims 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _prepare_vlr_local_victims(cfg: AppConfig, victim_names: list[str], progress: Callable[[str, str, float | None, str], None] | None) -> None:
     if not _staged_lifecycle_enabled(cfg):
         return
@@ -1211,6 +1263,7 @@ def _prepare_vlr_local_victims(cfg: AppConfig, victim_names: list[str], progress
     _emit_progress(progress, "model_preflight", "success", 66, "本地 VLM 已就绪，继续检索评测。")
 
 
+# 中文注释：封装 _run_attacked_vlr_stage 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _run_attacked_vlr_stage(cfg: AppConfig, ctx: dict[str, Any], progress: Callable[[str, str, float | None, str], None] | None) -> dict[str, Any]:
     eval_scope = str(ctx["eval_scope"])
     state: dict[str, Any] = {
@@ -1282,6 +1335,7 @@ def _run_attacked_vlr_stage(cfg: AppConfig, ctx: dict[str, Any], progress: Calla
     return state
 
 
+# 中文注释：封装 _evaluate_attacked_victims 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _evaluate_attacked_victims(
     *,
     victims: dict[str, Any],
@@ -1320,6 +1374,7 @@ def _evaluate_attacked_victims(
     return attacked_sims
 
 
+# 中文注释：封装 _run_defended_attack_stage 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _run_defended_attack_stage(
     *,
     cfg: AppConfig,
@@ -1365,6 +1420,7 @@ def _run_defended_attack_stage(
     return defended_samples, defended_debug
 
 
+# 中文注释：封装 _run_clean_defense_vlr_stage 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _run_clean_defense_vlr_stage(
     *,
     cfg: AppConfig,
@@ -1412,6 +1468,7 @@ def _run_clean_defense_vlr_stage(
     return defended_debug, defended_index
 
 
+# 中文注释：封装 _build_vlr_failure_rows 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _build_vlr_failure_rows(*, eval_scope: str, attacked_index: VLRIndex | None, attacked_sims: dict[str, np.ndarray], ks: list[int]) -> list[dict[str, Any]]:
     if eval_scope == "clean" or attacked_index is None:
         return []
@@ -1438,6 +1495,7 @@ def _build_vlr_failure_rows(*, eval_scope: str, attacked_index: VLRIndex | None,
     return failure_rows
 
 
+# 中文注释：封装 _vlr_conditional_asr_attack 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _vlr_conditional_asr_attack(victim_metrics: dict[str, Any], victim_names: list[str], eval_scope: str) -> float:
     values: list[float] = []
     if eval_scope == "clean":
@@ -1450,6 +1508,7 @@ def _vlr_conditional_asr_attack(victim_metrics: dict[str, Any], victim_names: li
     return float(_safe_mean(values))
 
 
+# 中文注释：封装 _vlr_risk_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _vlr_risk_payload(cfg: AppConfig, *, asr_attack: float, semantic_score: float, cost_score: float, transfer_score: float, stability_score: float) -> dict[str, Any]:
     if bool(cfg.risk.enabled):
         return compute_risk_score(
@@ -1473,6 +1532,7 @@ def _vlr_risk_payload(cfg: AppConfig, *, asr_attack: float, semantic_score: floa
     }
 
 
+# 中文注释：封装 _vlr_outcome_context 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _vlr_outcome_context(
     *,
     cfg: AppConfig,
@@ -1540,6 +1600,7 @@ def _vlr_outcome_context(
     return context
 
 
+# 中文注释：封装 _victim_compare_rows 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _victim_compare_rows(victim_metrics: dict[str, Any], victim_names: list[str], victim_status: dict[str, dict[str, str]]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for victim_name in victim_names:
@@ -1559,6 +1620,7 @@ def _victim_compare_rows(victim_metrics: dict[str, Any], victim_names: list[str]
     return rows
 
 
+# 中文注释：封装 _defense_compare_rows 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _defense_compare_rows(victim_metrics: dict[str, Any], victim_names: list[str], ks: list[int]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for victim_name in victim_names:
@@ -1587,6 +1649,7 @@ def _defense_compare_rows(victim_metrics: dict[str, Any], victim_names: list[str
     return rows
 
 
+# 中文注释：封装 _reproduction_fidelity_rows 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _reproduction_fidelity_rows() -> list[dict[str, str]]:
     return [
         {"paper": "AdvCLIP", "status": "approx", "source": "src/mmsec_eval/attacks/advclip/*"},
@@ -1595,6 +1658,7 @@ def _reproduction_fidelity_rows() -> list[dict[str, str]]:
     ]
 
 
+# 中文注释：封装 _build_vlr_summary_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _build_vlr_summary_payload(
     *,
     cfg: AppConfig,
@@ -1667,6 +1731,7 @@ def _build_vlr_summary_payload(
     }
 
 
+# 中文注释：封装 _vlr_summary_risk_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _vlr_summary_risk_payload(outcome: dict[str, Any]) -> dict[str, Any]:
     object_decision_proxy = outcome["object_decision_proxy"]
     return {
@@ -1688,6 +1753,7 @@ def _vlr_summary_risk_payload(outcome: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _build_vlr_report_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _build_vlr_report_payload(
     *,
     summary: dict[str, Any],
@@ -1728,12 +1794,14 @@ def _build_vlr_report_payload(
     }
 
 
+# 中文注释：封装 _as_case_score_text 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _as_case_score_text(score: float | None) -> str:
     if score is None:
         return "未记录模型分数"
     return f"CLIP 相似度（CLIP similarity）={float(score):.4f}"
 
 
+# 中文注释：封装 _sample_delta_metrics 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _sample_delta_metrics(clean: Sample, attacked: Sample) -> tuple[int, float, float]:
     try:
         delta = np.asarray(attacked.image, dtype=np.float32) - np.asarray(clean.image, dtype=np.float32)
@@ -1746,6 +1814,7 @@ def _sample_delta_metrics(clean: Sample, attacked: Sample) -> tuple[int, float, 
         return 0, 0.0, 0.0
 
 
+# 中文注释：封装 _case_bundle_rows 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _case_bundle_rows(
     *,
     adapter: Any,
@@ -1787,6 +1856,7 @@ def _case_bundle_rows(
     return rows if int(max_cases) <= 0 else rows[: max(0, int(max_cases))]
 
 
+# 中文注释：封装 _save_vlr_case_images 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _save_vlr_case_images(
     case_dir: Path,
     clean: Sample,
@@ -1805,6 +1875,7 @@ def _save_vlr_case_images(
     return refs
 
 
+# 中文注释：封装 _vlr_case_bundle_payload 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _vlr_case_bundle_payload(
     *,
     row: dict[str, Any],
@@ -1881,6 +1952,7 @@ def _vlr_case_bundle_payload(
     return bundle, summary
 
 
+# 中文注释：封装 _write_vlr_case_bundle 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _write_vlr_case_bundle(
     *,
     case_dir: Path,
@@ -1910,6 +1982,7 @@ def _write_vlr_case_bundle(
     }
 
 
+# 中文注释：封装 _write_vlr_case_bundles 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _write_vlr_case_bundles(cfg: AppConfig, setup: dict[str, Any], state: dict[str, Any]) -> str:
     # Report pages need representative VLR case bundles even when the sample-store
     # feature is disabled; this keeps retrieval evidence aligned with VQA/Caption.
@@ -1943,6 +2016,7 @@ def _write_vlr_case_bundles(cfg: AppConfig, setup: dict[str, Any], state: dict[s
     return write_jsonl(str(run_dir / "cases_index.jsonl"), index_rows) if index_rows else ""
 
 
+# 中文注释：封装 _vlr_stage_metrics 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _vlr_stage_metrics(victim_metrics: dict[str, Any], victim_names: list[str]) -> dict[str, dict[str, Any]]:
     return {
         "clean": {name: victim_metrics.get(name, {}).get("clean", {}) for name in victim_names},
@@ -1953,6 +2027,7 @@ def _vlr_stage_metrics(victim_metrics: dict[str, Any], victim_names: list[str]) 
     }
 
 
+# 中文注释：封装 _write_vlr_recall_plots 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _write_vlr_recall_plots(*, run_dir: str, victim_metrics: dict[str, Any], victim_names: list[str], ks: list[int]) -> None:
     for victim_name in victim_names:
         clean_m = victim_metrics.get(victim_name, {}).get("clean", {}) or {}
@@ -1981,6 +2056,7 @@ def _write_vlr_recall_plots(*, run_dir: str, victim_metrics: dict[str, Any], vic
         )
 
 
+# 中文注释：封装 _vlr_transfer_plot_values 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _vlr_transfer_plot_values(victim_metrics: dict[str, Any], victim_names: list[str]) -> tuple[list[str], list[float], list[float]]:
     labels = [str(x) for x in victim_names]
     vals: list[float] = []
@@ -1995,6 +2071,7 @@ def _vlr_transfer_plot_values(victim_metrics: dict[str, Any], victim_names: list
     return labels, vals, vals_def
 
 
+# 中文注释：封装 _write_vlr_transfer_and_rank_plots 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _write_vlr_transfer_and_rank_plots(*, run_dir: str, victim_metrics: dict[str, Any], victim_names: list[str], defense: Any | None, asr_attack: float, asr_defended: float) -> None:
     labels, vals, vals_def = _vlr_transfer_plot_values(victim_metrics, victim_names)
     plot_grouped_bar(
@@ -2028,6 +2105,7 @@ def _write_vlr_transfer_and_rank_plots(*, run_dir: str, victim_metrics: dict[str
         )
 
 
+# 中文注释：封装 _vlr_rank_plot_values 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _vlr_rank_plot_values(victim_metrics: dict[str, Any], victim_names: list[str]) -> tuple[list[float], list[float]]:
     clean_rank: list[float] = []
     adv_rank: list[float] = []
@@ -2039,6 +2117,7 @@ def _vlr_rank_plot_values(victim_metrics: dict[str, Any], victim_names: list[str
     return clean_rank, adv_rank
 
 
+# 中文注释：封装 _write_vlr_plots 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _write_vlr_plots(*, cfg: AppConfig, run_dir: str, eval_scope: str, victim_metrics: dict[str, Any], victim_names: list[str], ks: list[int], outcome: dict[str, Any], defense: Any | None) -> None:
     if cfg.runner.save_plots and outcome["l2_values"]:
         plot_metric_curve(list(outcome["l2_values"]), "perturbation_l2", f"{run_dir}/metric_curve_l2.png")
@@ -2057,6 +2136,7 @@ def _write_vlr_plots(*, cfg: AppConfig, run_dir: str, eval_scope: str, victim_me
     )
 
 
+# 中文注释：封装 _finish_vlr_run 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _finish_vlr_run(cfg: AppConfig, setup: dict[str, Any], state: dict[str, Any], progress: Callable[[str, str, float | None, str], None] | None) -> RunArtifacts:
     _emit_progress(progress, "result_aggregation", "running", 90, "正在汇总多模型指标、风险分数和样本级摘要。")
     run_id = str(setup["run_id"])
@@ -2127,6 +2207,7 @@ def _finish_vlr_run(cfg: AppConfig, setup: dict[str, Any], state: dict[str, Any]
     return RunArtifacts(run_id=run_id, run_dir=run_dir, results_path=results_path, summary_path=summary_path, report_path=report_path, run_index_path=run_index_path, benchmark_summary_path="")
 
 
+# 中文注释：封装 _setup_vlr_run 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _setup_vlr_run(cfg: AppConfig) -> dict[str, Any]:
     set_seed(cfg.seed)
     run_id = new_run_id()
@@ -2148,6 +2229,7 @@ def _setup_vlr_run(cfg: AppConfig) -> dict[str, Any]:
     }
 
 
+# 中文注释：封装 _execute_vlr_stages 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _execute_vlr_stages(cfg: AppConfig, setup: dict[str, Any], progress: Callable[[str, str, float | None, str], None] | None) -> dict[str, Any]:
     clean_samples_subset, clean_index = _load_vlr_samples_and_index(cfg, progress)
     ks = list(cfg.task.retrieval_k or [1, 5, 10])
@@ -2212,6 +2294,7 @@ def _execute_vlr_stages(cfg: AppConfig, setup: dict[str, Any], progress: Callabl
     )
 
 
+# 中文注释：封装 _vlr_stage_state 的内部步骤，让评测运行器主流程保持清晰并隔离边界细节。
 def _vlr_stage_state(
     *,
     clean_samples_subset: list[Sample],
@@ -2256,6 +2339,7 @@ def _vlr_stage_state(
     }
 
 
+# 中文注释：串联 run 的主流程，集中处理评测运行器的初始化、执行和退出条件。
 def run(cfg: AppConfig, progress: Callable[[str, str, float | None, str], None] | None = None) -> RunArtifacts:
     """Run Vision-Language Retrieval (VLR) evaluation.
 

@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test local vlm launch scripts 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -5,6 +6,7 @@ from pathlib import Path
 from mmsec_eval.model_adapters.local_vlm_catalog import LOCAL_OPENAI_COMPAT_MODEL_SPECS
 
 
+# 中文注释：验证 test_local_vlm_launch_scripts_only_kill_their_own_ports 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_local_vlm_launch_scripts_only_kill_their_own_ports():
     for spec in LOCAL_OPENAI_COMPAT_MODEL_SPECS:
         content = Path(spec.launch_script).read_text(encoding="utf-8")

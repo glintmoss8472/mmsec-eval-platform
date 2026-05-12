@@ -1,8 +1,10 @@
+# 文件说明：该文件属于自动化测试，集中实现 test model task capabilities 相关逻辑。
 from __future__ import annotations
 
 from mmsec_api.services.model_runtime import model_supports_task, task_capabilities_for_adapter
 
 
+# 中文注释：验证 test_fixture_is_not_formal_task_model 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_fixture_is_not_formal_task_model() -> None:
     assert task_capabilities_for_adapter("fixture_vlm") == []
     assert model_supports_task("fixture_vlm", "vqa") is False
@@ -10,6 +12,7 @@ def test_fixture_is_not_formal_task_model() -> None:
     assert model_supports_task("fixture_vlm", "vlr") is False
 
 
+# 中文注释：验证 test_task_specific_model_capabilities 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_task_specific_model_capabilities() -> None:
     assert task_capabilities_for_adapter("clip_hf") == ["vlr"]
     assert model_supports_task("clip_hf", "vlr") is True

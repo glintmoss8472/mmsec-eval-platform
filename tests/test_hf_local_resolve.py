@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test hf local resolve 相关逻辑。
 from __future__ import annotations
 
 from pathlib import Path
@@ -5,6 +6,7 @@ from pathlib import Path
 from mmsec_eval.model_adapters.hf_local import resolve_hf_model_source
 
 
+# 中文注释：验证 test_resolve_hf_model_source_prefers_local_dir_when_ready 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_resolve_hf_model_source_prefers_local_dir_when_ready(tmp_path: Path, monkeypatch):
     art = tmp_path / "artifacts"
     model_dir = art / "hf_models" / "blip_itm"
@@ -17,6 +19,7 @@ def test_resolve_hf_model_source_prefers_local_dir_when_ready(tmp_path: Path, mo
     assert Path(src).resolve() == model_dir.resolve()
 
 
+# 中文注释：验证 test_resolve_hf_model_source_keeps_repo_id_when_local_missing 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_resolve_hf_model_source_keeps_repo_id_when_local_missing(tmp_path: Path, monkeypatch):
     art = tmp_path / "artifacts"
     monkeypatch.setenv("MMSEC_ARTIFACTS_DIR", str(art))
@@ -27,6 +30,7 @@ def test_resolve_hf_model_source_keeps_repo_id_when_local_missing(tmp_path: Path
     assert src == "dandelin/vilt-b32-finetuned-coco"
 
 
+# 中文注释：验证 test_resolve_hf_model_source_falls_back_to_bundle_assets 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_resolve_hf_model_source_falls_back_to_bundle_assets(tmp_path: Path, monkeypatch):
     art = tmp_path / "artifacts"
     bundle_root = tmp_path / "bundle"

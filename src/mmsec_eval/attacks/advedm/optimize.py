@@ -1,3 +1,4 @@
+# 文件说明：该文件属于AdvEDM 攻击模块，集中实现 optimize 相关逻辑。
 from __future__ import annotations
 
 from typing import Any
@@ -7,6 +8,7 @@ import numpy as np
 from mmsec_eval.types import AttackTraceStep
 
 
+# 中文注释：封装 _resize_fixation_map 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _resize_fixation_map(fixation_map: np.ndarray | None, height: int, width: int) -> np.ndarray:
     if fixation_map is None:
         return np.zeros((height, width), dtype=np.float32)
@@ -19,6 +21,7 @@ def _resize_fixation_map(fixation_map: np.ndarray | None, height: int, width: in
     return np.clip(fix_np, 0.0, 1.0).astype(np.float32)
 
 
+# 中文注释：封装 _torch_masks 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _torch_masks(image: np.ndarray, mask: np.ndarray, fixation_map: np.ndarray | None, device: str) -> tuple[Any, Any, Any, Any]:
     import torch
 
@@ -30,6 +33,7 @@ def _torch_masks(image: np.ndarray, mask: np.ndarray, fixation_map: np.ndarray |
     return preserve.expand(1, 3, height, width), attack.expand(1, 3, height, width), fix.expand(1, 3, height, width), fix_np
 
 
+# 中文注释：封装 _patch_grid_focus 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _patch_grid_focus(image: np.ndarray, mask: np.ndarray, fix_np_full: np.ndarray, patch_size: int, device: str) -> tuple[int, int, Any]:
     import torch
 
@@ -51,6 +55,7 @@ def _patch_grid_focus(image: np.ndarray, mask: np.ndarray, fix_np_full: np.ndarr
     return gh, gw, attack_grid * (0.1 + 2.8 * torch.pow(fix_grid, 1.55))
 
 
+# 中文注释：封装 _patch_score 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _patch_score(model_adapter: Any, x_adv: Any, target_text: str, gh: int, gw: int, attack_grid_focus: Any) -> Any:
     import torch.nn.functional as F
 
@@ -68,6 +73,7 @@ def _patch_score(model_adapter: Any, x_adv: Any, target_text: str, gh: int, gw: 
     return (patch_sim * attack_grid_focus).sum() / (attack_grid_focus.sum() + 1e-8)
 
 
+# 中文注释：封装 _loss_parts 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _loss_parts(
     *,
     x0: Any,
@@ -99,6 +105,7 @@ def _loss_parts(
     }
 
 
+# 中文注释：封装 _trace_step 的内部步骤，让AdvEDM 攻击模块主流程保持清晰并隔离边界细节。
 def _trace_step(k: int, parts: dict[str, Any], loss_total: Any, objective: str, caption_text: str, target_text: str) -> AttackTraceStep:
     return AttackTraceStep(
         step=k + 1,
@@ -115,6 +122,7 @@ def _trace_step(k: int, parts: dict[str, Any], loss_total: Any, objective: str, 
     )
 
 
+# 中文注释：实现 masked_pgd_optimize 的核心流程，支撑AdvEDM 攻击模块中的业务语义和异常边界。
 def masked_pgd_optimize(
     *,
     image: np.ndarray,

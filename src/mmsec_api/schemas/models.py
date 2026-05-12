@@ -1,3 +1,4 @@
+# 文件说明：该文件属于接口数据结构，集中实现 models 相关逻辑。
 from __future__ import annotations
 
 from typing import Any, Literal
@@ -22,6 +23,7 @@ BootstrapState = Literal["pending", "seeding", "warming", "ready", "degraded"]
 BootstrapStepState = Literal["pending", "running", "success", "failed", "skipped"]
 
 
+# 中文注释：定义 HealthResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class HealthResponse(BaseModel):
     status: str
     version: str
@@ -29,11 +31,13 @@ class HealthResponse(BaseModel):
     degraded_reason: str = ""
 
 
+# 中文注释：定义 PaginationQuery 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class PaginationQuery(BaseModel):
     page: int = Field(default=1, ge=1)
     page_size: int = Field(default=20, ge=1, le=200)
 
 
+# 中文注释：定义 JobCreateRequest 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class JobCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -44,6 +48,7 @@ class JobCreateRequest(BaseModel):
     payload: dict[str, Any] | None = None
 
 
+# 中文注释：定义 JobResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class JobResponse(BaseModel):
     id: str
     job_type: str
@@ -59,6 +64,7 @@ class JobResponse(BaseModel):
     error_message: str = ""
 
 
+# 中文注释：定义 JobLogResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class JobLogResponse(BaseModel):
     id: int
     job_id: str
@@ -67,6 +73,7 @@ class JobLogResponse(BaseModel):
     message: str
 
 
+# 中文注释：定义 JobListResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class JobListResponse(BaseModel):
     total: int
     page: int
@@ -74,6 +81,7 @@ class JobListResponse(BaseModel):
     items: list[JobResponse]
 
 
+# 中文注释：定义 JobLogListResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class JobLogListResponse(BaseModel):
     total: int
     page: int
@@ -81,6 +89,7 @@ class JobLogListResponse(BaseModel):
     items: list[JobLogResponse]
 
 
+# 中文注释：定义 JobStageResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class JobStageResponse(BaseModel):
     stage_key: str
     stage_label: str
@@ -90,6 +99,7 @@ class JobStageResponse(BaseModel):
     updated_at: str = ""
 
 
+# 中文注释：定义 JobProgressResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class JobProgressResponse(BaseModel):
     job_id: str
     job_type: str
@@ -111,6 +121,7 @@ class JobProgressResponse(BaseModel):
     run_id: str = ""
 
 
+# 中文注释：定义 DatasetPrepareRequest 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class DatasetPrepareRequest(BaseModel):
     name: Literal["flickr30k", "flickr1k", "coco_subset", "mini_flickr"]
     root_path: str = ""
@@ -123,6 +134,7 @@ class DatasetPrepareRequest(BaseModel):
     auto_download: bool = True
 
 
+# 中文注释：定义 DatasetInfo 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class DatasetInfo(BaseModel):
     name: str
     root_path: str
@@ -134,10 +146,12 @@ class DatasetInfo(BaseModel):
     note: str = ""
 
 
+# 中文注释：定义 DatasetListResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class DatasetListResponse(BaseModel):
     items: list[DatasetInfo]
 
 
+# 中文注释：定义 RunSummary 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class RunSummary(BaseModel):
     run_id: str
     created_at: str = ""
@@ -214,6 +228,7 @@ class RunSummary(BaseModel):
     artifact_index_path: str = ""
 
 
+# 中文注释：定义 RunListResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class RunListResponse(BaseModel):
     total: int
     page: int
@@ -221,11 +236,13 @@ class RunListResponse(BaseModel):
     items: list[RunSummary]
 
 
+# 中文注释：定义 RunCompareResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class RunCompareResponse(BaseModel):
     run_ids: list[str]
     compare: dict[str, Any]
 
 
+# 中文注释：定义 RowsResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class RowsResponse(BaseModel):
     total: int
     page: int
@@ -233,6 +250,7 @@ class RowsResponse(BaseModel):
     items: list[dict[str, Any]]
 
 
+# 中文注释：定义 CaseDetailResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class CaseDetailResponse(BaseModel):
     run_id: str
     sample_id: str
@@ -240,14 +258,17 @@ class CaseDetailResponse(BaseModel):
     attack_debug: dict[str, Any]
 
 
+# 中文注释：定义 DocsIngestRequest 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class DocsIngestRequest(BaseModel):
     config_path: str = "configs/mvp.yaml"
 
 
+# 中文注释：定义 DocsPayloadResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class DocsPayloadResponse(BaseModel):
     items: list[dict[str, Any]]
 
 
+# 中文注释：定义 BootstrapStep 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class BootstrapStep(BaseModel):
     name: str
     state: BootstrapStepState
@@ -255,6 +276,7 @@ class BootstrapStep(BaseModel):
     updated_at: str
 
 
+# 中文注释：定义 WarmupArtifactRef 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class WarmupArtifactRef(BaseModel):
     docs_index: str = ""
     docs_snippets: str = ""
@@ -262,6 +284,7 @@ class WarmupArtifactRef(BaseModel):
     seeded_data: list[str] = Field(default_factory=list)
 
 
+# 中文注释：定义 BootstrapStatusResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class BootstrapStatusResponse(BaseModel):
     state: BootstrapState
     started_at: str = ""
@@ -271,10 +294,12 @@ class BootstrapStatusResponse(BaseModel):
     artifacts: WarmupArtifactRef = Field(default_factory=WarmupArtifactRef)
 
 
+# 中文注释：定义 BootstrapLogsResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class BootstrapLogsResponse(BaseModel):
     items: list[dict[str, str]]
 
 
+# 中文注释：定义 ModelOverviewResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class ModelOverviewResponse(BaseModel):
     adapter: str
     display_name: str
@@ -291,11 +316,13 @@ class ModelOverviewResponse(BaseModel):
     capability_note: str = ""
 
 
+# 中文注释：定义 ModelListResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class ModelListResponse(BaseModel):
     total: int
     items: list[ModelOverviewResponse] = Field(default_factory=list)
 
 
+# 中文注释：定义 DatasetOverviewItem 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class DatasetOverviewItem(BaseModel):
     key: str
     name: str
@@ -309,6 +336,7 @@ class DatasetOverviewItem(BaseModel):
     source: str = ""
 
 
+# 中文注释：定义 SystemOverviewResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class SystemOverviewResponse(BaseModel):
     generated_at: str
     project_root: str
@@ -363,6 +391,7 @@ class SystemOverviewResponse(BaseModel):
     validation_summary: dict[str, Any] = Field(default_factory=dict)
 
 
+# 中文注释：定义 ComplianceItem 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class ComplianceItem(BaseModel):
     id: str
     title: str
@@ -371,6 +400,7 @@ class ComplianceItem(BaseModel):
     gap: str = ""
 
 
+# 中文注释：定义 PaperCoverageItem 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class PaperCoverageItem(BaseModel):
     paper: str
     repo: str
@@ -381,18 +411,21 @@ class PaperCoverageItem(BaseModel):
     todo: str = ""
 
 
+# 中文注释：定义 UiPageItem 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class UiPageItem(BaseModel):
     route: str
     page_file: str
     exists: bool
 
 
+# 中文注释：定义 ProjectStageResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class ProjectStageResponse(BaseModel):
     stage: str
     final_stage: str
     criteria: dict[str, bool]
 
 
+# 中文注释：定义 ResultConformanceResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class ResultConformanceResponse(BaseModel):
     analysis_path: str = ""
     threshold_path: str = ""
@@ -413,12 +446,14 @@ class ResultConformanceResponse(BaseModel):
     caveats: list[str] = Field(default_factory=list)
 
 
+# 中文注释：定义 EngineeringViewsResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class EngineeringViewsResponse(BaseModel):
     project_stage: ProjectStageResponse | None = None
     backend_interfaces: list[ComplianceItem] = Field(default_factory=list)
     ui_pages: list[UiPageItem] = Field(default_factory=list)
 
 
+# 中文注释：定义 SystemComplianceResponse 的结构化职责，作为接口数据结构中状态、配置或行为的边界。
 class SystemComplianceResponse(BaseModel):
     generated_at: str
     checklist_semantics: str = ""

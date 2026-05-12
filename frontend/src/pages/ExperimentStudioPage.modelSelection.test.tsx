@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 ExperimentStudioPage.modelSelection.test 相关逻辑。
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
@@ -26,6 +27,7 @@ const modelAdapters = [
   "openai_gemma3_12b",
 ];
 
+/** 中文注释：构造模型依赖已就绪的测试条件，确保模型选择流程只验证前端业务分支。 */
 const readyRequirement = (label: string, required = true) => ({
   label,
   required,
@@ -36,6 +38,7 @@ const readyRequirement = (label: string, required = true) => ({
   note: "已配置并存在",
 });
 
+/** 中文注释：实现 notRequiredRequirement 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 const notRequiredRequirement = (label: string) => ({
   label,
   required: false,
@@ -120,6 +123,7 @@ vi.mock("../lib/api", () => ({
   createJob: vi.fn(),
 }));
 
+/** 中文注释：实现 createClient 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function createClient() {
   return new QueryClient({
     defaultOptions: {
@@ -131,6 +135,7 @@ function createClient() {
   });
 }
 
+/** 中文注释：实现 renderPage 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function renderPage() {
   return render(
     <MemoryRouter initialEntries={["/testing"]}>
@@ -141,6 +146,7 @@ function renderPage() {
   );
 }
 
+/** 中文注释：实现 findDatasetSelect 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 async function findDatasetSelect() {
   await screen.findByRole("heading", { name: "选择数据集" });
   const datasetSelect = document.querySelector('select[name="datasetId"]') as HTMLSelectElement | null;

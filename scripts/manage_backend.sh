@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 文件说明：该文件属于运维与实验脚本，集中实现 manage backend 相关逻辑。
 set -euo pipefail
 
 ACTION="${1:-status}"
@@ -12,17 +13,20 @@ HEALTH_URL="http://${HOST}:${PORT}/api/v1/health"
 
 mkdir -p "${LOG_DIR}"
 
+# 中文注释：实现 read_pid 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 read_pid() {
   if [[ -s "${PID_FILE}" ]]; then
     tr -d '[:space:]' < "${PID_FILE}"
   fi
 }
 
+# 中文注释：实现 pid_alive 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 pid_alive() {
   local pid="${1:-}"
   [[ -n "${pid}" ]] && kill -0 "${pid}" >/dev/null 2>&1
 }
 
+# 中文注释：实现 pid_cmdline 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 pid_cmdline() {
   local pid="${1:-}"
   if [[ -n "${pid}" && -r "/proc/${pid}/cmdline" ]]; then
@@ -30,6 +34,7 @@ pid_cmdline() {
   fi
 }
 
+# 中文注释：实现 pid_looks_like_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 pid_looks_like_backend() {
   local pid="${1:-}"
   local cmd
@@ -37,6 +42,7 @@ pid_looks_like_backend() {
   [[ "${cmd}" == *"mmsec_api.main:app"* || "${cmd}" == *"scripts/run_backend.sh"* ]]
 }
 
+# 中文注释：实现 port_pid 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 port_pid() {
   if command -v ss >/dev/null 2>&1; then
     ss -ltnp 2>/dev/null \
@@ -49,10 +55,12 @@ port_pid() {
     | awk -v port="${PORT}" '$2 ~ /python/ && $0 ~ /uvicorn mmsec_api.main:app/ && $0 ~ ("--port " port) {print $1; exit}'
 }
 
+# 中文注释：实现 health_ok 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 health_ok() {
   curl -fsS "${HEALTH_URL}" >/dev/null 2>&1
 }
 
+# 中文注释：实现 start_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 start_backend() {
   local pid
   pid="$(read_pid || true)"
@@ -94,6 +102,7 @@ start_backend() {
   return 1
 }
 
+# 中文注释：实现 stop_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 stop_backend() {
   local pid
   pid="$(read_pid || true)"
@@ -123,6 +132,7 @@ stop_backend() {
   return 1
 }
 
+# 中文注释：实现 status_backend 的核心流程，支撑运维与实验脚本中的业务语义和异常边界。
 status_backend() {
   local pid
   pid="$(read_pid || true)"

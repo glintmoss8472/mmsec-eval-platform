@@ -1,10 +1,13 @@
+# 文件说明：该文件属于项目工程，集中实现 rule judge 相关逻辑。
 from __future__ import annotations
 
 from mmsec_eval.plugins.base import Judge
 from mmsec_eval.types import EvalRecord, JudgeResult
 
 
+# 中文注释：定义 RuleJudge 的结构化职责，作为项目工程中状态、配置或行为的边界。
 class RuleJudge(Judge):
+    # 中文注释：实现 RuleJudge.judge 的核心行为，维护项目工程在该对象上的调用契约。
     def judge(self, record: EvalRecord) -> JudgeResult:
         clean = record.pred_clean.text.lower().strip()
         adv = record.pred_adv.text.lower().strip()

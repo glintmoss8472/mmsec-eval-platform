@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 ReportDetailPage 相关逻辑。
 import ReactECharts from "echarts-for-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -22,10 +23,12 @@ import {
   formatWrapped,
 } from "../lib/uiLabels";
 
+/** 中文注释：实现 asRecord 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
 }
 
+/** 中文注释：实现 asRows 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function asRows(value: unknown): Array<Record<string, unknown>> {
   if (!Array.isArray(value)) {
     return [];
@@ -33,11 +36,13 @@ function asRows(value: unknown): Array<Record<string, unknown>> {
   return value.map((x) => asRecord(x));
 }
 
+/** 中文注释：实现 asNum 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function asNum(value: unknown): number {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
 }
 
+/** 中文注释：实现 parseKs 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function parseKs(value: unknown): number[] {
   if (!Array.isArray(value)) {
     return [1, 5, 10];
@@ -46,11 +51,13 @@ function parseKs(value: unknown): number[] {
   return out.length > 0 ? out : [1, 5, 10];
 }
 
+/** 中文注释：实现 formatOptionalMeta 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function formatOptionalMeta(value: unknown): string {
   const text = String(value ?? "").trim();
   return text && text !== "-" && text !== "null" && text !== "undefined" ? text : "未记录 / 不适用";
 }
 
+/** 中文注释：实现 formatOptionalMetric 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function formatOptionalMetric(value: unknown): string {
   const text = String(value ?? "").trim();
   return text && text !== "-" && text !== "null" && text !== "undefined" ? text : "未记录";
@@ -67,11 +74,13 @@ const ATTACK_MODE_LABELS: Record<string, string> = {
   m_attack: "局部语义匹配迁移优化",
 };
 
+/** 中文注释：实现 formatAttackModeName 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function formatAttackModeName(attack: unknown, mode: unknown): string {
   const attackId = String(attack ?? "").trim().toLowerCase();
   return ATTACK_MODE_LABELS[attackId] ?? formatModeName(String(mode ?? "-"));
 }
 
+/** 中文注释：实现 confidenceLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function confidenceLabel(count: number): string {
   if (count >= 30) return "高置信证据";
   if (count >= 5) return "中置信证据";
@@ -79,11 +88,13 @@ function confidenceLabel(count: number): string {
   return "仅运行摘要";
 }
 
+/** 中文注释：实现 resultTypeLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function resultTypeLabel(runId: string, summary: Record<string, unknown>): string {
   const text = [runId, summary.benchmark_tag, summary.dataset_name, summary.experiment_id].map((x) => String(x ?? "").toLowerCase()).join(" ");
   return /smoke|debug|vram_|quick|trial|toy|demo|staged_lifecycle/.test(text) ? "调试结果" : "正式结果";
 }
 
+/** 中文注释：实现 taskMetricExplanation 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function taskMetricExplanation(taskKind: string, generationMetrics: Record<string, unknown>, summary: Record<string, unknown>): string {
   if (taskKind === "vqa") {
     return `视觉问答按“原始输入准确率、攻击后准确率、答案变化率”判断模型是否被误导：原始输入准确率=${asNum(generationMetrics.clean_accuracy).toFixed(4)}，攻击后准确率=${asNum(generationMetrics.attacked_accuracy).toFixed(4)}，答案变化率=${asNum(generationMetrics.answer_change_rate).toFixed(4)}。`;
@@ -94,6 +105,7 @@ function taskMetricExplanation(taskKind: string, generationMetrics: Record<strin
   return `图文检索按“前 K 位召回率、条件攻击成功率、平均排名变化”判断图文匹配是否被破坏：攻击成功率=${asNum(summary.asr_attack ?? summary.asr).toFixed(4)}，平均排名变化=${formatOptionalMetric(summary.rank_delta_mean)}。`;
 }
 
+/** 中文注释：实现 supportConclusion 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function supportConclusion(count: number, resultType: string): string {
   if (count >= 30) return `${resultType}，样本规模 n=${count}，可以作为稳定统计结论展示。`;
   if (count >= 5) return `${resultType}，样本规模 n=${count}，可以支撑趋势分析，正式论文中建议补充更大样本。`;
@@ -101,6 +113,7 @@ function supportConclusion(count: number, resultType: string): string {
   return `${resultType}，当前未登记可复盘样本，不能单独支撑样本级结论。`;
 }
 
+/** 中文注释：实现 conclusionBoundary 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function conclusionBoundary(count: number, resultType: string): string {
   if (count >= 30) return "可用于答辩中的统计性结论，并可作为正式对比实验的主证据。";
   if (count >= 5) return "可用于展示趋势、任务覆盖和方法效果，正式论文结论需要结合更多运行交叉验证。";
@@ -108,12 +121,14 @@ function conclusionBoundary(count: number, resultType: string): string {
   return "当前缺少可复盘样本，只能说明任务曾运行，不能说明攻击效果。";
 }
 
+/** 中文注释：实现 taskObjective 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function taskObjective(taskKind: string): string {
   if (taskKind === "vqa") return "验证对抗图像是否改变视觉问答模型对同一问题的回答正确性。";
   if (taskKind === "caption") return "验证对抗扰动是否改变图像描述中的目标对象，同时尽量保留非目标语义。";
   return "验证图像或文本侧扰动是否破坏图文匹配和召回排序。";
 }
 
+/** 中文注释：实现 avgRecall 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function avgRecall(metrics: Record<string, unknown>, k: number): number {
   const ir = asNum(metrics[`ir_r@${k}`]);
   const tr = asNum(metrics[`tr_r@${k}`]);

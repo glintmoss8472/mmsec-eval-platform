@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 ExperimentStudioPage 相关逻辑。
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -168,6 +169,7 @@ export default function ExperimentStudioPage() {
     : "当前没有可用于该任务的真实生成式数据集";
   const activeAttacks = attacks;
   const rawSampleBatches = sampleBatchQ.data?.items ?? [];
+  /** 中文注释：实现 selectableAssetCount 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   const selectableAssetCount = (batch: any) => {
     if (assetBatchStatus === "pending_evaluation") {
       const ids = Array.isArray(batch.asset_ids) ? batch.asset_ids.length : 0;
@@ -495,6 +497,7 @@ export default function ExperimentStudioPage() {
     }
   }, [attack, compatibleSurrogates, selectedSurrogate, surrogate]);
 
+  /** 中文注释：实现 applyAttackDefaults 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   function applyAttackDefaults(nextAttack: string) {
     setAdvancedSteps(String(defaultStepCount(nextAttack)));
     setAdvancedStepSize(String(defaultStepSize(nextAttack, Number(defaultStrengthForAttack(nextAttack)))));
@@ -514,6 +517,7 @@ export default function ExperimentStudioPage() {
     setAttackModeOverride("A");
   }
 
+  /** 中文注释：实现 saveDraft 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   function saveDraft() {
     try {
       window.localStorage.setItem(
@@ -649,7 +653,9 @@ export default function ExperimentStudioPage() {
   });
 
   const runningJob = jobsQ.data?.items?.find((item) => item.status === "running" || item.status === "queued");
+  /** 中文注释：实现 goNext 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   const goNext = () => setCurrentStep((step) => Math.min(4, step + 1) as WizardStep);
+  /** 中文注释：实现 goPrev 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   const goPrev = () => setCurrentStep((step) => Math.max(1, step - 1) as WizardStep);
   const taskKindLabel = taskKind === "vqa" ? "视觉问答" : taskKind === "caption" ? "图像描述" : "图文检索";
   const sidePanelTitle = currentStep === 1 ? "对象状态" : currentStep === 2 ? evaluationMode === "assets" ? "样本集" : "数据规模" : currentStep === 3 ? evaluationMode === "assets" ? "复用测评" : "样本生成参数" : "提交检查";

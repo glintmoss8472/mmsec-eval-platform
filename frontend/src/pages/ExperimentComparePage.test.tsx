@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 ExperimentComparePage.test 相关逻辑。
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";

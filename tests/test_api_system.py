@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test api system 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -8,6 +9,7 @@ import pytest
 from api_test_utils import make_client
 
 
+# 中文注释：封装 _write_system_dataset_fixtures 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _write_system_dataset_fixtures(client, tmp_path: Path) -> None:
     store = client.app.state.store
     coco_root = tmp_path / "datasets" / "coco"
@@ -39,6 +41,7 @@ def _write_system_dataset_fixtures(client, tmp_path: Path) -> None:
     store.upsert_dataset("mini_flickr", str(mini_root), True, 4, "prepared via api (demo fixture)")
 
 
+# 中文注释：封装 _assert_dataset_endpoint_ready 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _assert_dataset_endpoint_ready(client) -> None:
     datasets_resp = client.get("/api/v1/datasets")
     assert datasets_resp.status_code == 200
@@ -49,6 +52,7 @@ def _assert_dataset_endpoint_ready(client) -> None:
         assert dataset_items[name]["ready_reason"] == ""
 
 
+# 中文注释：封装 _assert_overview_top_level 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _assert_overview_top_level(payload: dict) -> None:
     required = {
         "project_root", "adapters", "models", "attacks", "datasets", "paper_repositories",
@@ -70,6 +74,7 @@ def _assert_overview_top_level(payload: dict) -> None:
     assert payload["model_coverage"]["online"]["count"] == payload["online_model_count"]
 
 
+# 中文注释：封装 _assert_external_attack_status 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _assert_external_attack_status(payload: dict) -> None:
     statuses = payload["external_attack_status"]
     expected = {"vqa_visual_corruption", "xtransfer_uap", "foa_attack", "anyattack", "mpc_attack", "m_attack"}
@@ -86,6 +91,7 @@ def _assert_external_attack_status(payload: dict) -> None:
     assert statuses["foa_attack"]["target"]["required"] is True
 
 
+# 中文注释：封装 _assert_overview_datasets 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _assert_overview_datasets(payload: dict) -> None:
     assert len(payload["datasets"]) == payload["dataset_total_count"]
     assert payload["dataset_total_count"] == 4
@@ -100,6 +106,7 @@ def _assert_overview_datasets(payload: dict) -> None:
     assert any(item["key"] == "coco_caption_object_val" and item.get("tier") == "generation" for item in payload["dataset_catalog"])
 
 
+# 中文注释：封装 _assert_overview_environment 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _assert_overview_environment(payload: dict) -> None:
     assert payload["primary_formal_runs_source_path"].endswith("artifacts/paper_suite_20260418_final/paper_suite_analysis.json")
     assert payload["primary_formal_runs_source_kind"] == "canonical_thesis_suite"
@@ -113,6 +120,7 @@ def _assert_overview_environment(payload: dict) -> None:
     assert payload["validated_model_count"] == 0
 
 
+# 中文注释：封装 _assert_primary_formal_runs 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _assert_primary_formal_runs(payload: dict) -> None:
     assert payload["primary_formal_runs_artifact_index_path"].endswith("artifacts/paper_suite_20260418_final/row_artifact_index.json")
     if not payload["latest_primary_formal_runs"]:
@@ -136,6 +144,7 @@ def _assert_primary_formal_runs(payload: dict) -> None:
     assert {"图像", "图文联合"}.issubset({item.get("attack_modality", "") for item in rows})
 
 
+# 中文注释：封装 _assert_primary_artifact_paths 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _assert_primary_artifact_paths(payload: dict) -> None:
     if not payload["latest_primary_formal_runs"]:
         return
@@ -152,6 +161,7 @@ def _assert_primary_artifact_paths(payload: dict) -> None:
     assert primary_row["portable_report_path"] == "artifacts/paper_suite_20260418_final/rows/paper_e1_advclip_coco/portable_report.html"
 
 
+# 中文注释：封装 _assert_ablation_runs 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _assert_ablation_runs(payload: dict) -> None:
     if not payload["latest_ablation_runs"]:
         return
@@ -162,6 +172,7 @@ def _assert_ablation_runs(payload: dict) -> None:
     assert ablation_row["archived_summary_path"].startswith("artifacts/paper_suite_20260418_final/rows/")
 
 
+# 中文注释：封装 _assert_compliance_payload 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _assert_compliance_payload(cp: dict) -> None:
     assert {"checklist_semantics", "taskbook_items", "paper_coverage", "engineering_views"}.issubset(cp)
     assert "result_conformance" in cp
@@ -190,6 +201,7 @@ def _assert_compliance_payload(cp: dict) -> None:
     assert "portable_formal_report_runs=" in taskbook_items["req_3"]["evidence"]
 
 
+# 中文注释：验证 test_system_overview 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_system_overview(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         _write_system_dataset_fixtures(client, tmp_path)
@@ -209,6 +221,7 @@ def test_system_overview(tmp_path: Path, monkeypatch):
         _assert_compliance_payload(c.json())
 
 
+# 中文注释：验证 test_datasets_endpoint_splits_prepared_from_ready 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_datasets_endpoint_splits_prepared_from_ready(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         store = client.app.state.store
@@ -242,6 +255,7 @@ def test_datasets_endpoint_splits_prepared_from_ready(tmp_path: Path, monkeypatc
         assert payload["formal_dataset_count"] == 1
 
 
+# 中文注释：验证 test_models_endpoint_exposes_task_capabilities_and_excludes_fixture_from_formal_tasks 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_models_endpoint_exposes_task_capabilities_and_excludes_fixture_from_formal_tasks(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         r = client.get("/api/v1/models")
@@ -253,6 +267,7 @@ def test_models_endpoint_exposes_task_capabilities_and_excludes_fixture_from_for
         assert {"vlr", "vqa", "caption"}.issubset(set(items["openai_qwen35_9b"]["task_capabilities"]))
 
 
+# 中文注释：验证 test_unknown_api_path_returns_json_404_instead_of_spa_html 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_unknown_api_path_returns_json_404_instead_of_spa_html(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         r = client.get("/api/v1/not-a-real-endpoint")
@@ -261,6 +276,7 @@ def test_unknown_api_path_returns_json_404_instead_of_spa_html(tmp_path: Path, m
         assert "API route not found" in r.json()["detail"]
 
 
+# 中文注释：验证 test_generation_jsonl_datasets_are_registry_ready 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_generation_jsonl_datasets_are_registry_ready(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         store = client.app.state.store
@@ -290,6 +306,7 @@ def test_generation_jsonl_datasets_are_registry_ready(tmp_path: Path, monkeypatc
         assert payload["formal_dataset_count"] == 1
 
 
+# 中文注释：验证 test_job_progress_exposes_stage_local_hard_counts 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_job_progress_exposes_stage_local_hard_counts(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         store = client.app.state.store
@@ -322,6 +339,7 @@ def test_job_progress_exposes_stage_local_hard_counts(tmp_path: Path, monkeypatc
         assert payload["progress_percent_semantics"].startswith("overall pipeline completion percent")
 
 
+# 中文注释：验证 test_success_job_progress_prefers_completed_stage_and_closes_running_report 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_success_job_progress_prefers_completed_stage_and_closes_running_report(tmp_path: Path, monkeypatch):
     with make_client(tmp_path, monkeypatch) as client:
         store = client.app.state.store
@@ -352,6 +370,7 @@ def test_success_job_progress_prefers_completed_stage_and_closes_running_report(
         assert stages["completed"]["state"] == "success"
 
 
+# 中文注释：封装 _paper_acceptance_rows 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _paper_acceptance_rows(*, strong_defense: bool) -> list[dict]:
     strong_gains = {
         "paper_e1_tmm_coco": 0.12,
@@ -395,6 +414,7 @@ def _paper_acceptance_rows(*, strong_defense: bool) -> list[dict]:
     ]
 
 
+# 中文注释：封装 _model_validation_fixture_payload 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _model_validation_fixture_payload() -> dict:
     return {
         "passed": True,
@@ -428,6 +448,7 @@ def _model_validation_fixture_payload() -> dict:
     }
 
 
+# 中文注释：封装 _write_result_conformance_fixture 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _write_result_conformance_fixture(
     tmp_project_name: str,
     *,
@@ -459,6 +480,7 @@ def _write_result_conformance_fixture(
     return tmp_project, artifacts_dir
 
 
+# 中文注释：验证 test_result_conformance_contract_uses_validation_rows_for_defense_and_model_validation 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_result_conformance_contract_uses_validation_rows_for_defense_and_model_validation():
     from mmsec_api.services import system_overview as system_overview_module
 
@@ -482,6 +504,7 @@ def test_result_conformance_contract_uses_validation_rows_for_defense_and_model_
     assert all("risk gain" not in item for item in result["caveats"])
 
 
+# 中文注释：验证 test_result_conformance_rejects_weak_defense_gain_even_when_rows_are_effective 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_result_conformance_rejects_weak_defense_gain_even_when_rows_are_effective():
     from mmsec_api.services import system_overview as system_overview_module
 
@@ -503,6 +526,7 @@ def test_result_conformance_rejects_weak_defense_gain_even_when_rows_are_effecti
     assert "Defense recovery is still below the baseline acceptance threshold" in result["caveats"]
 
 
+# 中文注释：封装 _patch_taskbook_contract_dependencies 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _patch_taskbook_contract_dependencies(system_overview_module, monkeypatch) -> None:
     monkeypatch.setattr(
         system_overview_module,
@@ -531,6 +555,7 @@ def _patch_taskbook_contract_dependencies(system_overview_module, monkeypatch) -
     monkeypatch.setattr(system_overview_module, "_core_routes_ready", lambda *_: True)
 
 
+# 中文注释：封装 _write_taskbook_run_fixture 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _write_taskbook_run_fixture(artifacts_dir: Path, *, run_id: str, attack: str, scope: str, text_changed_ratio: float) -> Path:
     run_dir = artifacts_dir / "runs" / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -561,6 +586,7 @@ def _write_taskbook_run_fixture(artifacts_dir: Path, *, run_id: str, attack: str
     return run_dir
 
 
+# 中文注释：封装 _write_taskbook_paper_suite_fixture 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _write_taskbook_paper_suite_fixture(artifacts_dir: Path) -> None:
     paper_suite_dir = artifacts_dir / "paper_suite_20990101_final"
     paper_suite_dir.mkdir(parents=True, exist_ok=True)
@@ -582,6 +608,7 @@ def _write_taskbook_paper_suite_fixture(artifacts_dir: Path) -> None:
     (paper_suite_dir / "paper_suite_analysis.json").write_text(json.dumps({"rows": rows}, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 中文注释：封装 _write_taskbook_sample_artifacts 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _write_taskbook_sample_artifacts(artifacts_dir: Path, run_dir: Path) -> None:
     (artifacts_dir / "advclip_patch_registry.json").write_text(
         json.dumps({"version": 1, "entries": {"demo_patch": {"path": "artifacts/patches/demo.png"}}}, ensure_ascii=False, indent=2),
@@ -596,6 +623,7 @@ def _write_taskbook_sample_artifacts(artifacts_dir: Path, run_dir: Path) -> None
     (debug_dir / "debug.json").write_text(json.dumps({"ok": True}, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 中文注释：封装 _write_taskbook_validation_fixture 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _write_taskbook_validation_fixture(artifacts_dir: Path) -> None:
     validation_dir = artifacts_dir / "model_validation_20990101_final"
     validation_dir.mkdir(parents=True, exist_ok=True)
@@ -616,6 +644,7 @@ def _write_taskbook_validation_fixture(artifacts_dir: Path) -> None:
     (validation_dir / "summary.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 中文注释：封装 _sample_management_ready_payload 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _sample_management_ready_payload() -> dict:
     return {
         "cases_index_runs": 1,
@@ -625,6 +654,7 @@ def _sample_management_ready_payload() -> dict:
     }
 
 
+# 中文注释：封装 _taskbook_artifact_summary 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _taskbook_artifact_summary(**overrides) -> dict:
     payload = {
         "archived_row_evidence_runs": 2,
@@ -647,6 +677,7 @@ def _taskbook_artifact_summary(**overrides) -> dict:
     return payload
 
 
+# 中文注释：封装 _taskbook_observed_summary 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _taskbook_observed_summary(**overrides) -> dict:
     payload = {
         "image_only_execution_report_runs": 1,
@@ -658,6 +689,7 @@ def _taskbook_observed_summary(**overrides) -> dict:
     return payload
 
 
+# 中文注释：封装 _patch_taskbook_gap_dependencies 的内部步骤，让自动化测试主流程保持清晰并隔离边界细节。
 def _patch_taskbook_gap_dependencies(
     system_overview_module,
     monkeypatch,
@@ -682,6 +714,7 @@ def _patch_taskbook_gap_dependencies(
     monkeypatch.setattr(system_overview_module, "_exists", lambda *_: True)
 
 
+# 中文注释：验证 test_taskbook_items_contract_bind_to_artifact_shapes_and_validation 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_taskbook_items_contract_bind_to_artifact_shapes_and_validation(tmp_path: Path, monkeypatch):
     from mmsec_api.services import system_overview as system_overview_module
 
@@ -716,6 +749,7 @@ def test_taskbook_items_contract_bind_to_artifact_shapes_and_validation(tmp_path
     assert items_after_validation["req_5"]["status"] == "ready"
 
 
+# 中文注释：验证 test_primary_paper_suite_analysis_prefers_canonical_thesis_suite_over_newer_completed_dir 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_primary_paper_suite_analysis_prefers_canonical_thesis_suite_over_newer_completed_dir(tmp_path: Path):
     from mmsec_api.services import system_overview as system_overview_module
 
@@ -746,6 +780,7 @@ def test_primary_paper_suite_analysis_prefers_canonical_thesis_suite_over_newer_
     assert source_kind == "canonical_thesis_suite"
 
 
+# 中文注释：验证 test_frozen_evidence_pack_manifest_declares_completed_subset_boundary 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_frozen_evidence_pack_manifest_declares_completed_subset_boundary():
     project_root = Path.cwd()
     manifest = json.loads(
@@ -761,6 +796,7 @@ def test_frozen_evidence_pack_manifest_declares_completed_subset_boundary():
     assert "successful surviving row-level records" in provenance["provenance_note"]
 
 
+# 中文注释：验证 test_latest_formal_runs_excludes_demo_and_min_verify_runs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_latest_formal_runs_excludes_demo_and_min_verify_runs(tmp_path: Path):
     from mmsec_api.services import system_overview as system_overview_module
 
@@ -841,6 +877,7 @@ def test_latest_formal_runs_excludes_demo_and_min_verify_runs(tmp_path: Path):
     assert rows[0]["official_result"] is True
 
 
+# 中文注释：验证 test_latest_formal_runs_keep_experiment_tiers_separate 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_latest_formal_runs_keep_experiment_tiers_separate(tmp_path: Path):
     from mmsec_api.services import system_overview as system_overview_module
 
@@ -920,6 +957,7 @@ def test_latest_formal_runs_keep_experiment_tiers_separate(tmp_path: Path):
     assert ablation_rows[0]["experiment_label"] == "E4 消融 / 完整版本"
 
 
+# 中文注释：验证 test_taskbook_req_1_requires_official_joint_execution_evidence 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_taskbook_req_1_requires_official_joint_execution_evidence(monkeypatch):
     from mmsec_api.services import system_overview as system_overview_module
 
@@ -964,6 +1002,7 @@ def test_taskbook_req_1_requires_official_joint_execution_evidence(monkeypatch):
     assert "image-only and image-text joint scenarios required by the taskbook" in items["req_1"]["gap"]
 
 
+# 中文注释：验证 test_observed_execution_summary_skips_legacy_runs_without_attack_debug 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_observed_execution_summary_skips_legacy_runs_without_attack_debug(tmp_path: Path):
     from mmsec_api.services import system_overview as system_overview_module
 
@@ -993,6 +1032,7 @@ def test_observed_execution_summary_skips_legacy_runs_without_attack_debug(tmp_p
     assert summary["joint_execution_attacks"] == []
 
 
+# 中文注释：验证 test_taskbook_req_2_requires_three_stage_coverage_across_official_formal_runs 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_taskbook_req_2_requires_three_stage_coverage_across_official_formal_runs(monkeypatch):
     from mmsec_api.services import system_overview as system_overview_module
 

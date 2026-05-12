@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端工程配置，集中实现 App 相关逻辑。
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
@@ -15,6 +16,7 @@ const CaseReviewPage = lazy(() => import("./pages/CaseReviewPage"));
 const ReportDetailPage = lazy(() => import("./pages/ReportDetailPage"));
 const CaseReplayPage = lazy(() => import("./pages/CaseReplayPage"));
 
+/** 中文注释：实现 PageFallback 的核心流程，支撑前端工程配置中的业务语义和异常边界。 */
 function PageFallback() {
   return <div className="gov-empty-state">正在加载页面。</div>;
 }

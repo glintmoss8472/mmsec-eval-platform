@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端页面，集中实现 SampleLibraryPage 相关逻辑。
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -52,11 +53,13 @@ const FALLBACK_DATASETS = [
 const BATCH_PAGE_SIZES = [10, 20, 50, 100];
 const DEFAULT_BATCH_SORT: BatchSortState = { key: "created_at", direction: "desc" };
 
+/** 中文注释：实现 ariaSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function ariaSort(sort: BatchSortState, key: BatchSortKey): "none" | "ascending" | "descending" {
   if (sort.key !== key) return "none";
   return sort.direction === "asc" ? "ascending" : "descending";
 }
 
+/** 中文注释：实现 BatchSortHeader 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function BatchSortHeader({ sort, sortKey, label, onSort }: { sort: BatchSortState; sortKey: BatchSortKey; label: string; onSort: (key: BatchSortKey) => void }) {
   const active = sort.key === sortKey;
   const icon = active ? (sort.direction === "asc" ? "↑" : "↓") : "↕";
@@ -68,11 +71,13 @@ function BatchSortHeader({ sort, sortKey, label, onSort }: { sort: BatchSortStat
   );
 }
 
+/** 中文注释：实现 taskLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function taskLabel(value: string) {
   if (value === "mixed") return "混合任务";
   return TASK_OPTIONS.find(([key]) => key === value)?.[1] || value || "未记录";
 }
 
+/** 中文注释：实现 reuseLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function reuseLabel(value: string) {
   if (value === "ready") return "可复用";
   if (value === "pending_evaluation") return "待测评";
@@ -81,26 +86,31 @@ function reuseLabel(value: string) {
   return value || "未记录";
 }
 
+/** 中文注释：实现 statusClass 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function statusClass(value: string) {
   if (value === "ready" || value === "callable") return "ok";
   if (value === "pending_evaluation" || value === "summary_only" || value === "partial") return "warn";
   return "muted";
 }
 
+/** 中文注释：实现 batchStatusLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function batchStatusLabel(batch: SampleAssetBatchItem) {
   if ((batch.callable_assets || 0) >= 1) return "可用于测评";
   if (batch.batch_status === "pending_evaluation" || (batch.pending_evaluation_assets || 0) >= 1) return "仅生成 / 待测评";
   return "仅可复盘";
 }
 
+/** 中文注释：实现 firstReadyModel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function firstReadyModel(models: any[], taskKind: TaskKind) {
   return models.find((model) => victimSelectableForLaunch(model.health_status) && modelSupportsTask(model, taskKind)) ?? models.find((model) => victimSelectableForLaunch(model.health_status)) ?? models[0];
 }
 
+/** 中文注释：实现 firstDataset 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function firstDataset(datasets: any[], taskKind: TaskKind) {
   return compatibleDatasetsForTask(datasets, taskKind)[0];
 }
 
+/** 中文注释：实现 compatibleDatasetsForTask 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function compatibleDatasetsForTask(datasets: any[], taskKind: TaskKind) {
   if (taskKind === "vlr") {
     return datasets.filter((item) => String(item.tier || "").trim() !== "generation" && String(item.tier || "").trim() !== "demo");
@@ -108,18 +118,22 @@ function compatibleDatasetsForTask(datasets: any[], taskKind: TaskKind) {
   return datasets.filter((item) => String(item.tier || "").trim() === "generation" && generationDatasetSupportsTask(item.key, taskKind));
 }
 
+/** 中文注释：实现 percentLabel 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function percentLabel(value: number) {
   return `${Math.round((Number(value) || 0) * 100)}%`;
 }
 
+/** 中文注释：实现 compactId 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function compactId(value: string) {
   return value ? value.replace(/^20/, "20") : "未记录";
 }
 
+/** 中文注释：实现 displayAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function displayAttack(value: string) {
   return value === "mixed" ? "混合攻击" : formatAttackName(value);
 }
 
+/** 中文注释：实现 displayDataset 的核心流程，支撑前端页面中的业务语义和异常边界。 */
 function displayDataset(batch: SampleAssetBatchItem) {
   const dataset = batch.benchmark_tag || batch.dataset_name;
   return dataset === "mixed" ? "混合数据集" : formatDatasetName(dataset);
@@ -186,6 +200,7 @@ export default function SampleLibraryPage() {
   const requestedSampleCountNumber = Math.max(1, Number(sampleCount) || 1);
   const sampleCountNumber = selectedDatasetItemCount > 0 ? Math.min(requestedSampleCountNumber, selectedDatasetItemCount) : requestedSampleCountNumber;
   const strengthNumber = Number(strength) || Number(defaultStrengthForAttack(attack));
+  /** 中文注释：实现 toggleSort 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   const toggleSort = (key: BatchSortKey) => {
     setSort((current) => ({ key, direction: current.key === key && current.direction === "desc" ? "asc" : "desc" }));
     setPage(1);
@@ -287,11 +302,13 @@ export default function SampleLibraryPage() {
     },
   });
 
+  /** 中文注释：实现 updateFilter 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   function updateFilter(key: keyof FilterState, value: string) {
     setFilters((prev) => ({ ...prev, [key]: value }));
     setPage(1);
   }
 
+  /** 中文注释：实现 chooseAttack 的核心流程，支撑前端页面中的业务语义和异常边界。 */
   function chooseAttack(nextAttack: string) {
     setAttack(nextAttack);
     setStrength(defaultStrengthForAttack(nextAttack));

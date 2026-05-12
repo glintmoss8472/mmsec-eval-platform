@@ -1,3 +1,4 @@
+# 文件说明：该文件属于运维与实验脚本，集中实现 run gate checks 相关逻辑。
 Param(
   [string]$Config = "configs/mvp.yaml",
   [string]$PythonExe = ""

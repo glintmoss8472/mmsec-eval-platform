@@ -1,3 +1,4 @@
+// 文件说明：该文件属于前端组件，集中实现 BootstrapProgress 相关逻辑。
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getBootstrapLogs, getBootstrapStatus, retryBootstrap } from "../lib/api";
@@ -23,6 +24,7 @@ const STEP_STATE_LABEL: Record<string, string> = {
   skipped: "已跳过",
 };
 
+/** 中文注释：实现 progressValue 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 function progressValue(steps: { state: string }[]) {
   if (!steps.length) return 0;
   const score = steps.reduce((acc, step) => {
@@ -33,6 +35,7 @@ function progressValue(steps: { state: string }[]) {
   return Math.round((score / steps.length) * 100);
 }
 
+/** 中文注释：实现 BootstrapProgress 的核心流程，支撑前端组件中的业务语义和异常边界。 */
 export function BootstrapProgress() {
   const qc = useQueryClient();
   const statusQ = useQuery({

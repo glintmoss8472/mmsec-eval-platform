@@ -1,3 +1,4 @@
+# 文件说明：该文件属于自动化测试，集中实现 test report data consistency 相关逻辑。
 from __future__ import annotations
 
 import json
@@ -9,6 +10,7 @@ from mmsec_eval.plugins.builtin import register_builtin_plugins
 from mmsec_eval.runner.eval_runner import run
 
 
+# 中文注释：验证 test_report_data_consistency 覆盖的业务场景，防止自动化测试后续改动破坏既有行为。
 def test_report_data_consistency(tmp_path: Path):
     register_builtin_plugins()
     cfg = load_config("configs/mvp.yaml")
